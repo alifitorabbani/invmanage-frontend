@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>InvManage - Riwayat Peminjaman</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <img src="image.png" alt="Logo" class="sidebar-logo">
+      <h1>InvManage Admin</h1>
+
+      <div class="menu">
+        <a href="dashboard.html" class="menu-item">Dashboard</a>
+        <a href="riwayat.html" class="menu-item active">Riwayat Peminjaman</a>
+        <a href="laporan.html" class="menu-item">📊 Laporan & Analitik</a>
+        <a href="profil.html" class="menu-item">Profil</a>
+        <a href="feedback.html" class="menu-item">Feedback</a>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <div class="card-container">
+        <div class="card">
+          <h3>Sedang Dipinjam</h3>
+          <div class="card-number" id="totalDipinjamAdmin" style="color:orange;">0</div>
+        </div>
+        <div class="card">
+          <h3>Sudah Dikembalikan</h3>
+          <div class="card-number" id="totalDikembalikanAdmin" style="color:green;">0</div>
+        </div>
+      </div>
+
+      <div class="table-box">
+        <div class="table-header">
+          <div>
+            <h2 class="table-title">Riwayat Peminjaman Semua User</h2>
+            <p style="color:var(--gray-400); margin: 8px 0 0 0; font-size: 14px;">Daftar semua peminjaman barang dari user</p>
+          </div>
+          <button class="add-btn" onclick="openPeminjamanAdminModal()">+ Input Peminjaman Manual</button>
+        </div>
+
+        <!-- Container untuk menampilkan data peminjaman -->
+        <div id="riwayat-peminjaman-container" class="data-container">
+          <!-- Data will be loaded here by JavaScript -->
+        </div>
+
+        <!-- Modal Input Peminjaman Manual -->
+        <div class="modal-bg" id="modalPeminjamanAdmin">
+          <div class="modal">
+            <h3 id="modalPeminjamanTitle">Input Peminjaman Manual</h3>
+
+            <div class="input-group">
+              <label>Pilih User</label>
+              <select id="adminPeminjamanUser" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
+                <option value="">Pilih User</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Pilih Barang</label>
+              <select id="adminPeminjamanBarang" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
+                <option value="">Pilih Barang</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Jumlah</label>
+              <input type="number" id="adminPeminjamanJumlah" placeholder="Jumlah barang" min="1">
+            </div>
+
+            <div class="input-group">
+              <label>Status</label>
+              <select id="adminPeminjamanStatus" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
+                <option value="dipinjam">Dipinjam</option>
+                <option value="dikembalikan">Dikembalikan</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Catatan (opsional)</label>
+              <input type="text" id="adminPeminjamanCatatan" placeholder="Catatan peminjaman">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+              <button class="primary" onclick="savePeminjamanAdmin()">Simpan</button>
+              <button class="btn-red" onclick="closePeminjamanAdminModal()">Batal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Copyright Footer -->
+  <footer class="copyright-footer">
+    <p>&copy; 2025 InvManage. All rights reserved.</p>
+    <div class="copyright-team">
+      <div class="team-member">
+        <div class="team-role">Software Architect & Developer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+            Alifito Rabbani Cahyono
+          </a>
+        </div>
+      </div>
+      <div class="team-member">
+        <div class="team-role">UI/UX Architect & Developer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+            Satria Febry Andanu
+          </a>
+        </div>
+      </div>
+      <div class="team-member">
+        <div class="team-role">Data Analyst & Engineer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+            Naufal Thafhan
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    console.log('Riwayat Peminjaman page loading...');
+
+    // Fallback function in case app.js doesn't load
+    async function loadRiwayatPeminjaman() {
+      console.log('🔄 Loading riwayat peminjaman (fallback)...');
+
+      const container = document.getElementById('riwayat-peminjaman-container');
+      if (!container) {
+        console.error('❌ Container riwayat-peminjaman-container not found!');
+        return;
+      }
+
+      container.innerHTML = '<div class="loading">Memuat data...</div>';
+
+      // Display sample data immediately for better UX
+      console.log('📊 Displaying sample peminjaman data immediately');
+      displayRiwayatPeminjaman(window.samplePeminjaman || []);
+
+      // Try to load real data from backend
+      try {
+        console.log('Attempting to load real peminjaman data from backend...');
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+        const response = await fetch('http://localhost:8001/api/peminjaman/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          mode: 'cors',
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Real data loaded from backend:', data);
+
+          if (Array.isArray(data) && data.length > 0) {
+            console.log('Replacing sample data with real data:', data.length, 'records');
+            displayRiwayatPeminjaman(data);
+          } else {
+            console.log('Backend returned empty data, keeping sample data');
+          }
+        } else {
+          console.warn('Backend API request failed:', response.status, response.statusText);
+        }
+      } catch (error) {
+        console.log('Could not load real data from backend, keeping sample data:', error.message);
+      }
+    }
+
+    function displayRiwayatPeminjaman(peminjamanData) {
+      console.log('Displaying peminjaman data:', peminjamanData);
+
+      const container = document.getElementById('riwayat-peminjaman-container');
+      if (!container) {
+        console.error('Container riwayat peminjaman tidak ditemukan');
+        return;
+      }
+
+      container.innerHTML = '';
+
+      if (!Array.isArray(peminjamanData) || peminjamanData.length === 0) {
+        container.innerHTML = '<p class="no-data">Tidak ada data peminjaman</p>';
+        return;
+      }
+
+      const table = document.createElement('table');
+      table.className = 'peminjaman-table';
+
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Barang</th>
+            <th>Peminjam</th>
+            <th>Jumlah</th>
+            <th>Status</th>
+            <th>Tanggal Pinjam</th>
+            <th>Tanggal Kembali</th>
+            <th>Info</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      `;
+
+      const tbody = table.querySelector('tbody');
+
+      let totalDipinjam = 0;
+      let totalDikembalikan = 0;
+
+      peminjamanData.forEach((item) => {
+        if (item.status === 'dipinjam') totalDipinjam++;
+        else if (item.status === 'dikembalikan') totalDikembalikan++;
+
+        const row = document.createElement('tr');
+        const statusClass = item.status === 'dipinjam' ? 'status-dipinjam' : 'status-dikembalikan';
+
+        row.innerHTML = `
+          <td>${item.id || '-'}</td>
+          <td>${item.barang_nama || item.barang || '-'}</td>
+          <td>${item.user_nama || item.user || '-'}</td>
+          <td>${item.jumlah || 0}</td>
+          <td><span class="status ${statusClass}">${item.status || '-'}</span></td>
+          <td>${item.tanggal_pinjam ? new Date(item.tanggal_pinjam).toLocaleDateString('id-ID') : '-'}</td>
+          <td>${item.tanggal_kembali ? new Date(item.tanggal_kembali).toLocaleDateString('id-ID') : '-'}</td>
+          <td>${item.catatan || '-'}</td>
+        `;
+
+        tbody.appendChild(row);
+      });
+
+      container.appendChild(table);
+
+      // Update counters
+      const totalDipinjamEl = document.getElementById('totalDipinjamAdmin');
+      const totalDikembalikanEl = document.getElementById('totalDikembalikanAdmin');
+
+      if (totalDipinjamEl) totalDipinjamEl.textContent = totalDipinjam;
+      if (totalDikembalikanEl) totalDikembalikanEl.textContent = totalDikembalikan;
+
+      console.log(`Updated counters: ${totalDipinjam} dipinjam, ${totalDikembalikan} dikembalikan`);
+    }
+
+    function initPeminjaman() {
+      console.log('🚀 Initializing Peminjaman page...');
+
+      // Check if container exists
+      const container = document.getElementById('riwayat-peminjaman-container');
+      if (!container) {
+        console.error('❌ Peminjaman container not found!');
+        return;
+      }
+      console.log('✅ Peminjaman container found');
+
+      // Load data - use the function from app.js if available, otherwise use fallback
+      console.log('🔄 Calling loadRiwayatPeminjaman...');
+      if (typeof window.loadRiwayatPeminjaman === 'function') {
+        window.loadRiwayatPeminjaman();
+      } else {
+        loadRiwayatPeminjaman();
+      }
+    }
+
+    // Custom close function to reset form
+    function closePeminjamanAdminModal() {
+      const modal = document.getElementById('modalPeminjamanAdmin');
+      if (modal) modal.style.display = 'none';
+      // Reset form
+      const userSelect = document.getElementById('adminPeminjamanUser');
+      const barangSelect = document.getElementById('adminPeminjamanBarang');
+      const jumlahInput = document.getElementById('adminPeminjamanJumlah');
+      const statusSelect = document.getElementById('adminPeminjamanStatus');
+      const catatanInput = document.getElementById('adminPeminjamanCatatan');
+
+      if (userSelect) userSelect.value = '';
+      if (barangSelect) barangSelect.value = '';
+      if (jumlahInput) jumlahInput.value = '';
+      if (statusSelect) statusSelect.value = 'dipinjam';
+      if (catatanInput) catatanInput.value = '';
+    }
+
+    function openPeminjamanAdminModal() {
+      console.log("Opening peminjaman admin modal...");
+
+      const modal = document.getElementById('modalPeminjamanAdmin');
+      if (!modal) {
+        console.error("Modal #modalPeminjamanAdmin not found");
+        alert("Modal tidak ditemukan. Refresh halaman.");
+        return;
+      }
+
+      // Reset form fields instantly
+      const title = document.getElementById('modalPeminjamanTitle');
+      const userSelect = document.getElementById('adminPeminjamanUser');
+      const barangSelect = document.getElementById('adminPeminjamanBarang');
+      const jumlahInput = document.getElementById('adminPeminjamanJumlah');
+      const statusSelect = document.getElementById('adminPeminjamanStatus');
+      const catatanInput = document.getElementById('adminPeminjamanCatatan');
+
+      if (title) title.textContent = "Input Peminjaman Manual";
+      if (jumlahInput) jumlahInput.value = "";
+      if (statusSelect) statusSelect.value = "dipinjam";
+      if (catatanInput) catatanInput.value = "";
+
+      // Load sample data instantly for immediate UX
+      if (userSelect) {
+        userSelect.disabled = false;
+        userSelect.innerHTML = '<option value="">Pilih User</option>';
+        if (window.sampleUsers) {
+          window.sampleUsers.filter(u => u.role === 'user').forEach((u) => {
+            const opt = document.createElement("option");
+            opt.value = u.id;
+            opt.textContent = u.nama;
+            userSelect.appendChild(opt);
+          });
+        }
+        userSelect.value = "";
+      }
+
+      if (barangSelect) {
+        barangSelect.disabled = false;
+        barangSelect.innerHTML = '<option value="">Pilih Barang</option>';
+        if (window.sampleBarang) {
+          window.sampleBarang.forEach((b) => {
+            const opt = document.createElement("option");
+            opt.value = b.id;
+            opt.textContent = `${b.nama} (Stok: ${b.stok})`;
+            barangSelect.appendChild(opt);
+          });
+        }
+        barangSelect.value = "";
+      }
+
+      // Show modal instantly
+      modal.style.display = "flex";
+      console.log("Peminjaman admin modal opened instantly");
+
+      // Try to load real data in background (non-blocking)
+      setTimeout(() => {
+        // Load real users if function available
+        if (typeof window.loadUserOptions === 'function') {
+          window.loadUserOptions().catch(err => {
+            console.log("Using sample users (backend not available)");
+          });
+        }
+
+        // Load real barang if function available
+        if (typeof window.loadBarangOptionsAdmin === 'function') {
+          window.loadBarangOptionsAdmin().catch(err => {
+            console.log("Using sample barang (backend not available)");
+          });
+        }
+      }, 500); // Small delay to not interfere with modal opening
+    }
+
+    function savePeminjamanAdmin() {
+      const userId = document.getElementById('adminPeminjamanUser')?.value;
+      const barangId = document.getElementById('adminPeminjamanBarang')?.value;
+      const jumlah = parseInt(document.getElementById('adminPeminjamanJumlah')?.value || 0);
+      const status = document.getElementById('adminPeminjamanStatus')?.value || "dipinjam";
+      const catatan = document.getElementById('adminPeminjamanCatatan')?.value || "";
+
+      if (!userId || !barangId || !jumlah) {
+        alert('Harap lengkapi semua field yang diperlukan!');
+        return;
+      }
+
+      // Use function from app.js if available
+      if (typeof window.savePeminjamanAdmin === 'function') {
+        window.savePeminjamanAdmin();
+      } else {
+        alert('Fungsi penyimpanan tidak tersedia!');
+      }
+      closePeminjamanAdminModal();
+      // Refresh data
+      if (typeof window.loadRiwayatPeminjaman === 'function') {
+        window.loadRiwayatPeminjaman();
+      } else {
+        loadRiwayatPeminjaman();
+      }
+    }
+  </script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Initialize after all scripts are loaded
+    window.addEventListener('load', function() {
+      console.log('📋 Window loaded, initializing Peminjaman...');
+      // Small delay to ensure all functions are available
+      setTimeout(initPeminjaman, 100);
+    });
+  </script>
+</body>
+</html>

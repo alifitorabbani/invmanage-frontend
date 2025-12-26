@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvManage - Enterprise Inventory Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #666;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-top: 100px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-dipinjam {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-dikembalikan {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-masuk {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-keluar {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .filter-select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            min-width: 150px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover,
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab-container {
+            margin-bottom: 2rem;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .data-table {
+                font-size: 0.8rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">InvManage</div>
+            <nav class="nav-links">
+                <a href="#dashboard" class="nav-link active" onclick="showTab('dashboard')">Dashboard</a>
+                <a href="#peminjaman" class="nav-link" onclick="showTab('peminjaman')">Riwayat Peminjaman</a>
+                <a href="#feedback" class="nav-link" onclick="showTab('feedback')">Feedback</a>
+                <a href="#transaksi" class="nav-link" onclick="showTab('transaksi')">Transaksi</a>
+                <a href="#users" class="nav-link" onclick="showTab('users')">Users</a>
+                <a href="#barang" class="nav-link" onclick="showTab('barang')">Barang</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="stats-card">
+                    <i class="fas fa-users stats-icon" style="color: #667eea;"></i>
+                    <div class="stats-number" id="total-users">-</div>
+                    <div class="stats-label">Total Users</div>
+                </div>
+                <div class="stats-card">
+                    <i class="fas fa-boxes stats-icon" style="color: #764ba2;"></i>
+                    <div class="stats-number" id="total-items">-</div>
+                    <div class="stats-label">Total Items</div>
+                </div>
+                <div class="stats-card">
+                    <i class="fas fa-hand-holding stats-icon" style="color: #28a745;"></i>
+                    <div class="stats-number" id="total-loans">-</div>
+                    <div class="stats-label">Total Loans</div>
+                </div>
+                <div class="stats-card">
+                    <i class="fas fa-exchange-alt stats-icon" style="color: #ffc107;"></i>
+                    <div class="stats-number" id="total-transactions">-</div>
+                    <div class="stats-label">Total Transactions</div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="section-header">
+                    <h2 class="section-title">System Overview</h2>
+                    <button class="refresh-btn" onclick="loadDashboardData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div id="dashboard-content">
+                    <div class="loading">Loading dashboard data...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Riwayat Peminjaman Tab -->
+        <div id="peminjaman" class="tab-content">
+            <div class="main-content">
+                <div class="section-header">
+                    <h2 class="section-title">Riwayat Peminjaman</h2>
+                    <button class="refresh-btn" onclick="loadPeminjamanData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="search-filter">
+                    <input type="text" class="search-input" id="peminjaman-search" placeholder="Cari berdasarkan nama user atau barang..." onkeyup="filterPeminjaman()">
+                    <select class="filter-select" id="peminjaman-status-filter" onchange="filterPeminjaman()">
+                        <option value="">Semua Status</option>
+                        <option value="dipinjam">Dipinjam</option>
+                        <option value="dikembalikan">Dikembalikan</option>
+                    </select>
+                </div>
+
+                <div id="peminjaman-content">
+                    <div class="loading">Loading riwayat peminjaman...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Tab -->
+        <div id="feedback" class="tab-content">
+            <div class="main-content">
+                <div class="section-header">
+                    <h2 class="section-title">Feedback Pengguna</h2>
+                    <button class="refresh-btn" onclick="loadFeedbackData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="search-filter">
+                    <input type="text" class="search-input" id="feedback-search" placeholder="Cari berdasarkan nama user atau pesan..." onkeyup="filterFeedback()">
+                    <select class="filter-select" id="feedback-sort" onchange="filterFeedback()">
+                        <option value="newest">Terbaru</option>
+                        <option value="oldest">Terlama</option>
+                    </select>
+                </div>
+
+                <div id="feedback-content">
+                    <div class="loading">Loading feedback data...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaksi Tab -->
+        <div id="transaksi" class="tab-content">
+            <div class="main-content">
+                <div class="section-header">
+                    <h2 class="section-title">Riwayat Transaksi</h2>
+                    <button class="refresh-btn" onclick="loadTransaksiData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="search-filter">
+                    <input type="text" class="search-input" id="transaksi-search" placeholder="Cari berdasarkan nama barang..." onkeyup="filterTransaksi()">
+                    <select class="filter-select" id="transaksi-type-filter" onchange="filterTransaksi()">
+                        <option value="">Semua Tipe</option>
+                        <option value="masuk">Masuk</option>
+                        <option value="keluar">Keluar</option>
+                    </select>
+                </div>
+
+                <div id="transaksi-content">
+                    <div class="loading">Loading riwayat transaksi...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users" class="tab-content">
+            <div class="main-content">
+                <div class="section-header">
+                    <h2 class="section-title">Manajemen Users</h2>
+                    <button class="refresh-btn" onclick="loadUsersData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="search-filter">
+                    <input type="text" class="search-input" id="users-search" placeholder="Cari berdasarkan nama atau email..." onkeyup="filterUsers()">
+                    <select class="filter-select" id="users-role-filter" onchange="filterUsers()">
+                        <option value="">Semua Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                    </select>
+                    <select class="filter-select" id="users-dept-filter" onchange="filterUsers()">
+                        <option value="">Semua Departemen</option>
+                        <option value="IT">IT</option>
+                        <option value="HR">HR</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Legal">Legal</option>
+                        <option value="Procurement">Procurement</option>
+                        <option value="Quality">Quality</option>
+                    </select>
+                </div>
+
+                <div id="users-content">
+                    <div class="loading">Loading users data...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barang Tab -->
+        <div id="barang" class="tab-content">
+            <div class="main-content">
+                <div class="section-header">
+                    <h2 class="section-title">Manajemen Barang</h2>
+                    <button class="refresh-btn" onclick="loadBarangData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="search-filter">
+                    <input type="text" class="search-input" id="barang-search" placeholder="Cari berdasarkan nama barang..." onkeyup="filterBarang()">
+                    <select class="filter-select" id="barang-stock-filter" onchange="filterBarang()">
+                        <option value="">Semua Status Stok</option>
+                        <option value="available">Tersedia</option>
+                        <option value="low">Stok Rendah</option>
+                        <option value="out">Habis</option>
+                    </select>
+                </div>
+
+                <div id="barang-content">
+                    <div class="loading">Loading barang data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8001/api';
+
+        // Global data storage
+        let currentData = {
+            peminjaman: [],
+            feedback: [],
+            transaksi: [],
+            users: [],
+            barang: []
+        };
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from nav links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked nav link
+            event.target.classList.add('active');
+
+            // Load data for the tab if not already loaded
+            switch(tabName) {
+                case 'dashboard':
+                    if (!currentData.peminjaman.length) loadDashboardData();
+                    break;
+                case 'peminjaman':
+                    if (!currentData.peminjaman.length) loadPeminjamanData();
+                    break;
+                case 'feedback':
+                    if (!currentData.feedback.length) loadFeedbackData();
+                    break;
+                case 'transaksi':
+                    if (!currentData.transaksi.length) loadTransaksiData();
+                    break;
+                case 'users':
+                    if (!currentData.users.length) loadUsersData();
+                    break;
+                case 'barang':
+                    if (!currentData.barang.length) loadBarangData();
+                    break;
+            }
+        }
+
+        // API fetch helper
+        async function fetchAPI(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE}/${endpoint}/`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${endpoint}:`, error);
+                throw error;
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                document.getElementById('dashboard-content').innerHTML = '<div class="loading">Loading dashboard data...</div>';
+
+                const [users, barang, peminjaman, transaksi] = await Promise.all([
+                    fetchAPI('users'),
+                    fetchAPI('barang'),
+                    fetchAPI('peminjaman'),
+                    fetchAPI('transaksi')
+                ]);
+
+                // Update stats
+                document.getElementById('total-users').textContent = users.length;
+                document.getElementById('total-items').textContent = barang.length;
+                document.getElementById('total-loans').textContent = peminjaman.length;
+                document.getElementById('total-transactions').textContent = transaksi.length;
+
+                // Store data
+                currentData.users = users;
+                currentData.barang = barang;
+                currentData.peminjaman = peminjaman;
+                currentData.transaksi = transaksi;
+
+                // Display recent activity
+                const recentLoans = peminjaman.slice(0, 5);
+                const recentTransactions = transaksi.slice(0, 5);
+
+                let html = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+                        <div>
+                            <h3 style="margin-bottom: 1rem; color: #333;">Recent Loans</h3>
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                ${recentLoans.map(loan => `
+                                    <div style="padding: 0.75rem; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong>${loan.barang_nama || 'Unknown Item'}</strong><br>
+                                            <small>${loan.user_nama || 'Unknown User'} • ${loan.jumlah} items</small>
+                                        </div>
+                                        <span class="status-badge status-${loan.status}">${loan.status}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <h3 style="margin-bottom: 1rem; color: #333;">Recent Transactions</h3>
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                ${recentTransactions.map(tx => `
+                                    <div style="padding: 0.75rem; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong>${tx.barang_nama || 'Unknown Item'}</strong><br>
+                                            <small>${tx.user_nama || 'System'} • ${tx.jumlah} items</small>
+                                        </div>
+                                        <span class="status-badge status-${tx.tipe}">${tx.tipe}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('dashboard-content').innerHTML = html;
+
+            } catch (error) {
+                document.getElementById('dashboard-content').innerHTML =
+                    '<div class="error">Error loading dashboard data. Please check if the backend server is running.</div>';
+            }
+        }
+
+        // Load peminjaman data
+        async function loadPeminjamanData() {
+            try {
+                document.getElementById('peminjaman-content').innerHTML = '<div class="loading">Loading riwayat peminjaman...</div>';
+
+                const data = await fetchAPI('peminjaman');
+                currentData.peminjaman = data;
+
+                displayPeminjamanData(data);
+
+            } catch (error) {
+                document.getElementById('peminjaman-content').innerHTML =
+                    '<div class="error">Error loading peminjaman data. Please check if the backend server is running.</div>';
+            }
+        }
+
+        function displayPeminjamanData(data) {
+            if (data.length === 0) {
+                document.getElementById('peminjaman-content').innerHTML = '<p>No peminjaman records found.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Barang</th>
+                            <th>Jumlah</th>
+                            <th>Status</th>
+                            <th>Tanggal Pinjam</th>
+                            <th>Tanggal Kembali</th>
+                            <th>Catatan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+            const tanggalPinjam = new Date(item.tanggal_pinjam).toLocaleDateString('id-ID');
+            const tanggalKembali = item.tanggal_kembali ? new Date(item.tanggal_kembali).toLocaleDateString('id-ID') : '-';
+
+            html += `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.user_nama || 'Unknown'}</td>
+                    <td>${item.barang_nama || 'Unknown'}</td>
+                    <td>${item.jumlah}</td>
+                    <td><span class="status-badge status-${item.status}">${item.status}</span></td>
+                    <td>${tanggalPinjam}</td>
+                    <td>${tanggalKembali}</td>
+                    <td>${item.catatan || '-'}</td>
+                </tr>
+            `;
+        });
+
+            html += '</tbody></table>';
+            document.getElementById('peminjaman-content').innerHTML = html;
+        }
+
+        // Load feedback data
+        async function loadFeedbackData() {
+            try {
+                document.getElementById('feedback-content').innerHTML = '<div class="loading">Loading feedback data...</div>';
+
+                const data = await fetchAPI('feedback');
+                currentData.feedback = data;
+
+                displayFeedbackData(data);
+
+            } catch (error) {
+                document.getElementById('feedback-content').innerHTML =
+                    '<div class="error">Error loading feedback data. Please check if the backend server is running.</div>';
+            }
+        }
+
+        function displayFeedbackData(data) {
+            if (data.length === 0) {
+                document.getElementById('feedback-content').innerHTML = '<p>No feedback records found.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Pesan</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                const tanggal = new Date(item.tanggal).toLocaleDateString('id-ID');
+
+                html += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.user_nama || 'Anonymous'}</td>
+                        <td>${item.pesan}</td>
+                        <td>${tanggal}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('feedback-content').innerHTML = html;
+        }
+
+        // Load transaksi data
+        async function loadTransaksiData() {
+            try {
+                document.getElementById('transaksi-content').innerHTML = '<div class="loading">Loading riwayat transaksi...</div>';
+
+                const data = await fetchAPI('transaksi');
+                currentData.transaksi = data;
+
+                displayTransaksiData(data);
+
+            } catch (error) {
+                document.getElementById('transaksi-content').innerHTML =
+                    '<div class="error">Error loading transaksi data. Please check if the backend server is running.</div>';
+            }
+        }
+
+        function displayTransaksiData(data) {
+            if (data.length === 0) {
+                document.getElementById('transaksi-content').innerHTML = '<p>No transaksi records found.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Barang</th>
+                            <th>User</th>
+                            <th>Jumlah</th>
+                            <th>Tipe</th>
+                            <th>Catatan</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                const tanggal = new Date(item.created_at || item.tanggal).toLocaleDateString('id-ID');
+
+                html += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.barang_nama || 'Unknown'}</td>
+                        <td>${item.user_nama || 'System'}</td>
+                        <td>${item.jumlah}</td>
+                        <td><span class="status-badge status-${item.tipe}">${item.tipe}</span></td>
+                        <td>${item.catatan || '-'}</td>
+                        <td>${tanggal}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('transaksi-content').innerHTML = html;
+        }
+
+        // Load users data
+        async function loadUsersData() {
+            try {
+                document.getElementById('users-content').innerHTML = '<div class="loading">Loading users data...</div>';
+
+                const data = await fetchAPI('users');
+                currentData.users = data;
+
+                displayUsersData(data);
+
+            } catch (error) {
+                document.getElementById('users-content').innerHTML =
+                    '<div class="error">Error loading users data. Please check if the backend server is running.</div>';
+            }
+        }
+
+        function displayUsersData(data) {
+            if (data.length === 0) {
+                document.getElementById('users-content').innerHTML = '<p>No users found.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Departemen</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.nama}</td>
+                        <td>${item.email}</td>
+                        <td><span class="status-badge" style="background: ${item.role === 'admin' ? '#dc3545' : '#28a745'}; color: white;">${item.role}</span></td>
+                        <td>${item.departemen || '-'}</td>
+                        <td>${item.phone || '-'}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('users-content').innerHTML = html;
+        }
+
+        // Load barang data
+        async function loadBarangData() {
+            try {
+                document.getElementById('barang-content').innerHTML = '<div class="loading">Loading barang data...</div>';
+
+                const data = await fetchAPI('barang');
+                currentData.barang = data;
+
+                displayBarangData(data);
+
+            } catch (error) {
+                document.getElementById('barang-content').innerHTML =
+                    '<div class="error">Error loading barang data. Please check if the backend server is running.</div>';
+            }
+        }
+
+        function displayBarangData(data) {
+            if (data.length === 0) {
+                document.getElementById('barang-content').innerHTML = '<p>No barang found.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nama</th>
+                            <th>Stok</th>
+                            <th>Harga</th>
+                            <th>Minimum</th>
+                            <th>Status Stok</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                let statusClass = 'status-dikembalikan'; // available
+                let statusText = 'Tersedia';
+
+                if (item.is_out_of_stock) {
+                    statusClass = 'status-keluar'; // out of stock
+                    statusText = 'Habis';
+                } else if (item.is_low_stock) {
+                    statusClass = 'status-dipinjam'; // low stock
+                    statusText = 'Stok Rendah';
+                }
+
+                html += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.nama}</td>
+                        <td>${item.stok}</td>
+                        <td>Rp ${item.harga?.toLocaleString('id-ID') || '0'}</td>
+                        <td>${item.minimum}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('barang-content').innerHTML = html;
+        }
+
+        // Filter functions
+        function filterPeminjaman() {
+            const searchTerm = document.getElementById('peminjaman-search').value.toLowerCase();
+            const statusFilter = document.getElementById('peminjaman-status-filter').value;
+
+            let filtered = currentData.peminjaman.filter(item => {
+                const matchesSearch = item.user_nama?.toLowerCase().includes(searchTerm) ||
+                                    item.barang_nama?.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || item.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            displayPeminjamanData(filtered);
+        }
+
+        function filterFeedback() {
+            const searchTerm = document.getElementById('feedback-search').value.toLowerCase();
+            const sortOrder = document.getElementById('feedback-sort').value;
+
+            let filtered = currentData.feedback.filter(item => {
+                return item.user_nama?.toLowerCase().includes(searchTerm) ||
+                       item.pesan?.toLowerCase().includes(searchTerm);
+            });
+
+            // Sort by date
+            filtered.sort((a, b) => {
+                const dateA = new Date(a.tanggal);
+                const dateB = new Date(b.tanggal);
+                return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+            });
+
+            displayFeedbackData(filtered);
+        }
+
+        function filterTransaksi() {
+            const searchTerm = document.getElementById('transaksi-search').value.toLowerCase();
+            const typeFilter = document.getElementById('transaksi-type-filter').value;
+
+            let filtered = currentData.transaksi.filter(item => {
+                const matchesSearch = item.barang_nama?.toLowerCase().includes(searchTerm);
+                const matchesType = !typeFilter || item.tipe === typeFilter;
+                return matchesSearch && matchesType;
+            });
+
+            displayTransaksiData(filtered);
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('users-search').value.toLowerCase();
+            const roleFilter = document.getElementById('users-role-filter').value;
+            const deptFilter = document.getElementById('users-dept-filter').value;
+
+            let filtered = currentData.users.filter(item => {
+                const matchesSearch = item.nama?.toLowerCase().includes(searchTerm) ||
+                                    item.email?.toLowerCase().includes(searchTerm);
+                const matchesRole = !roleFilter || item.role === roleFilter;
+                const matchesDept = !deptFilter || item.departemen === deptFilter;
+                return matchesSearch && matchesRole && matchesDept;
+            });
+
+            displayUsersData(filtered);
+        }
+
+        function filterBarang() {
+            const searchTerm = document.getElementById('barang-search').value.toLowerCase();
+            const stockFilter = document.getElementById('barang-stock-filter').value;
+
+            let filtered = currentData.barang.filter(item => {
+                const matchesSearch = item.nama?.toLowerCase().includes(searchTerm);
+                let matchesStock = true;
+
+                if (stockFilter) {
+                    if (stockFilter === 'available') matchesStock = !item.is_out_of_stock && !item.is_low_stock;
+                    else if (stockFilter === 'low') matchesStock = item.is_low_stock;
+                    else if (stockFilter === 'out') matchesStock = item.is_out_of_stock;
+                }
+
+                return matchesSearch && matchesStock;
+            });
+
+            displayBarangData(filtered);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvManage - Laporan & Analitik</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .reports-container {
+            padding: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .reports-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-600);
+        }
+
+        .reports-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gray-100);
+            margin: 0;
+        }
+
+        .reports-subtitle {
+            color: var(--gray-400);
+            margin: 8px 0 0 0;
+            font-size: 14px;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-300);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--gray-600);
+            border-radius: 8px;
+            background: var(--gray-700);
+            color: var(--gray-100);
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .filter-select:focus {
+            border-color: #3b82f6;
+            outline: none;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-100);
+            margin: 0;
+        }
+
+        .chart-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3b82f6;
+            margin: 0;
+        }
+
+        .chart-subtitle {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin: 4px 0 0 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(96, 165, 250, 0.1) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray-300);
+            font-weight: 500;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            margin-top: 8px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .stat-change.positive {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .stat-change.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: var(--gray-400);
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 16px;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .time-range-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .time-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--gray-600);
+            border-radius: 6px;
+            background: var(--gray-700);
+            color: var(--gray-300);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .time-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .time-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .reports-container {
+                padding: 20px;
+            }
+
+            .reports-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .filter-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Notification -->
+    <div id="welcomeNotification" class="welcome-message">
+        <h3 id="welcomeTitle">Selamat!</h3>
+        <p id="welcomeMessage"></p>
+    </div>
+
+    <div class="dashboard-layout">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <img src="image.png" alt="Logo" class="sidebar-logo">
+            <h1>InvManage Admin</h1>
+
+            <div class="menu">
+                <a href="dashboard.html" class="menu-item">Dashboard</a>
+                <a href="riwayat.html" class="menu-item">Riwayat Transaksi</a>
+                <a href="laporan.html" class="menu-item active">📊 Laporan & Analitik</a>
+                <a href="profil.html" class="menu-item">Profil</a>
+                <a href="feedback.html" class="menu-item">Feedback</a>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <div class="reports-container">
+                <div class="reports-header">
+                    <div>
+                        <h1 class="reports-title">📊 Laporan & Analitik</h1>
+                        <p class="reports-subtitle">Analisis mendalam performa inventory dan tren peminjaman</p>
+                    </div>
+
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label class="filter-label">Periode</label>
+                            <select id="periodFilter" class="filter-select">
+                                <option value="7d">7 Hari</option>
+                                <option value="30d" selected>30 Hari</option>
+                                <option value="90d">3 Bulan</option>
+                                <option value="1y">1 Tahun</option>
+                                <option value="all">Semua</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">Kategori</label>
+                            <select id="categoryFilter" class="filter-select">
+                                <option value="all" selected>Semua</option>
+                                <option value="stock">Stok</option>
+                                <option value="borrowing">Peminjaman</option>
+                                <option value="users">Pengguna</option>
+                            </select>
+                        </div>
+
+                        <button class="export-btn" onclick="exportReports()">📥 Export</button>
+                        <button class="export-btn" onclick="showSampleDataGenerator()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">🎯 Generate Sample Data</button>
+                    </div>
+                </div>
+
+                <!-- Statistics Overview -->
+                <div class="stats-overview" id="statsOverview">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalItems">0</div>
+                        <div class="stat-label">Total Barang</div>
+                        <div class="stat-change positive">+12% dari bulan lalu</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-number" id="activeLoans">0</div>
+                        <div class="stat-label">Peminjaman Aktif</div>
+                        <div class="stat-change positive">+8% dari bulan lalu</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUsers">0</div>
+                        <div class="stat-label">Total Pengguna</div>
+                        <div class="stat-change positive">+15% dari bulan lalu</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-number" id="returnRate">0%</div>
+                        <div class="stat-label">Tingkat Pengembalian</div>
+                        <div class="stat-change positive">+5% dari bulan lalu</div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+
+                    <!-- Stock Levels Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h3 class="chart-title">📦 Tingkat Stok Barang</h3>
+                                <p class="chart-subtitle">Distribusi stok berdasarkan kategori</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="stockChart"></canvas>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #10b981;"></div>
+                                <span>Aman</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #f59e0b;"></div>
+                                <span>Rendah</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444;"></div>
+                                <span>Kritis</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Borrowing Trends Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h3 class="chart-title">📈 Tren Peminjaman</h3>
+                                <p class="chart-subtitle">Aktivitas peminjaman per periode</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="borrowingChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Most Borrowed Items Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h3 class="chart-title">🏆 Barang Paling Diminjam</h3>
+                                <p class="chart-subtitle">Top 10 barang berdasarkan frekuensi peminjaman</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="popularItemsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- User Activity Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h3 class="chart-title">👥 Aktivitas Pengguna</h3>
+                                <p class="chart-subtitle">Distribusi peminjaman per pengguna</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="userActivityChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Return Rate Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h3 class="chart-title">🔄 Tingkat Pengembalian</h3>
+                                <p class="chart-subtitle">Persentase pengembalian tepat waktu</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="returnRateChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Category Distribution Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h3 class="chart-title">📊 Distribusi Kategori</h3>
+                                <p class="chart-subtitle">Proporsi barang berdasarkan kategori</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copyright Footer -->
+    <footer class="copyright-footer">
+        <p>&copy; 2025 InvManage. All rights reserved.</p>
+        <div class="copyright-team">
+            <div class="team-member">
+                <div class="team-role">Software Architect & Developer</div>
+                <div class="team-name">
+                    <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+                        Alifito Rabbani Cahyono
+                    </a>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="team-role">UI/UX Architect & Developer</div>
+                <div class="team-name">
+                    <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+                        Satria Febry Andanu
+                    </a>
+                </div>
+            </div>
+            <div class="team-member">
+                <div class="team-role">Data Analyst & Engineer</div>
+                <div class="team-name">
+                    <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+                        Naufal Thafhan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Chart instances
+        let stockChart, borrowingChart, popularItemsChart, userActivityChart, returnRateChart, categoryChart;
+
+        // Data cache
+        let reportsData = {
+            barang: [],
+            peminjaman: [],
+            users: [],
+            transaksi: []
+        };
+
+        // Initialize page
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
+            // if (!checkAuth('admin')) return;
+
+            // Show welcome message
+            showWelcomeMessage();
+
+            // Load initial data
+            await loadReportsData();
+
+            // Initialize charts
+            initializeCharts();
+
+            // Setup filters
+            setupFilters();
+
+            // Update charts with data
+            updateAllCharts();
+        });
+
+        function showWelcomeMessage() {
+            const currentUser = getCurrentUser();
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const welcomeNotification = document.getElementById('welcomeNotification');
+
+            const welcomeShownKey = `welcome_shown_reports_${currentUser?.id || 'unknown'}`;
+            const welcomeAlreadyShown = localStorage.getItem(welcomeShownKey);
+
+            if (welcomeMessage && welcomeNotification && !welcomeAlreadyShown) {
+                localStorage.setItem(welcomeShownKey, 'true');
+
+                const userName = currentUser && currentUser.nama ? currentUser.nama : 'Admin';
+                welcomeMessage.textContent = `${userName} mengakses halaman laporan dan analitik`;
+
+                welcomeNotification.style.display = 'block';
+                welcomeNotification.style.opacity = '0';
+                welcomeNotification.style.transform = 'translateY(-20px)';
+
+                setTimeout(() => {
+                    welcomeNotification.style.transition = 'all 0.5s ease';
+                    welcomeNotification.style.opacity = '1';
+                    welcomeNotification.style.transform = 'translateY(0)';
+                }, 100);
+
+                setTimeout(() => {
+                    welcomeNotification.style.opacity = '0';
+                    welcomeNotification.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        welcomeNotification.style.display = 'none';
+                    }, 500);
+                }, 4000);
+            }
+        }
+
+        async function loadReportsData() {
+            try {
+                showLoading("Memuat data laporan...");
+
+                // Load all data in parallel
+                const [barangRes, peminjamanRes, usersRes, transaksiRes] = await Promise.all([
+                    fetch(`${API_BASE}/barang/`),
+                    fetch(`${API_BASE}/peminjaman/`),
+                    fetch(`${API_BASE}/users/`),
+                    fetch(`${API_BASE}/transaksi/`)
+                ]);
+
+                if (barangRes.ok) reportsData.barang = await barangRes.json();
+                if (peminjamanRes.ok) reportsData.peminjaman = await peminjamanRes.json();
+                if (usersRes.ok) reportsData.users = await usersRes.json();
+                if (transaksiRes.ok) reportsData.transaksi = await transaksiRes.json();
+
+                console.log('Reports data loaded:', reportsData);
+                hideLoading();
+
+            } catch (error) {
+                console.error('Error loading reports data:', error);
+                hideLoading();
+                showNotification("Gagal memuat data laporan", "error");
+            }
+        }
+
+        function setupFilters() {
+            const periodFilter = document.getElementById('periodFilter');
+            const categoryFilter = document.getElementById('categoryFilter');
+
+            periodFilter.addEventListener('change', () => {
+                updateAllCharts();
+            });
+
+            categoryFilter.addEventListener('change', () => {
+                updateAllCharts();
+            });
+        }
+
+        function initializeCharts() {
+            // Stock Levels Chart
+            const stockCtx = document.getElementById('stockChart').getContext('2d');
+            stockChart = new Chart(stockCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stok Aman', 'Stok Rendah', 'Stok Kritis'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Borrowing Trends Chart
+            const borrowingCtx = document.getElementById('borrowingChart').getContext('2d');
+            borrowingChart = new Chart(borrowingCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Peminjaman',
+                        data: [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Popular Items Chart
+            const popularCtx = document.getElementById('popularItemsChart').getContext('2d');
+            popularItemsChart = new Chart(popularCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Jumlah Peminjaman',
+                        data: [],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // User Activity Chart
+            const userCtx = document.getElementById('userActivityChart').getContext('2d');
+            userActivityChart = new Chart(userCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Total Peminjaman',
+                        data: [],
+                        backgroundColor: '#10b981',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Return Rate Chart
+            const returnCtx = document.getElementById('returnRateChart').getContext('2d');
+            returnRateChart = new Chart(returnCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Dikembalikan', 'Belum Dikembalikan'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Category Distribution Chart
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            categoryChart = new Chart(categoryCtx, {
+                type: 'polarArea',
+                data: {
+                    labels: ['Elektronik', 'Aksesoris', 'Peralatan', 'Lainnya'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateAllCharts() {
+            updateStatsOverview();
+            updateStockChart();
+            updateBorrowingChart();
+            updatePopularItemsChart();
+            updateUserActivityChart();
+            updateReturnRateChart();
+            updateCategoryChart();
+        }
+
+        function updateStatsOverview() {
+            const totalItems = reportsData.barang.length;
+            const activeLoans = reportsData.peminjaman.filter(p => p.status === 'dipinjam').length;
+            const totalUsers = reportsData.users.filter(u => u.role === 'user').length;
+
+            const returnedLoans = reportsData.peminjaman.filter(p => p.status === 'dikembalikan').length;
+            const totalLoans = reportsData.peminjaman.length;
+            const returnRate = totalLoans > 0 ? Math.round((returnedLoans / totalLoans) * 100) : 0;
+
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('activeLoans').textContent = activeLoans;
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('returnRate').textContent = `${returnRate}%`;
+        }
+
+        function updateStockChart() {
+            const aman = reportsData.barang.filter(b => b.stok > b.minimum).length;
+            const rendah = reportsData.barang.filter(b => b.stok <= b.minimum && b.stok > 1).length;
+            const kritis = reportsData.barang.filter(b => b.stok <= 1).length;
+
+            stockChart.data.datasets[0].data = [aman, rendah, kritis];
+            stockChart.update();
+        }
+
+        function updateBorrowingChart() {
+            const period = document.getElementById('periodFilter').value;
+            const now = new Date();
+            let days = 30;
+
+            switch (period) {
+                case '7d': days = 7; break;
+                case '30d': days = 30; break;
+                case '90d': days = 90; break;
+                case '1y': days = 365; break;
+                case 'all': days = 365 * 2; break;
+            }
+
+            const startDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+
+            // Group by date
+            const dateGroups = {};
+            reportsData.peminjaman.forEach(p => {
+                const date = new Date(p.tanggal_pinjam).toISOString().split('T')[0];
+                if (new Date(p.tanggal_pinjam) >= startDate) {
+                    dateGroups[date] = (dateGroups[date] || 0) + 1;
+                }
+            });
+
+            const labels = [];
+            const data = [];
+
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
+                const dateStr = date.toISOString().split('T')[0];
+                labels.push(date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }));
+                data.push(dateGroups[dateStr] || 0);
+            }
+
+            borrowingChart.data.labels = labels;
+            borrowingChart.data.datasets[0].data = data;
+            borrowingChart.update();
+        }
+
+        function updatePopularItemsChart() {
+            const itemCounts = {};
+            reportsData.peminjaman.forEach(p => {
+                const itemName = p.barang_nama || `Barang ${p.barang}`;
+                itemCounts[itemName] = (itemCounts[itemName] || 0) + p.jumlah;
+            });
+
+            const sortedItems = Object.entries(itemCounts)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10);
+
+            popularItemsChart.data.labels = sortedItems.map(([name]) => name);
+            popularItemsChart.data.datasets[0].data = sortedItems.map(([,count]) => count);
+            popularItemsChart.update();
+        }
+
+        function updateUserActivityChart() {
+            const userCounts = {};
+            reportsData.peminjaman.forEach(p => {
+                const userName = p.user_nama || `User ${p.user}`;
+                userCounts[userName] = (userCounts[userName] || 0) + p.jumlah;
+            });
+
+            const sortedUsers = Object.entries(userCounts)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10);
+
+            userActivityChart.data.labels = sortedUsers.map(([name]) => name);
+            userActivityChart.data.datasets[0].data = sortedUsers.map(([,count]) => count);
+            userActivityChart.update();
+        }
+
+        function updateReturnRateChart() {
+            const returned = reportsData.peminjaman.filter(p => p.status === 'dikembalikan').length;
+            const active = reportsData.peminjaman.filter(p => p.status === 'dipinjam').length;
+
+            returnRateChart.data.datasets[0].data = [returned, active];
+            returnRateChart.update();
+        }
+
+        function updateCategoryChart() {
+            // Simple categorization based on item names
+            const categories = {
+                elektronik: 0,
+                aksesoris: 0,
+                peralatan: 0,
+                lainnya: 0
+            };
+
+            reportsData.barang.forEach(barang => {
+                const name = barang.nama.toLowerCase();
+                if (name.includes('laptop') || name.includes('komputer') || name.includes('router') || name.includes('webcam') || name.includes('microphone')) {
+                    categories.elektronik++;
+                } else if (name.includes('mouse') || name.includes('keyboard') || name.includes('kabel') || name.includes('speaker')) {
+                    categories.aksesoris++;
+                } else if (name.includes('proyektor') || name.includes('hard disk')) {
+                    categories.peralatan++;
+                } else {
+                    categories.lainnya++;
+                }
+            });
+
+            categoryChart.data.datasets[0].data = [
+                categories.elektronik,
+                categories.aksesoris,
+                categories.peralatan,
+                categories.lainnya
+            ];
+            categoryChart.update();
+        }
+
+        function exportReports() {
+            // Simple export functionality
+            const data = {
+                timestamp: new Date().toISOString(),
+                stats: {
+                    totalItems: reportsData.barang.length,
+                    activeLoans: reportsData.peminjaman.filter(p => p.status === 'dipinjam').length,
+                    totalUsers: reportsData.users.filter(u => u.role === 'user').length,
+                    returnRate: calculateReturnRate()
+                },
+                charts: {
+                    stockLevels: stockChart?.data || null,
+                    borrowingTrends: borrowingChart?.data || null,
+                    popularItems: popularItemsChart?.data || null,
+                    userActivity: userActivityChart?.data || null
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `invmanage-reports-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showNotification("Laporan berhasil di-export!", "success");
+        }
+
+        function calculateReturnRate() {
+            const returned = reportsData.peminjaman.filter(p => p.status === 'dikembalikan').length;
+            const total = reportsData.peminjaman.length;
+            return total > 0 ? Math.round((returned / total) * 100) : 0;
+        }
+
+        // Sample Data Generator Functions
+
+        function getRandomDate(startDate, endDate) {
+            const start = new Date(startDate).getTime();
+            const end = new Date(endDate).getTime();
+            const randomTime = start + Math.random() * (end - start);
+            return new Date(randomTime);
+        }
+
+        function getRandomCatatan() {
+            const catatan = [
+                "Untuk presentasi proyek akhir",
+                "Dipinjam untuk meeting klien",
+                "Dibutuhkan untuk workshop training",
+                "Penggunaan sementara",
+                "Untuk event perusahaan",
+                "Maintenance dan perbaikan",
+                "Testing aplikasi baru",
+                "Backup data penting",
+                "Presentasi produk",
+                "Riset dan development",
+                "Meeting dengan stakeholder",
+                "Training karyawan baru",
+                "Event promosi produk",
+                "Support teknis",
+                "Quality assurance testing"
+            ];
+            return catatan[Math.floor(Math.random() * catatan.length)];
+        }
+
+        function getRandomStatus() {
+            const statuses = ['dipinjam', 'dikembalikan', 'dikembalikan', 'dikembalikan'];
+            return statuses[Math.floor(Math.random() * statuses.length)];
+        }
+
+        function getRandomJumlah(maxStok) {
+            return Math.min(Math.floor(Math.random() * 5) + 1, maxStok);
+        }
+
+        async function generateSamplePeminjaman(count = 50) {
+            // Use actual data from the loaded reports data
+            const availableUsers = reportsData.users.filter(u => u.role === 'user');
+            const availableBarang = reportsData.barang;
+
+            if (availableUsers.length === 0 || availableBarang.length === 0) {
+                throw new Error('Tidak ada data user atau barang yang tersedia');
+            }
+
+            const peminjamanData = [];
+            const startDate = new Date('2024-01-01');
+            const endDate = new Date('2025-12-31');
+
+            for (let i = 0; i < count; i++) {
+                const user = availableUsers[Math.floor(Math.random() * availableUsers.length)];
+                const barang = availableBarang[Math.floor(Math.random() * availableBarang.length)];
+
+                const tanggalPinjam = getRandomDate(startDate, endDate);
+                const status = getRandomStatus();
+
+                let tanggalKembali = null;
+                if (status === 'dikembalikan') {
+                    const daysToReturn = Math.floor(Math.random() * 30) + 1;
+                    tanggalKembali = new Date(tanggalPinjam);
+                    tanggalKembali.setDate(tanggalKembali.getDate() + daysToReturn);
+                }
+
+                const jumlah = getRandomJumlah(barang.stok || 10); // fallback if stok is undefined
+                const catatan = getRandomCatatan();
+
+                const peminjaman = {
+                    user: user.id,
+                    barang: barang.id,
+                    jumlah: jumlah,
+                    catatan: catatan
+                };
+
+                peminjamanData.push(peminjaman);
+            }
+
+            peminjamanData.sort((a, b) => new Date(b.tanggal_pinjam) - new Date(a.tanggal_pinjam));
+            return peminjamanData;
+        }
+
+        async function sendPeminjamanToAPI(peminjamanData) {
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let i = 0; i < peminjamanData.length; i++) {
+                const peminjaman = peminjamanData[i];
+
+                try {
+                    const response = await fetch(`${API_BASE}/peminjaman/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(peminjaman)
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+
+                    await new Promise(resolve => setTimeout(resolve, 100));
+
+                } catch (error) {
+                    errorCount++;
+                }
+            }
+
+            return { successCount, errorCount, total: peminjamanData.length };
+        }
+
+        function showSampleDataGenerator() {
+            // Check if reports data is loaded
+            if (!reportsData.barang || reportsData.barang.length === 0 ||
+                !reportsData.users || reportsData.users.length === 0) {
+                showNotification('Data laporan belum dimuat. Silakan refresh halaman.', 'error');
+                return;
+            }
+
+            const count = prompt('Masukkan jumlah data sample yang ingin di-generate (1-200):', '50');
+            if (!count || isNaN(count) || count < 1 || count > 200) {
+                showNotification('Jumlah tidak valid. Masukkan angka 1-200.', 'error');
+                return;
+            }
+
+            if (confirm(`Generate ${count} data peminjaman sample? Data akan ditambahkan ke database.`)) {
+                generateAndUploadSampleData(parseInt(count));
+            }
+        }
+
+        async function generateAndUploadSampleData(count) {
+            try {
+                showLoading(`Generating ${count} sample data...`);
+
+                const sampleData = await generateSamplePeminjaman(count);
+                const result = await sendPeminjamanToAPI(sampleData);
+
+                hideLoading();
+
+                if (result.successCount > 0) {
+                    showNotification(`✅ Berhasil generate ${result.successCount} data sample${result.errorCount > 0 ? ` (${result.errorCount} gagal)` : ''}`, 'success');
+                    // Reload data
+                    await loadReportsData();
+                    updateAllCharts();
+                } else {
+                    showNotification('❌ Gagal generate data sample', 'error');
+                }
+
+            } catch (error) {
+                hideLoading();
+                console.error('Error generating sample data:', error);
+                showNotification('❌ Error saat generate data sample', 'error');
+            }
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

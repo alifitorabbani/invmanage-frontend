@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>InvManage - Feedback</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <img src="image.png" alt="Logo" class="sidebar-logo">
+      <h1>InvManage</h1>
+
+      <div class="menu">
+        <a href="user-dashboard.html" class="menu-item">Daftar Barang</a>
+        <a href="user-peminjaman.html" class="menu-item">Peminjaman Saya</a>
+        <a href="user-feedback.html" class="menu-item active">Feedback</a>
+        <a href="user-profil.html" class="menu-item">Profil</a>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <div class="table-box">
+        <div class="table-header">
+          <div>
+            <h2 class="table-title">Kirim Feedback</h2>
+            <p style="color:var(--gray-400); margin: 8px 0 0 0; font-size: 14px;">Berikan masukan untuk perbaikan sistem.</p>
+          </div>
+        </div>
+
+        <div id="feedbackForm" style="margin-bottom:40px; padding: 24px; background: var(--gray-800); border-radius: 12px; border: 1px solid var(--gray-600);">
+          <div class="input-group">
+            <label>Feedback Anda</label>
+            <textarea id="feedbackPesan" rows="4" style="width:100%; padding:16px 20px; border-radius:12px; border:2px solid var(--gray-600); background: var(--gray-700); color: var(--gray-100); font-size:16px; resize: vertical;" placeholder="Tulis feedback di sini..."></textarea>
+          </div>
+
+          <button class="primary" style="width:auto; margin-top: 16px;" onclick="tambahFeedback()">Kirim Feedback</button>
+        </div>
+
+        <h3 style="margin-top:30px; font-size: 20px; font-weight: 600; color: var(--gray-100);">Feedback Saya</h3>
+        <table id="tabelFeedbackUser">
+          <thead>
+            <tr>
+              <th>Pesan</th>
+              <th>Tanggal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- diisi lewat app.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copyright Footer -->
+  <footer class="copyright-footer">
+    <p>&copy; 2025 InvManage. All rights reserved.</p>
+    <div class="copyright-team">
+      <div class="team-member">
+        <div class="team-role">Software Architect & Developer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+            Alifito Rabbani Cahyono
+          </a>
+        </div>
+      </div>
+      <div class="team-member">
+        <div class="team-role">UI/UX Architect & Developer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+            Satria Febry Andanu
+          </a>
+        </div>
+      </div>
+      <div class="team-member">
+        <div class="team-role">Data Analyst & Engineer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+            Naufal Thafhan
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
+      // if (!checkAuth('user')) return;
+      loadFeedbackUser();
+    });
+  </script>
+</body>
+</html>

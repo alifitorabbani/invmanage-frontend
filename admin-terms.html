@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+  <title>Syarat & Ketentuan Admin - InvManage</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      min-height: 100vh;
+      color: #333;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .terms-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .terms-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .terms-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .terms-subtitle {
+      color: #64748b;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .terms-section {
+      margin-bottom: 35px;
+    }
+
+    .terms-section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #3b82f6;
+      display: inline-block;
+    }
+
+    .terms-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #374151;
+      margin: 25px 0 12px 0;
+    }
+
+    .terms-section p {
+      color: #4b5563;
+      line-height: 1.7;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+
+    .terms-section ul {
+      margin: 15px 0;
+      padding-left: 25px;
+    }
+
+    .terms-section li {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .terms-highlight {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #3b82f6;
+      margin: 20px 0;
+    }
+
+    .terms-highlight h4 {
+      color: #1e40af;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .terms-highlight p {
+      color: #1e3a8a;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      margin-top: 30px;
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(30, 64, 175, 0.4);
+      color: white;
+    }
+
+    .admin-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .terms-container {
+        padding: 25px;
+        margin: 10px;
+      }
+
+      .terms-header h1 {
+        font-size: 24px;
+      }
+    }
+
+    /* Copyright Footer for Admin Terms */
+    .copyright-footer-admin {
+      background: rgba(0,0,0,0.9);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 20px 0;
+      margin-top: 40px;
+      text-align: center;
+      color: rgba(255,255,255,0.8);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .copyright-team-admin {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .team-member-admin {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .team-role-admin {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .team-name-admin {
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
+    }
+
+    .team-name-admin a {
+      color: #fbbf24;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .team-name-admin a:hover {
+      color: #fcd34d;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="terms-container">
+  <div class="terms-header">
+    <h1>Syarat & Ketentuan Administrator <span class="admin-badge">Admin Only</span></h1>
+    <p class="terms-subtitle">InvManage - Sistem Manajemen Administrator</p>
+  </div>
+
+  <div class="terms-section">
+    <h2>1. Pendahuluan</h2>
+    <p>Selamat datang di InvManage Administrator Panel. Syarat dan ketentuan ini mengatur penggunaan akun administrator sistem manajemen inventaris kami. Dengan membuat akun administrator, Anda menyetujui untuk terikat oleh syarat dan ketentuan ini.</p>
+
+    <div class="terms-highlight">
+      <h4>⚠️ Akses Terbatas</h4>
+      <p>Akun administrator memberikan akses penuh ke sistem. Pastikan Anda adalah personel yang berwenang untuk mengelola sistem inventaris.</p>
+    </div>
+  </div>
+
+  <div class="terms-section">
+    <h2>2. Definisi</h2>
+    <ul>
+      <li><strong>"Administrator"</strong> atau <strong>"Admin"</strong> merujuk kepada Anda sebagai pengguna akun administrator</li>
+      <li><strong>"Sistem"</strong> merujuk kepada InvManage - platform manajemen inventaris</li>
+      <li><strong>"Data"</strong> merujuk kepada semua informasi inventaris, user, dan transaksi dalam sistem</li>
+      <li><strong>"Akses"</strong> merujuk kepada kemampuan untuk melihat, mengubah, atau menghapus data dalam sistem</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>3. Kewajiban Administrator</h2>
+    <p>Sebagai administrator InvManage, Anda berkewajiban untuk:</p>
+    <ul>
+      <li>🔐 <strong>Keamanan Akun</strong>: Menjaga kerahasiaan kredensial login dan tidak membagikannya kepada pihak lain</li>
+      <li>📊 <strong>Data Management</strong>: Mengelola data inventaris dengan akurat dan bertanggung jawab</li>
+      <li>👥 <strong>User Oversight</strong>: Mengawasi aktivitas user dan menjaga integritas sistem</li>
+      <li>🔄 <strong>System Maintenance</strong>: Memastikan sistem berjalan dengan baik dan melaporkan masalah teknis</li>
+      <li>📈 <strong>Reporting</strong>: Menyediakan laporan yang akurat tentang aktivitas sistem</li>
+      <li>🚫 <strong>Compliance</strong>: Mematuhi semua kebijakan dan regulasi yang berlaku</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>4. Hak Akses Administrator</h2>
+    <p>Administrator memiliki hak akses penuh untuk:</p>
+    <ul>
+      <li>📦 <strong>Manajemen Barang</strong>: Menambah, mengubah, dan menghapus data inventaris</li>
+      <li>👤 <strong>Manajemen User</strong>: Melihat dan mengelola akun user (kecuali akun admin lain)</li>
+      <li>📋 <strong>Transaksi</strong>: Memantau dan mengelola semua transaksi peminjaman</li>
+      <li>💬 <strong>Feedback</strong>: Melihat dan mengelola feedback dari user</li>
+      <li>📊 <strong>Laporan</strong>: Mengakses semua laporan dan analitik sistem</li>
+      <li>⚙️ <strong>Konfigurasi</strong>: Mengubah pengaturan sistem (jika diizinkan)</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>5. Larangan dan Batasan</h2>
+    <p>Administrator dilarang untuk:</p>
+    <ul>
+      <li>🚫 <strong>Misuse of Power</strong>: Menyalahgunakan akses admin untuk kepentingan pribadi</li>
+      <li>🔒 <strong>Data Breach</strong>: Membagikan data sensitif kepada pihak yang tidak berwenang</li>
+      <li>🗑️ <strong>Data Deletion</strong>: Menghapus data penting tanpa alasan yang valid</li>
+      <li>👤 <strong>User Interference</strong>: Mengganggu aktivitas user yang sah</li>
+      <li>🔐 <strong>Security Bypass</strong>: Mencoba melewati atau menonaktifkan fitur keamanan</li>
+      <li>📤 <strong>Unauthorized Access</strong>: Memberikan akses admin kepada user biasa</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>6. Tanggung Jawab Data</h2>
+    <p>Administrator bertanggung jawab atas:</p>
+    <ul>
+      <li>💾 <strong>Data Integrity</strong>: Memastikan keakuratan dan konsistensi data</li>
+      <li>🔄 <strong>Backup</strong>: Melakukan backup data secara berkala (jika diperlukan)</li>
+      <li>🚨 <strong>Incident Response</strong>: Menangani insiden keamanan atau data breach</li>
+      <li>📝 <strong>Audit Trail</strong>: Mencatat semua perubahan penting pada sistem</li>
+      <li>🔍 <strong>Monitoring</strong>: Memantau aktivitas mencurigakan dalam sistem</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>7. Kebijakan Keamanan</h2>
+    <h3>Password Policy</h3>
+    <ul>
+      <li>Minimal 8 karakter dengan kombinasi huruf, angka, dan simbol</li>
+      <li>Harus diubah setiap 90 hari</li>
+      <li>Tidak boleh menggunakan password yang sama dengan akun lain</li>
+    </ul>
+
+    <h3>Session Management</h3>
+    <ul>
+      <li>Sesi otomatis logout setelah 30 menit tidak aktif</li>
+      <li>Maksimal 1 sesi aktif per akun admin</li>
+      <li>Login dari device yang tidak dikenal memerlukan verifikasi</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>8. Pelaporan dan Audit</h2>
+    <p>Administrator wajib:</p>
+    <ul>
+      <li>📊 <strong>Monthly Reports</strong>: Menyediakan laporan bulanan aktivitas sistem</li>
+      <li>🚨 <strong>Incident Reports</strong>: Melaporkan insiden keamanan dalam 24 jam</li>
+      <li>📋 <strong>Audit Logs</strong>: Menjaga log aktivitas admin untuk audit</li>
+      <li>🔍 <strong>Compliance Checks</strong>: Memastikan kepatuhan terhadap kebijakan</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>9. Penghentian Akses</h2>
+    <p>Akses administrator dapat dihentikan jika:</p>
+    <ul>
+      <li>❌ Melanggar syarat dan ketentuan ini</li>
+      <li>🚪 Mengundurkan diri dari jabatan administrator</li>
+      <li>🔒 Kebutuhan keamanan sistem</li>
+      <li>⚖️ Pelanggaran kebijakan perusahaan</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>10. Persetujuan</h2>
+    <p>Dengan membuat akun administrator InvManage, Anda menyatakan bahwa:</p>
+    <ul>
+      <li>✅ Anda memahami dan menyetujui semua syarat dan ketentuan ini</li>
+      <li>✅ Anda memiliki wewenang untuk menjadi administrator sistem</li>
+      <li>✅ Anda akan menggunakan akses admin dengan bertanggung jawab</li>
+      <li>✅ Anda akan menjaga kerahasiaan dan keamanan sistem</li>
+      <li>✅ Anda akan mematuhi semua kebijakan dan prosedur yang berlaku</li>
+    </ul>
+
+    <div class="terms-highlight">
+      <h4>🎯 Komitmen Administrator</h4>
+      <p>Sebagai administrator, Anda berkomitmen untuk menjaga integritas, keamanan, dan efisiensi sistem InvManage untuk kepentingan organisasi dan semua pengguna.</p>
+    </div>
+  </div>
+
+  <div style="text-align: center;">
+    <a href="admin-login.html" class="back-button">
+      ← Kembali ke Login Admin
+    </a>
+  </div>
+
+  <!-- Copyright Footer -->
+  <footer class="copyright-footer-admin">
+    <p>&copy; 2025 InvManage. All rights reserved.</p>
+    <div class="copyright-team-admin">
+      <div class="team-member-admin">
+        <div class="team-role-admin">Software Architect & Developer</div>
+        <div class="team-name-admin">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+            Alifito Rabbani Cahyono
+          </a>
+        </div>
+      </div>
+      <div class="team-member-admin">
+        <div class="team-role-admin">UI/UX Architect & Developer</div>
+        <div class="team-name-admin">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+            Satria Febry Andanu
+          </a>
+        </div>
+      </div>
+      <div class="team-member-admin">
+        <div class="team-role-admin">Data Analyst & Engineer</div>
+        <div class="team-name-admin">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+            Naufal Thafhan
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html></content>
+</xai:function_call">The user has provided feedback on the name="Admin Terms">Created comprehensive admin-specific terms and conditions page

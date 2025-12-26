@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>InvManage - Profil</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <img src="image.png" alt="Logo" class="sidebar-logo">
+      <h1>InvManage Admin</h1>
+
+      <div class="menu">
+        <a href="dashboard.html" class="menu-item">Dashboard</a>
+        <a href="riwayat.html" class="menu-item">Riwayat Transaksi</a>
+        <a href="laporan.html" class="menu-item">📊 Laporan & Analitik</a>
+        <a href="profil.html" class="menu-item active">Profil</a>
+        <a href="feedback.html" class="menu-item">Feedback</a>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <h2 style="margin-bottom:5px; font-size: 28px; font-weight: 700; color: var(--gray-100);">Profil Pengguna</h2>
+      <p style="color:var(--gray-400); margin-bottom:30px; font-size: 16px;">Kelola informasi akun anda</p>
+
+      <!-- Profile Header Card -->
+      <div class="profile-header-card">
+        <div class="profile-photo-container">
+          <img id="profilePhoto" src="" alt="Profile" class="profile-photo">
+          <label for="photoInput" class="photo-edit-btn">📷</label>
+          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+        </div>
+        <div class="profile-info">
+          <div id="profileNamaHeader" class="profile-name">Admin</div>
+          <div id="profileRoleHeader" class="profile-role">Admin - Departemen</div>
+        </div>
+      </div>
+
+      <!-- Account Info Card -->
+      <div class="table-box" style="margin-top:30px;">
+        <div class="table-header">
+          <div>
+            <h3 style="margin:0; font-size: 20px; font-weight: 600; color: var(--gray-100);">Informasi Akun</h3>
+            <p style="color:var(--gray-400); margin:5px 0 0 0; font-size:14px;">Update data pribadi anda</p>
+          </div>
+          <button class="add-btn" onclick="toggleEditMode()">Edit</button>
+        </div>
+
+        <div class="profile-form">
+          <div class="form-row">
+            <div class="input-group">
+              <label>Nama Lengkap</label>
+              <input type="text" id="inputNama" placeholder="Nama lengkap" disabled>
+            </div>
+            <div class="input-group">
+              <label>Username</label>
+              <input type="text" id="inputUsername" placeholder="Username" disabled>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="input-group">
+              <label>Email</label>
+              <input type="email" id="inputEmail" placeholder="Email" disabled>
+            </div>
+            <div class="input-group">
+              <label>No. Telepon</label>
+              <input type="text" id="inputPhone" placeholder="No. Telepon" disabled>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="input-group" style="flex:1;">
+              <label>Departemen</label>
+              <input type="text" id="inputDepartemen" placeholder="Departemen" disabled>
+            </div>
+          </div>
+
+          <div id="saveButtons" style="display:none; margin-top:15px;">
+            <button class="primary" onclick="saveProfil()">Simpan Perubahan</button>
+            <button class="btn-red" style="margin-left:10px;" onclick="cancelEdit()">Batal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password Card -->
+      <div class="table-box" style="margin-top:30px;">
+        <div class="table-header">
+          <div>
+            <h3 style="margin:0; font-size: 20px; font-weight: 600; color: var(--gray-100);">Ganti Password</h3>
+            <p style="color:var(--gray-400); margin:5px 0 0 0; font-size:14px;">Perbarui password akun anda</p>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="input-group">
+            <label>Password Lama</label>
+            <input type="password" id="inputOldPassword" placeholder="Masukkan password lama">
+          </div>
+          <div class="input-group">
+            <label>Password Baru</label>
+            <input type="password" id="inputNewPassword" placeholder="Masukkan password baru">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label>Konfirmasi Password Baru</label>
+            <input type="password" id="inputConfirmPassword" placeholder="Konfirmasi password baru">
+          </div>
+          <div class="input-group" style="display:flex; align-items:flex-end;">
+            <button class="primary" onclick="changePassword()">Ubah Password</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logout Button -->
+      <div style="margin-top:20px;">
+        <button class="btn-red" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copyright Footer -->
+  <footer class="copyright-footer">
+    <p>&copy; 2025 InvManage. All rights reserved.</p>
+    <div class="copyright-team">
+      <div class="team-member">
+        <div class="team-role">Software Architect & Developer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+            Alifito Rabbani Cahyono
+          </a>
+        </div>
+      </div>
+      <div class="team-member">
+        <div class="team-role">UI/UX Architect & Developer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+            Satria Febry Andanu
+          </a>
+        </div>
+      </div>
+      <div class="team-member">
+        <div class="team-role">Data Analyst & Engineer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+            Naufal Thafhan
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
+      // if (!checkAuth('admin')) return;
+      loadProfilFull();
+    });
+  </script>
+</body>
+</html>

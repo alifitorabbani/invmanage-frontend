@@ -1,0 +1,21 @@
+{
+  "name": "invmanage-frontend",
+  "version": "1.0.0",
+  "description": "Inventory Management System Frontend",
+  "main": "app.js",
+  "scripts": {
+    "start": "http-server . -p 3000 -c-1 --cors",
+    "dev": "http-server . -p 3000 -c-1 --cors -o",
+    "serve": "python3 -m http.server 3000",
+    "build": "echo 'No build step required for static frontend'"
+  },
+  "keywords": ["inventory", "management", "frontend"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

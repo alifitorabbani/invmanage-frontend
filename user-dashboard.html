@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>InvManage - Dashboard User</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Welcome Notification -->
+  <div id="welcomeNotification" class="welcome-message">
+    <h3 id="welcomeTitle">Selamat!</h3>
+    <p id="welcomeMessage"></p>
+  </div>
+
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <img src="image.png" alt="Logo" class="sidebar-logo">
+      <h1>InvManage</h1>
+
+      <div class="menu">
+        <a href="user-dashboard.html" class="menu-item active">Daftar Barang</a>
+        <a href="user-peminjaman.html" class="menu-item">Peminjaman Saya</a>
+        <a href="user-feedback.html" class="menu-item">Feedback</a>
+        <a href="user-profil.html" class="menu-item">Profil</a>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <div class="table-box">
+        <div class="table-header">
+          <div>
+            <h2 class="table-title">Daftar Barang Tersedia</h2>
+            <p style="color:#64748b; margin: 8px 0 0 0; font-size: 14px;">Pilih barang yang ingin dipinjam</p>
+          </div>
+        </div>
+
+        <div class="input-group" style="max-width:350px; margin-bottom:20px;">
+          <input type="text" id="searchBarangUser" placeholder="Cari barang...">
+        </div>
+
+        <table id="tabelBarangUser">
+          <thead>
+            <tr>
+              <th>Nama Barang</th>
+              <th>Stok Tersedia</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- diisi lewat app.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Pinjam Barang -->
+  <div class="modal-bg" id="modalPinjam">
+    <div class="modal">
+      <h3>Pinjam Barang</h3>
+      <p>Barang: <strong id="pinjamNamaBarang"></strong></p>
+
+      <div class="input-group">
+        <label>Jumlah</label>
+        <input type="number" id="pinjamJumlah" placeholder="Jumlah yang dipinjam" min="1">
+      </div>
+
+      <div class="input-group">
+        <label>Catatan (opsional)</label>
+        <input type="text" id="pinjamCatatan" placeholder="Keperluan peminjaman">
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="primary" onclick="konfirmasiPinjam()">Pinjam</button>
+        <button class="btn-red" onclick="closePinjamModal()">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copyright Footer -->
+  <footer class="copyright-footer">
+    <p>&copy; 2025 InvManage. All rights reserved.</p>
+    <div class="copyright-team">
+      <div class="team-member">
+        <div class="team-role">Software Architect & Developer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+            Alifito Rabbani Cahyono
+          </a>
+        </div>
+      </div>
+      <div class="team-member">
+        <div class="team-role">UI/UX Architect & Developer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+            Satria Febry Andanu
+          </a>
+        </div>
+      </div>
+      <div class="team-member">
+        <div class="team-role">Data Analyst & Engineer</div>
+        <div class="team-name">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+            Naufal Thafhan
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
+      // if (!checkAuth('user')) return;
+
+      // Show welcome message only once after login
+      const currentUser = getCurrentUser();
+      console.log('Current user:', currentUser); // Debug
+
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const welcomeNotification = document.getElementById('welcomeNotification');
+
+      // Check if welcome message has already been shown
+      const welcomeShownKey = `welcome_shown_${currentUser?.id || 'unknown'}`;
+      const welcomeAlreadyShown = localStorage.getItem(welcomeShownKey);
+
+      if (welcomeMessage && welcomeNotification && !welcomeAlreadyShown) {
+        // Mark as shown to prevent repeated displays
+        localStorage.setItem(welcomeShownKey, 'true');
+
+        const userName = currentUser && currentUser.nama ? currentUser.nama : 'User';
+        welcomeMessage.textContent = `${userName} telah berhasil login`;
+
+        welcomeNotification.style.display = 'block';
+        welcomeNotification.style.opacity = '0';
+        welcomeNotification.style.transform = 'translateY(-20px)';
+
+        // Animate in
+        setTimeout(() => {
+          welcomeNotification.style.transition = 'all 0.5s ease';
+          welcomeNotification.style.opacity = '1';
+          welcomeNotification.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Hide after 5 seconds
+        setTimeout(() => {
+          welcomeNotification.style.opacity = '0';
+          welcomeNotification.style.transform = 'translateY(-20px)';
+          setTimeout(() => {
+            welcomeNotification.style.display = 'none';
+          }, 500);
+        }, 5000);
+      }
+
+      loadBarangUser();
+      document.getElementById("searchBarangUser")?.addEventListener("input", applyBarangUserFilter);
+    });
+  </script>
+</body>
+</html>

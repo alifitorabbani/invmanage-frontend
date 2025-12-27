@@ -155,8 +155,225 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20251226"></script>
   <script>
+    // User Profile Functions
+    let isEditMode = false;
+
+    function loadProfilFull() {
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
+
+      // Header
+      if ($("#profileNamaHeader")) $("#profileNamaHeader").textContent = currentUser.nama || "User";
+      if ($("#profileRoleHeader")) {
+        $("#profileRoleHeader").textContent = "Standard User";
+      }
+
+      // Photo
+      const photoEl = $("#profilePhoto");
+      if (photoEl) {
+        if (currentUser.foto) {
+          photoEl.src = currentUser.foto;
+          photoEl.style.background = 'none';
+        } else {
+          // Show initials
+          const initials = getInitials(currentUser.nama || "U");
+          photoEl.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect fill="%237c8db5" width="80" height="80"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="32" font-family="Arial">${initials}</text></svg>`;
+        }
+      }
+
+      // Form fields
+      if ($("#inputNama")) $("#inputNama").value = currentUser.nama || "";
+      if ($("#inputUsername")) $("#inputUsername").value = currentUser.username || "";
+      if ($("#inputEmail")) $("#inputEmail").value = currentUser.email || "";
+      if ($("#inputPhone")) $("#inputPhone").value = currentUser.phone || "";
+      if ($("#inputDepartemen")) $("#inputDepartemen").value = currentUser.departemen || "";
+    }
+
+    function getInitials(name) {
+      const parts = name.split(' ');
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
+    }
+
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      const inputs = document.querySelectorAll('.profile-form input');
+      const saveButtons = $("#saveButtons");
+
+      inputs.forEach(input => {
+        input.disabled = !isEditMode;
+      });
+
+      if (saveButtons) {
+        saveButtons.style.display = isEditMode ? 'block' : 'none';
+      }
+    }
+
+    function cancelEdit() {
+      isEditMode = false;
+      const inputs = document.querySelectorAll('.profile-form input');
+      const saveButtons = $("#saveButtons");
+
+      inputs.forEach(input => {
+        input.disabled = true;
+      });
+
+      if (saveButtons) {
+        saveButtons.style.display = 'none';
+      }
+
+      loadProfilFull(); // Reset values
+    }
+
+    async function saveProfil() {
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
+
+      const payload = {
+        nama: $("#inputNama")?.value || currentUser.nama,
+        username: $("#inputUsername")?.value || "",
+        email: $("#inputEmail")?.value || "",
+        phone: $("#inputPhone")?.value || "",
+        departemen: $("#inputDepartemen")?.value || "",
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/users/${currentUser.id}/`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const updatedUser = await res.json();
+          setCurrentUser(updatedUser);
+          cancelEdit();
+          loadProfilFull();
+          showNotification("Profil berhasil disimpan", "success");
+        } else {
+          showNotification("Gagal menyimpan profil", "error");
+        }
+      } catch (err) {
+        console.error(err);
+        showNotification("Gagal menyimpan profil", "error");
+      }
+    }
+
+    // Preview and upload photo
+    function previewPhoto(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          const base64 = e.target.result;
+
+          // Update preview
+          const photoEl = $("#profilePhoto");
+          if (photoEl) {
+            photoEl.src = base64;
+          }
+
+          // Save to server
+          await uploadPhoto(base64);
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    async function uploadPhoto(base64) {
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/users/${currentUser.id}/update_foto/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ foto: base64 }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentUser(data.user);
+          showNotification("Foto profil berhasil diubah", "success");
+        } else {
+          showNotification("Gagal mengubah foto profil", "error");
+        }
+      } catch (err) {
+        console.error(err);
+        showNotification("Gagal mengubah foto profil", "error");
+      }
+    }
+
+    async function changePassword() {
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
+
+      const oldPassword = $("#inputOldPassword")?.value;
+      const newPassword = $("#inputNewPassword")?.value;
+      const confirmPassword = $("#inputConfirmPassword")?.value;
+
+      if (!oldPassword || !newPassword || !confirmPassword) {
+        showNotification("Semua field password wajib diisi", "warning");
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        showNotification("Password baru dan konfirmasi tidak cocok", "error");
+        return;
+      }
+
+      if (newPassword.length < 4) {
+        showNotification("Password baru minimal 4 karakter", "warning");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/users/${currentUser.id}/change_password/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            old_password: oldPassword,
+            new_password: newPassword
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showNotification("Password berhasil diubah", "success");
+          // Clear password fields
+          if ($("#inputOldPassword")) $("#inputOldPassword").value = "";
+          if ($("#inputNewPassword")) $("#inputNewPassword").value = "";
+          if ($("#inputConfirmPassword")) $("#inputConfirmPassword").value = "";
+        } else {
+          showNotification(data.error || "Gagal mengubah password", "error");
+        }
+      } catch (err) {
+        console.error(err);
+        showNotification("Gagal mengubah password", "error");
+      }
+    }
+
+    function logout() {
+      const currentUser = getCurrentUser();
+
+      // Clear welcome notification flags
+      if (currentUser) {
+        localStorage.removeItem(`welcome_shown_${currentUser.id}`);
+        localStorage.removeItem(`welcome_shown_user_${currentUser.id}`);
+      }
+
+      clearCurrentUser();
+      localStorage.removeItem("profileNama");
+      localStorage.removeItem("profileEmail");
+
+      // Redirect to landing page
+      window.location.href = "index.html";
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
       // if (!checkAuth('user')) return;

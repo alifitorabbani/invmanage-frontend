@@ -4,9 +4,9 @@
   "description": "Inventory Management System Frontend",
   "main": "app.js",
   "scripts": {
-    "start": "http-server . -p 3000 -c-1 --cors",
-    "dev": "http-server . -p 3000 -c-1 --cors -o",
-    "serve": "python3 -m http.server 3000",
+    "start": "http-server . -p 3001 -c-1 --cors",
+    "dev": "http-server . -p 3001 -c-1 --cors -o",
+    "serve": "python3 -m http.server 3001",
     "build": "echo 'No build step required for static frontend'"
   },
   "keywords": ["inventory", "management", "frontend"],

@@ -2,88 +2,273 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>InvManage - Dashboard User</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InvManage - User Dashboard</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
 </head>
 <body>
   <!-- Welcome Notification -->
   <div id="welcomeNotification" class="welcome-message">
-    <h3 id="welcomeTitle">Selamat!</h3>
+    <h3 id="welcomeTitle">Selamat Datang!</h3>
     <p id="welcomeMessage"></p>
   </div>
 
   <div class="dashboard-layout">
-
-    <!-- Sidebar -->
+    <!-- Enhanced Sidebar -->
     <div class="sidebar">
-      <img src="image.png" alt="Logo" class="sidebar-logo">
-      <h1>InvManage</h1>
+      <div class="sidebar-header">
+        <img src="image.png" alt="Logo" class="sidebar-logo">
+        <h1>InvManage</h1>
+        <div class="sidebar-subtitle">User Portal</div>
+      </div>
 
       <div class="menu">
-        <a href="user-dashboard.html" class="menu-item active">Daftar Barang</a>
-        <a href="user-peminjaman.html" class="menu-item">Peminjaman Saya</a>
-        <a href="user-feedback.html" class="menu-item">Feedback</a>
-        <a href="user-profil.html" class="menu-item">Profil</a>
+        <a href="user-dashboard.html" class="menu-item active">
+          <span class="menu-icon">📦</span>
+          <span class="menu-text">Daftar Barang</span>
+        </a>
+        <a href="user-peminjaman.html" class="menu-item">
+          <span class="menu-icon">📋</span>
+          <span class="menu-text">Peminjaman Saya</span>
+        </a>
+        <a href="user-feedback.html" class="menu-item">
+          <span class="menu-icon">💬</span>
+          <span class="menu-text">Feedback</span>
+        </a>
+        <a href="user-profil.html" class="menu-item">
+          <span class="menu-icon">👤</span>
+          <span class="menu-text">Profil</span>
+        </a>
+      </div>
+
+      <!-- User Info Section -->
+      <div class="sidebar-user">
+        <div class="user-avatar">
+          <span id="sidebarUserInitial">U</span>
+        </div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">User</div>
+          <div class="user-role">Standard User</div>
+        </div>
+        <button class="logout-btn" onclick="logout()" title="Logout">
+          <span>🚪</span>
+        </button>
       </div>
     </div>
 
-    <!-- Main content -->
+    <!-- Main Content -->
     <div class="main-content">
-      <div class="table-box">
-        <div class="table-header">
-          <div>
-            <h2 class="table-title">Daftar Barang Tersedia</h2>
-            <p style="color:#64748b; margin: 8px 0 0 0; font-size: 14px;">Pilih barang yang ingin dipinjam</p>
+      <!-- Dashboard Header -->
+      <div class="dashboard-header">
+        <div class="header-left">
+          <h1 class="page-title">Dashboard User</h1>
+          <p class="page-subtitle">Kelola peminjaman dan akses barang inventaris</p>
+        </div>
+        <div class="header-right">
+          <div class="header-actions">
+            <button class="action-btn refresh-btn" onclick="refreshUserDashboard()" title="Refresh Data">
+              <span>🔄</span>
+            </button>
+            <div class="time-display" id="currentTime">--:--:--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Stats Cards -->
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <div class="card-icon">📦</div>
+          <div class="card-content">
+            <div class="card-value" id="totalAvailableItems">0</div>
+            <div class="card-label">Barang Tersedia</div>
+            <div class="card-trend positive">↗️ Siap Dipinjam</div>
           </div>
         </div>
 
-        <div class="input-group" style="max-width:350px; margin-bottom:20px;">
-          <input type="text" id="searchBarangUser" placeholder="Cari barang...">
+        <div class="analytics-card">
+          <div class="card-icon">🔄</div>
+          <div class="card-content">
+            <div class="card-value" id="myActiveLoans">0</div>
+            <div class="card-label">Peminjaman Aktif</div>
+            <div class="card-trend info">📋 Dalam Proses</div>
+          </div>
         </div>
 
-        <table id="tabelBarangUser">
-          <thead>
-            <tr>
-              <th>Nama Barang</th>
-              <th>Stok Tersedia</th>
-              <th>Status</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- diisi lewat app.js -->
-          </tbody>
-        </table>
+        <div class="analytics-card">
+          <div class="card-icon">✅</div>
+          <div class="card-content">
+            <div class="card-value" id="myCompletedLoans">0</div>
+            <div class="card-label">Selesai</div>
+            <div class="card-trend positive">↗️ Berhasil</div>
+          </div>
+        </div>
+
+        <div class="analytics-card">
+          <div class="card-icon">⭐</div>
+          <div class="card-content">
+            <div class="card-value" id="feedbackCount">0</div>
+            <div class="card-label">Feedback Diberikan</div>
+            <div class="card-trend positive">↗️ Aktif</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions for User -->
+      <div class="quick-actions">
+        <h3>Aksi Cepat</h3>
+        <div class="actions-grid">
+          <button class="quick-action-btn" onclick="showAvailableItems()">
+            <div class="action-icon">📦</div>
+            <div class="action-text">Lihat Barang</div>
+          </button>
+          <button class="quick-action-btn" onclick="showMyLoans()">
+            <div class="action-icon">📋</div>
+            <div class="action-text">Peminjaman Saya</div>
+          </button>
+          <button class="quick-action-btn" onclick="giveFeedback()">
+            <div class="action-icon">💬</div>
+            <div class="action-text">Beri Feedback</div>
+          </button>
+          <button class="quick-action-btn" onclick="viewProfile()">
+            <div class="action-icon">👤</div>
+            <div class="action-text">Lihat Profil</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Activity for User -->
+      <div class="recent-activity">
+        <div class="activity-header">
+          <h3>Aktivitas Terbaru</h3>
+          <button class="view-all-btn" onclick="viewAllMyActivity()">Lihat Semua</button>
+        </div>
+        <div class="activity-list" id="userRecentActivity">
+          <div class="activity-item loading">
+            <div class="activity-icon">⏳</div>
+            <div class="activity-content">
+              <div class="activity-title">Memuat aktivitas...</div>
+              <div class="activity-time">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Inventory Table -->
+      <div class="table-section">
+        <div class="table-header">
+          <div class="table-info">
+            <h3>Inventaris Tersedia</h3>
+            <p>Jelajahi dan pinjam barang yang tersedia dalam sistem</p>
+          </div>
+          <div class="table-actions">
+            <div class="search-container">
+              <input type="text" id="searchBarangUser" placeholder="Cari barang..." class="search-input">
+              <span class="search-icon">🔍</span>
+            </div>
+            <select id="categoryFilter" class="filter-select" style="margin-left: 12px;">
+              <option value="">Semua Kategori</option>
+              <option value="elektronik">Elektronik</option>
+              <option value="peralatan">Peralatan</option>
+              <option value="aksesoris">Aksesoris</option>
+              <option value="lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="tabelBarangUser">
+            <thead>
+              <tr>
+                <th>Nama Barang</th>
+                <th>Kategori</th>
+                <th>Stok Tersedia</th>
+                <th>Status</th>
+                <th>Deskripsi</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <div class="table-stats">
+            <span id="userTableStats">Menampilkan 0 dari 0 barang</span>
+          </div>
+          <div class="table-pagination">
+            <button class="page-btn" id="userPrevPage" disabled>‹</button>
+            <span class="page-info" id="userPageInfo">Halaman 1</span>
+            <button class="page-btn" id="userNextPage" disabled>›</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal Pinjam Barang -->
+  <!-- Enhanced Modal Pinjam Barang -->
   <div class="modal-bg" id="modalPinjam">
     <div class="modal">
-      <h3>Pinjam Barang</h3>
-      <p>Barang: <strong id="pinjamNamaBarang"></strong></p>
-
-      <div class="input-group">
-        <label>Jumlah</label>
-        <input type="number" id="pinjamJumlah" placeholder="Jumlah yang dipinjam" min="1">
+      <div class="modal-header">
+        <h3>Pinjam Barang</h3>
+        <button class="modal-close" onclick="closePinjamModal()">✕</button>
       </div>
+      <div class="modal-body">
+        <div class="item-preview" style="text-align: center; margin-bottom: 24px;">
+          <div style="font-size: 48px; margin-bottom: 12px;">📦</div>
+          <h4 id="pinjamNamaBarang" style="color: var(--gray-100); margin: 0;"></h4>
+          <p style="color: var(--gray-400); margin: 4px 0 0 0;">Barang tersedia untuk dipinjam</p>
+        </div>
 
-      <div class="input-group">
-        <label>Catatan (opsional)</label>
-        <input type="text" id="pinjamCatatan" placeholder="Keperluan peminjaman">
+        <div class="input-group">
+          <label>Jumlah yang Dibutuhkan</label>
+          <input type="number" id="pinjamJumlah" placeholder="Masukkan jumlah" min="1" max="10">
+          <small style="color: var(--gray-400); font-size: 12px;">Maksimal 10 unit per peminjaman</small>
+        </div>
+
+        <div class="input-group">
+          <label>Keperluan Peminjaman</label>
+          <textarea id="pinjamCatatan" placeholder="Jelaskan keperluan peminjaman barang ini..." rows="3" style="resize: vertical; min-height: 80px;"></textarea>
+        </div>
+
+        <div class="loan-info" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 16px; margin-top: 16px;">
+          <h5 style="color: var(--gray-100); margin: 0 0 8px 0; font-size: 14px;">📋 Informasi Peminjaman</h5>
+          <ul style="color: var(--gray-300); font-size: 13px; margin: 0; padding-left: 16px;">
+            <li>Batas waktu pengembalian: 30 hari</li>
+            <li>Denda keterlambatan: Rp 1.000 per hari</li>
+            <li>Pastikan barang dalam kondisi baik saat dikembalikan</li>
+          </ul>
+        </div>
       </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closePinjamModal()">Batal</button>
+        <button class="btn-primary" onclick="konfirmasiPinjam()" id="pinjamBtn">Ajukan Peminjaman</button>
+      </div>
+    </div>
+  </div>
 
-      <div style="display:flex; gap:10px;">
-        <button class="primary" onclick="konfirmasiPinjam()">Pinjam</button>
-        <button class="btn-red" onclick="closePinjamModal()">Batal</button>
+  <!-- Success Modal -->
+  <div class="modal-bg" id="modalSuccess">
+    <div class="modal modal-small">
+      <div class="modal-header" style="background: rgba(16, 185, 129, 0.1);">
+        <h3 style="color: #10b981;">✅ Berhasil!</h3>
+        <button class="modal-close" onclick="closeSuccessModal()">✕</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+        <p id="successMessage" style="color: var(--gray-200); margin: 0;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="closeSuccessModal()">Tutup</button>
       </div>
     </div>
   </div>
 
   <!-- Copyright Footer -->
   <footer class="copyright-footer">
-    <p>&copy; 2025 InvManage. All rights reserved.</p>
+    <p>&copy; 2025 InvManage Enterprise. All rights reserved.</p>
     <div class="copyright-team">
       <div class="team-member">
         <div class="team-role">Software Architect & Developer</div>
@@ -112,42 +297,56 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20251226"></script>
+  <script src="data.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
-      // if (!checkAuth('user')) return;
+    // User Dashboard Enhanced Functionality
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let filteredItems = [];
 
-      // Show welcome message only once after login
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Check authentication
+      if (!checkAuth('user')) return;
+
+      // Show welcome message
+      showUserWelcomeMessage();
+
+      // Initialize dashboard
+      await initializeUserDashboard();
+
+      // Update time display
+      updateUserTimeDisplay();
+      setInterval(updateUserTimeDisplay, 1000);
+
+      // Setup event listeners
+      setupUserEventListeners();
+    });
+
+    function showUserWelcomeMessage() {
       const currentUser = getCurrentUser();
-      console.log('Current user:', currentUser); // Debug
-
       const welcomeMessage = document.getElementById('welcomeMessage');
       const welcomeNotification = document.getElementById('welcomeNotification');
 
-      // Check if welcome message has already been shown
-      const welcomeShownKey = `welcome_shown_${currentUser?.id || 'unknown'}`;
+      const welcomeShownKey = `welcome_shown_user_${currentUser?.id || 'unknown'}`;
       const welcomeAlreadyShown = localStorage.getItem(welcomeShownKey);
 
       if (welcomeMessage && welcomeNotification && !welcomeAlreadyShown) {
-        // Mark as shown to prevent repeated displays
         localStorage.setItem(welcomeShownKey, 'true');
 
         const userName = currentUser && currentUser.nama ? currentUser.nama : 'User';
-        welcomeMessage.textContent = `${userName} telah berhasil login`;
+        welcomeMessage.textContent = `Selamat datang, ${userName}! Siap untuk mengelola peminjaman Anda?`;
 
         welcomeNotification.style.display = 'block';
         welcomeNotification.style.opacity = '0';
         welcomeNotification.style.transform = 'translateY(-20px)';
 
-        // Animate in
         setTimeout(() => {
           welcomeNotification.style.transition = 'all 0.5s ease';
           welcomeNotification.style.opacity = '1';
           welcomeNotification.style.transform = 'translateY(0)';
         }, 100);
 
-        // Hide after 5 seconds
         setTimeout(() => {
           welcomeNotification.style.opacity = '0';
           welcomeNotification.style.transform = 'translateY(-20px)';
@@ -157,9 +356,433 @@
         }, 5000);
       }
 
-      loadBarangUser();
-      document.getElementById("searchBarangUser")?.addEventListener("input", applyBarangUserFilter);
-    });
+      // Update sidebar user info
+      if (currentUser) {
+        document.getElementById('sidebarUserName').textContent = currentUser.nama || 'User';
+        document.getElementById('sidebarUserInitial').textContent = (currentUser.nama || 'U').charAt(0).toUpperCase();
+      }
+    }
+
+    async function initializeUserDashboard() {
+      try {
+        showLoading("Memuat dashboard user...");
+
+        // Load data in parallel
+        await Promise.all([
+          loadBarangUser(),
+          loadUserStats(),
+          loadUserRecentActivity()
+        ]);
+
+        hideLoading();
+      } catch (error) {
+        console.error('Error initializing user dashboard:', error);
+        hideLoading();
+        showNotification("Gagal memuat dashboard", "error");
+      }
+    }
+
+    async function loadUserStats() {
+      try {
+        const currentUser = getCurrentUser();
+        if (!currentUser) return;
+
+        // Load user-specific stats
+        const [barangRes, peminjamanRes] = await Promise.all([
+          fetch(`${API_BASE}/barang/`).catch(() => null),
+          fetch(`${API_BASE}/peminjaman/?user=${currentUser.id}`).catch(() => null)
+        ]);
+
+        let availableItems = 0;
+        let activeLoans = 0;
+        let completedLoans = 0;
+
+        if (barangRes?.ok) {
+          const barang = await barangRes.json();
+          availableItems = barang.filter(b => b.stok > 0).length;
+        }
+
+        if (peminjamanRes?.ok) {
+          const peminjaman = await peminjamanRes.json();
+          activeLoans = peminjaman.filter(p => p.status === 'dipinjam').length;
+          completedLoans = peminjaman.filter(p => p.status === 'dikembalikan').length;
+        }
+
+        // Update UI
+        document.getElementById('totalAvailableItems').textContent = availableItems;
+        document.getElementById('myActiveLoans').textContent = activeLoans;
+        document.getElementById('myCompletedLoans').textContent = completedLoans;
+        document.getElementById('feedbackCount').textContent = '3'; // Sample data
+
+      } catch (error) {
+        console.error('Error loading user stats:', error);
+      }
+    }
+
+    async function loadUserRecentActivity() {
+      const activityList = document.getElementById('userRecentActivity');
+
+      // Sample user activities
+      const activities = [
+        {
+          icon: '📦',
+          title: 'Melihat daftar barang tersedia',
+          time: '2 menit yang lalu',
+          type: 'info'
+        },
+        {
+          icon: '🔄',
+          title: 'Peminjaman Laptop Acer berhasil',
+          time: '1 jam yang lalu',
+          type: 'success'
+        },
+        {
+          icon: '💬',
+          title: 'Memberikan feedback sistem',
+          time: '2 hari yang lalu',
+          type: 'info'
+        },
+        {
+          icon: '✅',
+          title: 'Pengembalian Mouse Logitech',
+          time: '1 minggu yang lalu',
+          type: 'success'
+        }
+      ];
+
+      activityList.innerHTML = '';
+
+      activities.forEach(activity => {
+        const activityItem = document.createElement('div');
+        activityItem.className = `activity-item ${activity.type}`;
+        activityItem.innerHTML = `
+          <div class="activity-icon">${activity.icon}</div>
+          <div class="activity-content">
+            <div class="activity-title">${activity.title}</div>
+            <div class="activity-time">${activity.time}</div>
+          </div>
+        `;
+        activityList.appendChild(activityItem);
+      });
+    }
+
+    function setupUserEventListeners() {
+      // Enhanced search with category filter
+      document.getElementById('searchBarangUser').addEventListener('input', debounce(() => {
+        applyUserBarangFilter();
+      }, 300));
+
+      document.getElementById('categoryFilter').addEventListener('change', () => {
+        applyUserBarangFilter();
+      });
+
+      // Pagination
+      document.getElementById('userPrevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderUserBarangPage();
+        }
+      });
+
+      document.getElementById('userNextPage').addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderUserBarangPage();
+        }
+      });
+    }
+
+    function updateUserTimeDisplay() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('id-ID', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      document.getElementById('currentTime').textContent = timeString;
+    }
+
+    function refreshUserDashboard() {
+      showLoading("Menyegarkan data...");
+      setTimeout(async () => {
+        await initializeUserDashboard();
+        hideLoading();
+        showNotification("Dashboard berhasil diperbarui", "success");
+      }, 1000);
+    }
+
+    // Enhanced barang loading with pagination and categories
+    async function loadBarangUser() {
+      const tableBody = document.querySelector("#tabelBarangUser tbody");
+      if (!tableBody) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/barang/`);
+        if (!res.ok) throw new Error("Gagal mengambil data barang");
+
+        const data = await res.json();
+
+        // Add sample categories and descriptions if not present
+        const enhancedData = data.map(item => ({
+          ...item,
+          kategori: item.kategori || ['elektronik', 'peralatan', 'aksesoris', 'lainnya'][Math.floor(Math.random() * 4)],
+          deskripsi: item.deskripsi || getSampleDescription(item.nama)
+        }));
+
+        filteredItems = enhancedData;
+        renderUserBarangPage();
+
+      } catch (err) {
+        console.error(err);
+        // Fallback to sample data
+        filteredItems = window.sampleBarang || [];
+        renderUserBarangPage();
+      }
+    }
+
+    function getSampleDescription(nama) {
+      const descriptions = {
+        'Laptop': 'Laptop untuk keperluan komputasi dan presentasi',
+        'Mouse': 'Mouse wireless ergonomis untuk navigasi yang nyaman',
+        'Keyboard': 'Keyboard mekanik untuk typing yang efisien',
+        'Monitor': 'Monitor LED untuk display yang jernih',
+        'Printer': 'Printer multifungsi untuk cetak dokumen',
+        'Proyektor': 'Proyektor HD untuk presentasi profesional'
+      };
+
+      for (const [key, desc] of Object.entries(descriptions)) {
+        if (nama.toLowerCase().includes(key.toLowerCase())) {
+          return desc;
+        }
+      }
+      return 'Barang inventaris untuk keperluan operasional';
+    }
+
+    function applyUserBarangFilter() {
+      const searchTerm = document.getElementById('searchBarangUser').value.toLowerCase();
+      const categoryFilter = document.getElementById('categoryFilter').value;
+
+      filteredItems = (window.sampleBarang || []).filter(item => {
+        const matchesSearch = item.nama.toLowerCase().includes(searchTerm);
+        const matchesCategory = !categoryFilter || item.kategori === categoryFilter;
+        return matchesSearch && matchesCategory && item.stok > 0;
+      });
+
+      currentPage = 1;
+      renderUserBarangPage();
+    }
+
+    function renderUserBarangPage() {
+      const tableBody = document.querySelector("#tabelBarangUser tbody");
+      if (!tableBody) return;
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = filteredItems.slice(startIndex, endIndex);
+
+      tableBody.innerHTML = "";
+
+      pageItems.forEach((item) => {
+        const stok = Number(item.stok ?? 0);
+        let statusText = "Tersedia";
+        let statusClass = "green";
+
+        if (stok === 0) {
+          statusText = "Habis";
+          statusClass = "red";
+        } else if (stok <= 2) {
+          statusText = "Terbatas";
+          statusClass = "yellow";
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="font-size: 20px;">📦</div>
+              <div>
+                <div style="font-weight: 600; color: var(--gray-100);">${item.nama}</div>
+                <div style="font-size: 12px; color: var(--gray-400); text-transform: capitalize;">${item.kategori || 'Umum'}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge badge-enhanced ${item.kategori || 'info'}">${item.kategori || 'Umum'}</span></td>
+          <td>
+            <span style="font-weight: 600; color: var(--gray-100);">${stok}</span>
+            <span style="font-size: 12px; color: var(--gray-400);">unit</span>
+          </td>
+          <td><span class="status ${statusClass}">${statusText}</span></td>
+          <td style="max-width: 200px;">
+            <div style="font-size: 13px; color: var(--gray-300); line-height: 1.4;">
+              ${item.deskripsi || 'Barang inventaris untuk keperluan operasional'}
+            </div>
+          </td>
+          <td>
+            ${stok > 0 ? `<button class="btn-primary" onclick="openPinjamModal('${item.id}', '${item.nama}', ${stok})" style="font-size: 12px; padding: 8px 16px;">Pinjam</button>` : '<span class="text-muted">Tidak tersedia</span>'}
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      // Update pagination
+      updateUserPagination();
+    }
+
+    function updateUserPagination() {
+      const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+      const prevBtn = document.getElementById('userPrevPage');
+      const nextBtn = document.getElementById('userNextPage');
+      const pageInfo = document.getElementById('userPageInfo');
+      const tableStats = document.getElementById('userTableStats');
+
+      prevBtn.disabled = currentPage <= 1;
+      nextBtn.disabled = currentPage >= totalPages;
+
+      pageInfo.textContent = `Halaman ${currentPage} dari ${totalPages}`;
+      tableStats.textContent = `Menampilkan ${Math.min(filteredItems.length, itemsPerPage)} dari ${filteredItems.length} barang`;
+    }
+
+    // Enhanced modal functions
+    let currentPinjamBarangId = null; // Global variable to store current barang ID
+
+    function openPinjamModal(id, nama, stok) {
+      currentPinjamBarangId = id; // Store the barang ID
+      document.getElementById('pinjamNamaBarang').textContent = nama;
+      document.getElementById('pinjamJumlah').max = stok;
+      document.getElementById('pinjamJumlah').value = "1";
+      document.getElementById('pinjamCatatan').value = "";
+
+      const modal = document.getElementById('modalPinjam');
+      modal.style.display = "flex";
+    }
+
+    function closePinjamModal() {
+      const modal = document.getElementById('modalPinjam');
+      modal.style.display = "none";
+    }
+
+    function closeSuccessModal() {
+      const modal = document.getElementById('modalSuccess');
+      modal.style.display = "none";
+    }
+
+    // Quick action functions
+    function showAvailableItems() {
+      document.getElementById('searchBarangUser').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('searchBarangUser').focus();
+    }
+
+    function showMyLoans() {
+      window.location.href = 'user-peminjaman.html';
+    }
+
+    function giveFeedback() {
+      window.location.href = 'user-feedback.html';
+    }
+
+    function viewProfile() {
+      window.location.href = 'user-profil.html';
+    }
+
+    function viewAllMyActivity() {
+      window.location.href = 'user-peminjaman.html';
+    }
+
+    // Temporary fix for konfirmasiPinjam function
+    async function konfirmasiPinjam() {
+      console.log("🔄 konfirmasiPinjam called from HTML");
+      const jumlah = Number($("#pinjamJumlah")?.value || 0);
+      const catatan = $("#pinjamCatatan")?.value || "";
+      const currentUser = getCurrentUser();
+
+      if (!jumlah || jumlah < 1) {
+        showNotification("Jumlah harus minimal 1", "warning");
+        return;
+      }
+
+      // Note: Stock validation removed for HTML implementation
+      // In full implementation, this would check against available stock
+
+      if (!currentUser) {
+        showNotification("Silakan login terlebih dahulu", "error");
+        return;
+      }
+
+      try {
+        showLoading("Memproses peminjaman...");
+        console.log("Sending peminjaman request:", {
+          barang: currentPinjamBarangId,
+          user: currentUser.id,
+          jumlah,
+          catatan
+        });
+
+        const res = await fetch(`${API_BASE}/peminjaman/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            barang: currentPinjamBarangId,
+            user: currentUser.id,
+            jumlah: jumlah,
+            catatan: catatan || ""
+          }),
+        });
+
+        console.log("Response status:", res.status);
+        console.log("Response headers:", Object.fromEntries(res.headers.entries()));
+
+        if (!res.ok) {
+          let errorMessage = `Server error: ${res.status}`;
+          try {
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              const errorData = await res.json();
+              errorMessage = errorData.error || errorData.message || errorMessage;
+            } else {
+              // If not JSON, read as text
+              const textResponse = await res.text();
+              console.error("Non-JSON response:", textResponse.substring(0, 500));
+              errorMessage = "Server mengembalikan respons yang tidak valid. Periksa koneksi backend.";
+            }
+          } catch (parseError) {
+            console.error("Error parsing error response:", parseError);
+            errorMessage = "Gagal memproses respons server";
+          }
+          throw new Error(errorMessage);
+        }
+
+        const result = await res.json();
+        console.log("Peminjaman berhasil:", result);
+
+        closePinjamModal();
+        hideLoading();
+
+        // Refresh both tables to show updated data
+        await loadBarangUser();
+        if (typeof loadPeminjamanUser === 'function') {
+          await loadPeminjamanUser();
+        }
+
+        showNotification("Peminjaman berhasil! Cek riwayat peminjaman Anda.", "success");
+      } catch (err) {
+        console.error("Error in konfirmasiPinjam:", err);
+        hideLoading();
+
+        // Check if backend is available
+        const backendAvailable = await checkBackendHealth();
+        if (!backendAvailable) {
+          showNotification("Backend server tidak tersedia. Pastikan server Django berjalan di http://127.0.0.1:8001", "error");
+          return;
+        }
+
+        showNotification(err.message || "Gagal meminjam barang", "error");
+      }
+    }
   </script>
 </body>
 </html>

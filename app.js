@@ -1,7 +1,8 @@
 // ============================
 // KONFIGURASI API BACKEND - INVMANAGE
 // ============================
-const BACKEND_URL = 'http://localhost:8001';
+console.log('🚀 InvManage Frontend v2.0 - Loaded at:', new Date().toISOString());
+const BACKEND_URL = 'http://127.0.0.1:8001';
 const API_BASE = `${BACKEND_URL}/api`;
 
 // Configuration for better error handling
@@ -379,7 +380,7 @@ function handleApiError(error, context = "") {
   if (error.name === 'TypeError' && error.message.includes('fetch')) {
     showNotification("Backend server tidak tersedia. Pastikan Django server berjalan di http://127.0.0.1:8001", "error");
   } else if (error.status === 400) {
-    showNotification("Data yang dimasukkan tidak valid. Periksa kembali.", "error");
+    showNotification("Data yang dimasukkan tidak valid. Periksa kembali input Anda.", "error");
   } else if (error.status === 401) {
     showNotification("Sesi telah berakhir. Silakan login kembali.", "warning");
     const currentUser = getCurrentUser();
@@ -390,8 +391,12 @@ function handleApiError(error, context = "") {
         window.location.href = "index.html";
       }
     }, 2000);
+  } else if (error.status === 403) {
+    showNotification("Akses ditolak. Anda tidak memiliki izin untuk melakukan tindakan ini.", "error");
   } else if (error.status === 404) {
     showNotification("Endpoint API tidak ditemukan. Periksa konfigurasi backend.", "error");
+  } else if (error.status === 429) {
+    showNotification("Terlalu banyak permintaan. Coba lagi dalam beberapa saat.", "warning");
   } else if (error.status >= 500) {
     showNotification("Server mengalami masalah internal. Periksa log Django.", "error");
   } else if (error.status) {
@@ -447,12 +452,17 @@ function checkAuth(requiredRole = null) {
 }
 
 async function doLogin() {
-    const email = $("#loginEmail")?.value?.trim();
+    // Only run if we're on a page that has the correct elements
+    const loginEmail = $("#loginEmail");
+    const loginUsername = $("#loginUsername");
+    if (!loginEmail && !loginUsername) return; // Not on a login page that uses this function
+
+    const identifier = loginEmail?.value?.trim() || loginUsername?.value?.trim();
     const password = $("#loginPassword")?.value;
     const loginBtn = $("#loginForm")?.querySelector("button.primary");
 
-    if (!email || !password) {
-      showNotification("Email dan password wajib diisi", "warning");
+    if (!identifier || !password) {
+      showNotification("Username/email dan password wajib diisi", "warning");
       return;
     }
 
@@ -464,7 +474,7 @@ async function doLogin() {
       const response = await apiCall(`${API_BASE}/login/`, {
         method: "POST",
         body: JSON.stringify({
-          email: email,
+          identifier: identifier,
           password: password
         }),
       });
@@ -495,50 +505,8 @@ async function doLogin() {
     }
 }
 
-async function doAdminLogin() {
-    const email = $("#adminLoginEmail")?.value?.trim();
-    const password = $("#adminLoginPassword")?.value;
-    const loginBtn = $("#adminLoginForm")?.querySelector("button.primary");
-
-    if (!email || !password) {
-      showNotification("Email dan password wajib diisi", "warning");
-      return;
-    }
-
-    // Show loading state
-    if (loginBtn) setButtonLoading(loginBtn, true, "Masuk...");
-    showLoading("Sedang masuk...");
-
-    try {
-      const response = await apiCall(`${API_BASE}/admin/login/`, {
-        method: "POST",
-        body: JSON.stringify({
-          email: email,
-          password: password
-        }),
-      });
-
-      const data = await response.json();
-
-      hideLoading();
-      if (loginBtn) setButtonLoading(loginBtn, false);
-
-      // Store user data
-      setCurrentUser(data.user);
-
-      showNotification(`Selamat datang, ${data.user.nama}!`, "success");
-
-      // Redirect to admin dashboard
-      setTimeout(() => {
-        window.location.href = "dashboard.html";
-      }, 1500);
-
-    } catch (err) {
-      hideLoading();
-      if (loginBtn) setButtonLoading(loginBtn, false);
-      handleApiError(err, "Admin Login");
-    }
-}
+// REMOVED: Old doAdminLogin function that used email field
+// The correct function is now in admin-login.html using username field
 
 async function doRegister() {
     const nama = $("#registerUsername")?.value?.trim();
@@ -877,20 +845,22 @@ async function loadBarang(forceRefresh = false) {
 
     // Handle offline mode or use cached data
     if (usingOfflineMode || finalData.length === 0) {
-      console.log('Using offline/local/cached mode');
+      console.log('Using offline/local/cached/sample mode');
 
       // Try cache first, then local data, then sample data
       let offlineData = finalData.length > 0 ? finalData : apiCache.get('barang') || localData;
 
       if (offlineData.length === 0) {
-        // Create sample data as last resort
-        offlineData = [
-          { id: 1, nama: "Laptop Acer", stok: 10, minimum: 5 },
-          { id: 2, nama: "Mouse Logitech", stok: 25, minimum: 10 },
-          { id: 3, nama: "Keyboard Dell", stok: 3, minimum: 8 },
-          { id: 4, nama: "Monitor Samsung", stok: 15, minimum: 5 },
-          { id: 5, nama: "Printer HP", stok: 2, minimum: 3 }
+        // Use sample data from data.js
+        console.log('Using sample barang data');
+        offlineData = window.sampleBarang || [
+          { id: 1, nama: "Laptop Acer Aspire 5", stok: 5, minimum: 2 },
+          { id: 2, nama: "Mouse Logitech MX Master 3", stok: 15, minimum: 5 },
+          { id: 3, nama: "Keyboard Dell KB216", stok: 8, minimum: 3 },
+          { id: 4, nama: "Monitor Samsung 24 inch", stok: 6, minimum: 2 },
+          { id: 5, nama: "Printer HP LaserJet", stok: 3, minimum: 1 }
         ];
+        showNotification("Menggunakan data sample barang", "info");
       }
 
       // Cache offline data
@@ -986,21 +956,23 @@ function renderBarangData(data) {
 
   data.forEach((item) => {
     const stok = Number(item.stok ?? 0);
-    const minimum = Number(item.minimum ?? 5);
     totalItem++;
 
     let statusText = "Aman";
     let statusClass = "green";
 
-    if (stok <= 1) {
-      statusText = "Hampir Habis";
+    // Use backend computed fields if available
+    if (item.is_out_of_stock) {
+      statusText = "Habis";
       statusClass = "red";
       hampirHabis++;
-    } else if (stok <= minimum) {
+    } else if (item.is_low_stock) {
       statusText = "Stok Rendah";
       statusClass = "yellow";
       stokRendah++;
     } else {
+      statusText = "Tersedia";
+      statusClass = "green";
       stokAman++;
     }
 
@@ -1030,7 +1002,7 @@ function renderBarangData(data) {
         ${sanitizeInput(item.nama || '-')}
       </td>
       <td>${stok}</td>
-      <td>${minimum}</td>
+      <td>${item.minimum || 5}</td>
       <td><span class="status ${statusClass}">${statusText}</span></td>
       <td>
         <button class="icon-btn" style="border:none; background:none; cursor:pointer; margin-right:6px;"
@@ -1457,11 +1429,7 @@ async function loadFeedback() {
 
   console.log('✅ Loading feedback...');
 
-  // Clear any existing content and show loading immediately
-  tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">Memuat feedback...</td></tr>';
-
-  // Display sample feedback immediately from centralized data
-  console.log('📊 Displaying sample feedback immediately');
+  // Display sample feedback immediately for better UX
   tableBody.innerHTML = "";
   window.sampleFeedback.forEach((f) => {
     const namaUser = f.user_nama || "Unknown";
@@ -1475,9 +1443,9 @@ async function loadFeedback() {
     `;
     tableBody.appendChild(tr);
   });
-  console.log('✅ Sample feedback displayed');
+  console.log('✅ Sample feedback displayed immediately');
 
-  // Try to load real feedback in background with shorter timeout
+  // Try to load real feedback from backend in background
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
@@ -1513,34 +1481,40 @@ async function loadFeedback() {
           `;
           tableBody.appendChild(tr);
         });
+        showNotification(`Berhasil memuat ${data.length} feedback dari database`, "success");
       } else {
-        console.log('API returned empty feedback data, keeping sample data');
+        console.log('API returned empty data, keeping sample data');
+        showNotification("Database kosong, menampilkan data sample", "info");
       }
     } else {
       console.warn('Feedback API request failed:', res.status, res.statusText);
+      showNotification("Backend tidak tersedia, menampilkan data sample", "warning");
     }
   } catch (err) {
-    console.log('Could not load real feedback, keeping sample data:', err.message);
+    console.error('Error loading real feedback, keeping sample data:', err.message);
+    showNotification("Menggunakan data sample - backend tidak dapat diakses", "info");
   }
 }
 
-async function tambahFeedback() {
+// Make tambahFeedback globally available
+window.tambahFeedback = async function() {
   const pesan = $("#feedbackPesan")?.value;
   const currentUser = getCurrentUser();
 
   if (!pesan) {
-    alert("Pesan feedback wajib diisi");
+    showNotification("Pesan feedback wajib diisi", "warning");
     return;
   }
 
   if (!currentUser) {
-    alert("Silakan login terlebih dahulu");
+    showNotification("Silakan login terlebih dahulu", "error");
     return;
   }
 
   const payload = { user: currentUser.id, pesan };
 
   try {
+    showLoading("Mengirim feedback...");
     const res = await fetch(`${API_BASE}/feedback/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1550,33 +1524,32 @@ async function tambahFeedback() {
     if (!res.ok) throw new Error("Gagal mengirim feedback");
 
     if ($("#feedbackPesan")) $("#feedbackPesan").value = "";
-    
+
     // Reload feedback user jika ada
     if ($("#tabelFeedbackUser")) {
       await loadFeedbackUser();
     }
-    
-    alert("Feedback terkirim");
+
+    hideLoading();
+    showNotification("Feedback berhasil dikirim!", "success");
   } catch (err) {
     console.error(err);
-    alert("Gagal mengirim feedback");
+    hideLoading();
+    showNotification("Gagal mengirim feedback", "error");
   }
-}
+};
 
-// Load feedback milik user yang sedang login
-async function loadFeedbackUser() {
+// Make loadFeedbackUser globally available
+window.loadFeedbackUser = async function() {
   const tableBody = document.querySelector("#tabelFeedbackUser tbody");
   if (!tableBody) {
     console.warn('User feedback table body not found');
     return;
   }
 
-  // Clear any existing content and show loading immediately
-  tableBody.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Memuat feedback...</td></tr>';
-
   const currentUser = getCurrentUser();
 
-  // Display sample feedback immediately from centralized data
+  // Display sample feedback immediately for better UX
   console.log('📊 Displaying sample user feedback immediately');
   tableBody.innerHTML = "";
   window.sampleUserFeedback.forEach((f) => {
@@ -1589,7 +1562,7 @@ async function loadFeedbackUser() {
     `;
     tableBody.appendChild(tr);
   });
-  console.log('✅ Sample user feedback displayed');
+  console.log('✅ Sample user feedback displayed immediately');
 
   // Try to load real user feedback in background
   if (currentUser) {
@@ -1630,22 +1603,27 @@ async function loadFeedbackUser() {
               `;
               tableBody.appendChild(tr);
             });
+            showNotification(`Berhasil memuat ${userFeedback.length} feedback Anda`, "success");
           } else {
             console.log('No user feedback found, keeping sample data');
+            showNotification("Belum ada feedback Anda, menampilkan contoh", "info");
           }
         } else {
           console.log('API returned empty feedback data, keeping sample data');
         }
       } else {
         console.warn('User feedback API request failed:', res.status, res.statusText);
+        showNotification("Backend tidak tersedia, menampilkan contoh feedback", "warning");
       }
     } catch (err) {
       console.log('Could not load real user feedback, keeping sample data:', err.message);
+      showNotification("Menggunakan contoh feedback - backend tidak dapat diakses", "info");
     }
   } else {
     console.log('No current user found, showing sample feedback');
+    showNotification("Silakan login untuk melihat feedback Anda", "info");
   }
-}
+};
 
 // ============================
 // RIWAYAT TRANSAKSI
@@ -2184,12 +2162,35 @@ async function loadBarangUser() {
   const table = document.querySelector("#tabelBarangUser tbody");
   if (!table) return;
 
+  // Show sample data immediately for better UX
+  table.innerHTML = "";
+  window.sampleBarang.forEach((item) => {
+    const stok = Number(item.stok ?? 0);
+    let statusText = stok > 0 ? "Tersedia" : "Habis";
+    let statusClass = stok > 0 ? "green" : "red";
+
+    const tr = document.createElement("tr");
+    tr.setAttribute("data-nama", (item.nama || "").toLowerCase());
+
+    tr.innerHTML = `
+      <td>${item.nama}</td>
+      <td>${stok}</td>
+      <td><span class="status ${statusClass}">${statusText}</span></td>
+      <td>
+        ${stok > 0 ? `<button class="add-btn" onclick="openPinjamModal(${item.id}, '${item.nama}', ${stok})">Pinjam</button>` : '-'}
+      </td>
+    `;
+    table.appendChild(tr);
+  });
+
   try {
     const res = await fetch(`${API_BASE}/barang/`);
     if (!res.ok) throw new Error("Gagal mengambil data barang");
 
     const data = await res.json();
-    table.innerHTML = "";
+    if (Array.isArray(data) && data.length > 0) {
+      console.log('Real barang data loaded, replacing sample data:', data.length, 'items');
+      table.innerHTML = "";
 
     data.forEach((item) => {
       const stok = Number(item.stok ?? 0);
@@ -2209,6 +2210,7 @@ async function loadBarangUser() {
       `;
       table.appendChild(tr);
     });
+    }
   } catch (err) {
     console.error(err);
     alert("Gagal memuat data barang");
@@ -2247,7 +2249,8 @@ function closePinjamModal() {
   pinjamBarangId = null;
 }
 
-async function konfirmasiPinjam() {
+window.konfirmasiPinjam = async function() {
+  console.log("🔄 konfirmasiPinjam function called");
   const jumlah = Number($("#pinjamJumlah")?.value || 0);
   const catatan = $("#pinjamCatatan")?.value || "";
   const currentUser = getCurrentUser();
@@ -2339,13 +2342,13 @@ async function konfirmasiPinjam() {
 
     showNotification(err.message || "Gagal meminjam barang", "error");
   }
-}
+};
 
 // ============================
 // USER - PEMINJAMAN SAYA
 // ============================
 
-async function loadPeminjamanUser() {
+window.loadPeminjamanUser = async function() {
   const tableBody = document.querySelector("#tabelPeminjamanUser tbody");
   if (!tableBody) return;
 
@@ -2430,7 +2433,7 @@ async function loadPeminjamanUser() {
     showNotification("Gagal memuat riwayat peminjaman", "error");
     tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 40px;">Gagal memuat data peminjaman</td></tr>`;
   }
-}
+};
 
 async function kembalikanBarang(peminjamanId) {
   if (!confirm("Yakin ingin mengembalikan barang ini?")) return;
@@ -2490,10 +2493,7 @@ async function loadPeminjamanAdmin() {
 
   console.log("Loading peminjaman admin data...");
 
-  // Clear loading and show sample data immediately
-  tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px;">Memuat data peminjaman...</td></tr>';
-
-  // Display sample data immediately from centralized data
+  // Display sample data immediately for better UX
   console.log('📊 Displaying sample peminjaman admin data immediately');
   peminjamanCache = window.samplePeminjaman;
   tableBody.innerHTML = "";
@@ -2814,18 +2814,7 @@ async function getPeminjamanById(id) {
 async function loadRiwayatPeminjaman() {
     console.log('🔄 Loading riwayat peminjaman...');
 
-    // Clear loading message immediately and show sample data
-    const container = document.getElementById('riwayat-peminjaman-container');
-    console.log('Container found:', !!container);
-    if (container) {
-        container.innerHTML = '<div class="loading">Memuat data...</div>';
-        console.log('✅ Set loading message');
-    } else {
-        console.error('❌ Container riwayat-peminjaman-container not found!');
-        return;
-    }
-
-    // Display sample data immediately from centralized data
+    // Display sample data immediately for better UX
     console.log('📊 Displaying sample peminjaman data immediately');
     displayRiwayatPeminjaman(window.samplePeminjaman);
 
@@ -3111,6 +3100,51 @@ async function deletePeminjamanAdmin(peminjamanId) {
 }
 
 // ============================
+// DASHBOARD STATISTICS
+// ============================
+
+async function loadDashboardStats() {
+  try {
+    const res = await apiCall(`${API_BASE}/reports/dashboard/`);
+    if (res.ok) {
+      const stats = await res.json();
+      console.log('Dashboard stats loaded:', stats);
+
+      // Update dashboard cards
+      if (stats.total_items !== undefined) {
+        const totalItemsEl = document.getElementById('cardTotalItem') || document.getElementById('totalItems');
+        if (totalItemsEl) totalItemsEl.textContent = stats.total_items;
+      }
+
+      if (stats.active_loans !== undefined) {
+        const activeLoansEl = document.getElementById('cardActiveLoans') || document.getElementById('activeLoans');
+        if (activeLoansEl) activeLoansEl.textContent = stats.active_loans;
+      }
+
+      if (stats.low_stock_items !== undefined) {
+        const lowStockEl = document.getElementById('cardLowStock') || document.getElementById('lowStockItems');
+        if (lowStockEl) lowStockEl.textContent = stats.low_stock_items;
+      }
+
+      if (stats.total_users !== undefined) {
+        const totalUsersEl = document.getElementById('cardTotalUsers') || document.getElementById('totalUsers');
+        if (totalUsersEl) totalUsersEl.textContent = stats.total_users;
+      }
+
+      if (stats.total_feedback !== undefined) {
+        const totalFeedbackEl = document.getElementById('cardTotalFeedback') || document.getElementById('totalFeedback');
+        if (totalFeedbackEl) totalFeedbackEl.textContent = stats.total_feedback;
+      }
+
+      return stats;
+    }
+  } catch (err) {
+    console.warn('Failed to load dashboard stats:', err);
+  }
+  return null;
+}
+
+// ============================
 // INIT SAAT PAGE DILOAD
 // ============================
 
@@ -3137,6 +3171,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if ($("#tabelBarang")) {
     // Load data immediately without delay for instant response
     loadBarang();
+    loadDashboardStats(); // Load dashboard statistics
     const searchInput = $("#searchBarang");
     if (searchInput) {
       searchInput.addEventListener("input", () => applyBarangFilter());

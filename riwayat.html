@@ -24,6 +24,19 @@
 
     <!-- Main content -->
     <div class="main-content">
+      <!-- Manual Input Section at Top -->
+      <div class="manual-input-section" style="background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--gray-600);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h3 style="color: var(--gray-100); margin: 0; font-size: 18px;">Input Peminjaman Manual</h3>
+            <p style="color: var(--gray-400); margin: 4px 0 0 0; font-size: 14px;">Tambahkan peminjaman secara manual untuk user dan barang tertentu</p>
+          </div>
+          <button class="add-btn" onclick="openPeminjamanAdminModal()" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); border: 1px solid #3b82f6; padding: 12px 20px;">
+            <i class="fas fa-plus"></i> Input Manual
+          </button>
+        </div>
+      </div>
+
       <div class="card-container">
         <div class="card">
           <h3>Sedang Dipinjam</h3>
@@ -41,7 +54,6 @@
             <h2 class="table-title">Riwayat Peminjaman Semua User</h2>
             <p style="color:var(--gray-400); margin: 8px 0 0 0; font-size: 14px;">Daftar semua peminjaman barang dari user</p>
           </div>
-          <button class="add-btn" onclick="openPeminjamanAdminModal()">+ Input Peminjaman Manual</button>
         </div>
 
         <!-- Container untuk menampilkan data peminjaman -->
@@ -305,7 +317,7 @@
         return;
       }
 
-      // Reset form fields instantly
+      // Reset form fields instantly (same as openBarangModal)
       const title = document.getElementById('modalPeminjamanTitle');
       const userSelect = document.getElementById('adminPeminjamanUser');
       const barangSelect = document.getElementById('adminPeminjamanBarang');
@@ -314,59 +326,23 @@
       const catatanInput = document.getElementById('adminPeminjamanCatatan');
 
       if (title) title.textContent = "Input Peminjaman Manual";
+      if (userSelect) userSelect.value = "";
+      if (barangSelect) barangSelect.value = "";
       if (jumlahInput) jumlahInput.value = "";
       if (statusSelect) statusSelect.value = "dipinjam";
       if (catatanInput) catatanInput.value = "";
 
-      // Load sample data instantly for immediate UX
-      if (userSelect) {
-        userSelect.disabled = false;
-        userSelect.innerHTML = '<option value="">Pilih User</option>';
-        if (window.sampleUsers) {
-          window.sampleUsers.filter(u => u.role === 'user').forEach((u) => {
-            const opt = document.createElement("option");
-            opt.value = u.id;
-            opt.textContent = u.nama;
-            userSelect.appendChild(opt);
-          });
-        }
-        userSelect.value = "";
-      }
-
-      if (barangSelect) {
-        barangSelect.disabled = false;
-        barangSelect.innerHTML = '<option value="">Pilih Barang</option>';
-        if (window.sampleBarang) {
-          window.sampleBarang.forEach((b) => {
-            const opt = document.createElement("option");
-            opt.value = b.id;
-            opt.textContent = `${b.nama} (Stok: ${b.stok})`;
-            barangSelect.appendChild(opt);
-          });
-        }
-        barangSelect.value = "";
-      }
-
-      // Show modal instantly
+      // Show modal instantly (same as openBarangModal)
       modal.style.display = "flex";
       console.log("Peminjaman admin modal opened instantly");
 
-      // Try to load real data in background (non-blocking)
-      setTimeout(() => {
-        // Load real users if function available
-        if (typeof window.loadUserOptions === 'function') {
-          window.loadUserOptions().catch(err => {
-            console.log("Using sample users (backend not available)");
-          });
-        }
-
-        // Load real barang if function available
-        if (typeof window.loadBarangOptionsAdmin === 'function') {
-          window.loadBarangOptionsAdmin().catch(err => {
-            console.log("Using sample barang (backend not available)");
-          });
-        }
-      }, 500); // Small delay to not interfere with modal opening
+      // Load options asynchronously if available (same pattern as other modals)
+      if (typeof window.loadUserOptions === 'function') {
+        window.loadUserOptions();
+      }
+      if (typeof window.loadBarangOptionsAdmin === 'function') {
+        window.loadBarangOptionsAdmin();
+      }
     }
 
     function savePeminjamanAdmin() {
@@ -397,7 +373,7 @@
     }
   </script>
   <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=20251226"></script>
   <script>
     // Initialize after all scripts are loaded
     window.addEventListener('load', function() {

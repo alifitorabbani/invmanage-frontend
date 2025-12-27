@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <title>InvManage - User Login</title>
+</head>
+<body>
+
+<div id="authContainer" class="center-box">
+  <!-- Simple Logo Section -->
+  <div class="logo-container">
+    <img src="image.png" alt="Logo" class="logo">
+  </div>
+
+  <!-- Simple Header -->
+  <div class="header-content">
+    <h2 class="main-title">
+      <span class="title-gradient">InvManage</span>
+      <span class="title-accent">User</span>
+    </h2>
+    <p class="subtitle">
+      Standard User Access Portal
+    </p>
+  </div>
+
+  <!-- Simple Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tabLogin">
+      <span class="tab-text">User Login</span>
+    </button>
+    <button class="tab inactive" id="tabRegister">
+      <span class="tab-text">User Register</span>
+    </button>
+  </div>
+
+  <!-- User Login Form -->
+  <form id="loginForm" class="form-container" onsubmit="return false;">
+    <div class="form-header">
+      <h3>User Login</h3>
+      <p>Access your user account for inventory operations</p>
+    </div>
+
+    <div class="input-group">
+      <label>Username or Email Address</label>
+      <input type="text" id="userLoginUsername" placeholder="Enter username or email">
+      <div class="input-underline"></div>
+    </div>
+
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="userLoginPassword" placeholder="Enter password">
+      <div class="input-underline"></div>
+    </div>
+
+    <div class="form-options">
+      <label class="remember-me">
+        <input type="checkbox" id="rememberMe">
+        <span class="checkmark"></span>
+        Remember my login
+      </label>
+      <a href="#" class="forgot-password">Forgot password?</a>
+    </div>
+
+    <button type="button" class="primary" onclick="doUserLogin()">
+      <span class="btn-content">
+        <span class="btn-text">Access User Portal</span>
+      </span>
+    </button>
+
+    <div class="form-footer">
+      <p>Need administrator access? <a href="admin-login.html">Administrator Login</a></p>
+    </div>
+  </form>
+
+  <!-- User Register Form -->
+  <div id="registerForm" class="form-container" style="display:none;">
+    <div class="form-header">
+      <h3>Register User</h3>
+      <p>Create your user account for system access</p>
+    </div>
+
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="registerUsername" placeholder="Choose unique username">
+      <div class="input-underline"></div>
+    </div>
+
+    <div class="input-group">
+      <label>Email Address</label>
+      <input type="email" id="registerEmail" placeholder="Enter email @gmail.com">
+      <div class="input-underline"></div>
+    </div>
+
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="registerPassword" placeholder="Create strong password">
+      <div class="input-underline"></div>
+    </div>
+
+    <div class="terms-agreement">
+      <label class="checkbox-container">
+        <input type="checkbox" id="agreeTerms" required>
+        <span class="checkmark"></span>
+        I agree to the <a href="admin-terms.html" target="_blank" class="terms-link">Terms & Conditions</a> for users
+      </label>
+    </div>
+
+    <button class="primary" onclick="doUserRegister()">
+      <span class="btn-content">
+        <span class="btn-text">Create User Account</span>
+      </span>
+    </button>
+
+    <div class="form-footer">
+      <p>Already have an account? <a href="#" onclick="switchToLogin()">Login here</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div id="resetPasswordModal" class="modal-bg">
+  <div class="modal">
+    <h3>Reset User Password</h3>
+    <p>Enter your user email to receive password reset link</p>
+
+    <div class="input-group">
+      <label>Email Address</label>
+      <input type="email" id="resetEmail" placeholder="Enter your email @gmail.com">
+      <div class="input-underline"></div>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn-red" onclick="closeResetModal()">Cancel</button>
+      <button class="btn-green" onclick="sendResetEmail()">Send Reset Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal for Reset -->
+<div id="resetSuccessModal" class="modal-bg">
+  <div class="modal">
+    <h3>✅ Reset Link Sent!</h3>
+    <p>We have sent a password reset link to your email. Please check your inbox and follow the instructions.</p>
+
+    <div class="modal-buttons">
+      <button class="btn-green" onclick="closeResetSuccessModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Welcome Message -->
+<div class="welcome-message">
+  <h3>Welcome to InvManage User Portal</h3>
+  <p>Access inventory system for borrowing and tracking items</p>
+</div>
+
+<script>
+// User-specific login function
+async function doUserLogin() {
+  const identifier = document.getElementById("userLoginUsername")?.value?.trim();
+  const password = document.getElementById("userLoginPassword")?.value;
+  const loginBtn = document.getElementById("loginForm")?.querySelector("button.primary");
+
+  if (!identifier || !password) {
+      showNotification("Username/email dan password wajib diisi", "warning");
+      return;
+  }
+
+  // Show loading state
+  if (loginBtn) {
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = `
+      <span style="display: inline-flex; align-items: center; gap: 8px;">
+        <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: enterpriseSpin 1s linear infinite;"></div>
+        Authenticating...
+      </span>
+    `;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/login/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nama: identifier, password }),
+    });
+
+    if (!res.ok) {
+      if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = `
+          <span class="btn-content">
+            <span class="btn-text">Access User Portal</span>
+          </span>
+        `;
+      }
+
+      if (res.status === 400) {
+        const errorData = await res.json();
+        showNotification(errorData.error || "Invalid username/email or password", "error");
+        return;
+      } else if (res.status >= 500) {
+        showNotification("Server is experiencing issues. Please try again later.", "error");
+        return;
+      } else {
+        showNotification("Failed to connect to server", "error");
+        return;
+      }
+    }
+
+    const data = await res.json();
+
+    if (data.success) {
+      // Check if user has user role
+      if (data.user.role !== 'user') {
+        showNotification("This account is not a standard user account. Please use administrator login.", "error");
+        return;
+      }
+
+      // Set user access level
+      const userWithAccess = { ...data.user, accessLevel: 'user' };
+      setCurrentUser(userWithAccess);
+      showNotification("Login successful! Redirecting to User Dashboard...", "success");
+
+      // Smooth transition before redirect
+      setTimeout(() => {
+        window.location.href = "user-dashboard.html";
+      }, 1000);
+    } else {
+      if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = `
+          <span class="btn-content">
+            <span class="btn-text">Access User Portal</span>
+          </span>
+        `;
+      }
+      showNotification(data.error || "Login failed", "error");
+    }
+  } catch (err) {
+    if (loginBtn) {
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = `
+        <span class="btn-content">
+          <span class="btn-text">Access User Portal</span>
+        </span>
+      `;
+    }
+    console.error('User Login Error:', err);
+    showNotification("Failed to connect to server", "error");
+  }
+}
+
+// User-specific register function
+async function doUserRegister() {
+  const nama = document.getElementById("registerUsername")?.value?.trim();
+  const email = document.getElementById("registerEmail")?.value?.trim();
+  const password = document.getElementById("registerPassword")?.value;
+  const registerBtn = document.getElementById("registerForm")?.querySelector("button.primary");
+
+  if (!nama || !email || !password) {
+    showNotification("Username, email, and password are required", "warning");
+    return;
+  }
+
+  if (!email.includes('@gmail')) {
+    showNotification("Email must use @gmail.com domain", "warning");
+    return;
+  }
+
+  // Show loading state
+  if (registerBtn) {
+    registerBtn.disabled = true;
+    registerBtn.innerHTML = `
+      <span style="display: inline-flex; align-items: center; gap: 8px;">
+        <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: enterpriseSpin 1s linear infinite;"></div>
+        Creating Account...
+      </span>
+    `;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/register/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nama, email, password }),
+    });
+
+    if (!res.ok) {
+      if (registerBtn) {
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = `
+          <span class="btn-content">
+            <span class="btn-text">Create User Account</span>
+          </span>
+        `;
+      }
+
+      if (res.status === 400) {
+        const errorData = await res.json();
+        showNotification(errorData.error || "Registration data is invalid", "error");
+        return;
+      } else if (res.status >= 500) {
+        showNotification("Server is experiencing issues. Please try again later.", "error");
+        return;
+      } else {
+        showNotification("Failed to connect to server", "error");
+        return;
+      }
+    }
+
+    const data = await res.json();
+
+    if (data.success) {
+      if (registerBtn) {
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = `
+          <span class="btn-content">
+            <span class="btn-text">Create User Account</span>
+          </span>
+        `;
+      }
+      showNotification("Registration successful! Redirecting to login...", "success");
+
+      // Smooth transition to login tab
+      setTimeout(() => {
+        if (document.getElementById("tabLogin")) document.getElementById("tabLogin").click();
+      }, 1500);
+    } else {
+      if (registerBtn) {
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = `
+          <span class="btn-content">
+            <span class="btn-text">Create User Account</span>
+          </span>
+        `;
+      }
+      showNotification(data.error || "Registration failed", "error");
+    }
+  } catch (err) {
+    if (registerBtn) {
+      registerBtn.disabled = false;
+      registerBtn.innerHTML = `
+        <span class="btn-content">
+          <span class="btn-text">Create User Account</span>
+        </span>
+      `;
+    }
+    console.error('User Register Error:', err);
+    showNotification("Failed to connect to server", "error");
+  }
+}
+
+// Navigate to admin login
+function goToAdminLogin() {
+  window.location.href = "admin-login.html";
+}
+
+// Simple Tab Switching
+const loginTab = document.getElementById("tabLogin");
+const registerTab = document.getElementById("tabRegister");
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
+
+function switchToLogin() {
+  loginTab.classList.add("active");
+  loginTab.classList.remove("inactive");
+  registerTab.classList.remove("active");
+  registerTab.classList.add("inactive");
+
+  loginForm.style.display = "block";
+  registerForm.style.display = "none";
+}
+
+function switchToRegister() {
+  registerTab.classList.add("active");
+  registerTab.classList.remove("inactive");
+  loginTab.classList.remove("active");
+  loginTab.classList.add("inactive");
+
+  loginForm.style.display = "none";
+  registerForm.style.display = "block";
+}
+
+loginTab.onclick = switchToLogin;
+registerTab.onclick = switchToRegister;
+
+// Enhanced Enter key support
+document.getElementById("userLoginPassword")?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") doUserLogin();
+});
+document.getElementById("registerPassword")?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") doUserRegister();
+});
+
+// Basic email validation for user
+document.getElementById("registerEmail")?.addEventListener("blur", (e) => {
+  const email = e.target.value;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isValid = email === "" || (emailRegex.test(email) && email.includes("@gmail.com"));
+
+  e.target.classList.toggle("valid", isValid && email.length > 0);
+  e.target.classList.toggle("invalid", !isValid && email.length > 0);
+});
+
+// Basic password validation for user
+document.getElementById("registerPassword")?.addEventListener("blur", (e) => {
+  const password = e.target.value;
+  const isValid = password === "" || password.length >= 4;
+
+  e.target.classList.toggle("valid", isValid && password.length > 0);
+  e.target.classList.toggle("invalid", !isValid && password.length > 0);
+});
+
+// Basic username validation for user
+document.getElementById("registerUsername")?.addEventListener("blur", (e) => {
+  const username = e.target.value;
+  const isValid = username === "" || username.length >= 3;
+
+  e.target.classList.toggle("valid", isValid && username.length > 0);
+  e.target.classList.toggle("invalid", !isValid && username.length > 0);
+});
+
+// Terms agreement validation
+document.getElementById("agreeTerms")?.addEventListener("change", (e) => {
+  const registerBtn = document.querySelector("#registerForm .primary");
+  if (registerBtn) {
+    registerBtn.disabled = !e.target.checked;
+    registerBtn.style.opacity = e.target.checked ? "1" : "0.6";
+  }
+});
+
+// Remember me functionality
+document.getElementById("rememberMe")?.addEventListener("change", (e) => {
+  if (e.target.checked) {
+    showNotification("Remember me feature will save your login", "success", 3000);
+  }
+});
+
+// Reset Password functionality
+document.querySelector(".forgot-password")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  openResetModal();
+});
+
+function openResetModal() {
+  const modal = document.getElementById("resetPasswordModal");
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
+
+  // Focus on email input
+  setTimeout(() => {
+    document.getElementById("resetEmail").focus();
+  }, 100);
+}
+
+function closeResetModal() {
+  const modal = document.getElementById("resetPasswordModal");
+  modal.style.display = "none";
+  document.getElementById("resetEmail").value = "";
+}
+
+function closeResetSuccessModal() {
+  const modal = document.getElementById("resetSuccessModal");
+  modal.style.display = "none";
+}
+
+function sendResetEmail() {
+  const email = document.getElementById("resetEmail").value.trim();
+
+  if (!email) {
+    showNotification("Please enter your email address", "error");
+    return;
+  }
+
+  if (!email.includes("@gmail.com")) {
+    showNotification("Email must use @gmail.com domain", "error");
+    return;
+  }
+
+  // Simulate sending reset email
+  const resetBtn = event.target;
+  const originalText = resetBtn.textContent;
+  resetBtn.textContent = "Sending...";
+  resetBtn.disabled = true;
+
+  setTimeout(() => {
+    // Close reset modal
+    closeResetModal();
+
+    // Show success modal
+    const successModal = document.getElementById("resetSuccessModal");
+    successModal.style.display = "flex";
+    successModal.style.alignItems = "center";
+    successModal.style.justifyContent = "center";
+
+    // Reset button
+    resetBtn.textContent = originalText;
+    resetBtn.disabled = false;
+
+    showNotification("Password reset link has been sent to your email", "success");
+  }, 2000);
+}
+
+// Close modals when clicking outside
+document.getElementById("resetPasswordModal")?.addEventListener("click", (e) => {
+  if (e.target.id === "resetPasswordModal") {
+    closeResetModal();
+  }
+});
+
+document.getElementById("resetSuccessModal")?.addEventListener("click", (e) => {
+  if (e.target.id === "resetSuccessModal") {
+    closeResetSuccessModal();
+  }
+});
+
+// Enter key support for reset email
+document.getElementById("resetEmail")?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    sendResetEmail();
+  }
+});
+
+// Username input Enter key support
+document.getElementById("userLoginUsername").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") document.getElementById("userLoginPassword").focus();
+});
+document.getElementById("registerUsername").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") document.getElementById("registerEmail").focus();
+});
+document.getElementById("registerEmail").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") document.getElementById("registerPassword").focus();
+});
+
+// Initialize form states
+document.addEventListener("DOMContentLoaded", () => {
+  // Set initial display
+  loginForm.style.display = "block";
+  registerForm.style.display = "none";
+});
+</script>
+
+<script src="app.js?v=20251226"></script>
+
+<!-- Copyright Footer -->
+<footer class="copyright-footer">
+  <p>&copy; 2025 InvManage. All rights reserved.</p>
+  <div class="copyright-team">
+    <div class="team-member">
+      <div class="team-role">Software Architect & Developer</div>
+      <div class="team-name">
+        <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+          Alifito Rabbani Cahyono
+        </a>
+      </div>
+    </div>
+    <div class="team-member">
+      <div class="team-role">UI/UX Architect & Developer</div>
+      <div class="team-name">
+        <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+          Satria Febry Andanu
+        </a>
+      </div>
+    </div>
+    <div class="team-member">
+      <div class="team-role">Data Analyst & Engineer</div>
+      <div class="team-name">
+        <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+          Naufal Thafhan
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html></content>
+</xai:function_call
+<parameter name="path">index.html

@@ -1,353 +1,651 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>InvManage - Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvManage - Enterprise Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Welcome Notification -->
-  <div id="welcomeNotification" class="welcome-message">
-    <h3 id="welcomeTitle">Selamat!</h3>
-    <p id="welcomeMessage"></p>
-  </div>
-
-  <div class="dashboard-layout">
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <img src="image.png" alt="Logo" class="sidebar-logo">
-      <h1>InvManage Admin</h1>
-
-      <div class="menu">
-          <a href="dashboard.html" class="menu-item active">Dashboard</a>
-          <a href="riwayat.html" class="menu-item">Riwayat Transaksi</a>
-          <a href="laporan.html" class="menu-item">📊 Laporan & Analitik</a>
-          <a href="profil.html" class="menu-item">Profil</a>
-          <a href="feedback.html" class="menu-item">Feedback</a>
-      </div>
+    <!-- Welcome Notification -->
+    <div id="welcomeNotification" class="welcome-message">
+        <h3 id="welcomeTitle">Selamat!</h3>
+        <p id="welcomeMessage"></p>
     </div>
 
-    <!-- Main content -->
-    <div class="main-content">
+    <div class="dashboard-layout">
+        <!-- Enterprise Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="image.png" alt="Logo" class="sidebar-logo">
+                <h1>InvManage</h1>
+                <div class="sidebar-subtitle">Enterprise Admin</div>
+            </div>
 
-      <!-- Cards -->
-      <div class="card-container">
-        <div class="card">
-          <h3>Total Item</h3>
-          <div class="card-number" id="cardTotalItem">0</div>
-        </div>
-        <div class="card">
-          <h3>Stok rendah</h3>
-          <div class="card-number" id="cardStokRendah" style="color:red;">0</div>
-        </div>
-        <div class="card">
-          <h3>Hampir habis</h3>
-          <div class="card-number" id="cardHampirHabis" style="color:orange;">0</div>
-        </div>
-        <div class="card">
-          <h3>Stok Aman</h3>
-          <div class="card-number" id="cardStokAman" style="color:green;">0</div>
-        </div>
-      </div>
+            <div class="menu">
+                <a href="dashboard.html" class="menu-item active">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Dashboard</span>
+                </a>
+                <a href="riwayat.html" class="menu-item">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">Riwayat Transaksi</span>
+                </a>
+                <a href="laporan.html" class="menu-item">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Laporan & Analitik</span>
+                </a>
+                <a href="profil.html" class="menu-item">
+                    <span class="menu-icon">👤</span>
+                    <span class="menu-text">Profil</span>
+                </a>
+                <a href="feedback.html" class="menu-item">
+                    <span class="menu-icon">💬</span>
+                    <span class="menu-text">Feedback</span>
+                </a>
+            </div>
 
-      <!-- Table Barang -->
-      <div class="table-box">
-        <div class="table-header">
-          <div>
-            <h2 class="table-title">Manajemen Stok</h2>
-            <p style="color:#64748b; margin: 8px 0 0 0; font-size: 14px;">Kelola dan pantau stok barang secara real-time</p>
-          </div>
-          <button class="add-btn" onclick="openBarangModal('add')">+ Tambah Stok</button>
+            <!-- User Info Section -->
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    <span id="sidebarUserInitial">A</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarUserName">Admin</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+                <button class="logout-btn" onclick="logout()" title="Logout">
+                    <span>🚪</span>
+                </button>
+            </div>
         </div>
 
-        <div class="input-group" style="max-width:350px; margin-bottom:20px;">
-          <input type="text" id="searchBarang" placeholder="Cari barang...">
-        </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="header-left">
+                    <h1 class="page-title">Enterprise Dashboard</h1>
+                    <p class="page-subtitle">Pantau dan kelola sistem inventaris perusahaan</p>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="action-btn refresh-btn" onclick="refreshDashboard()" title="Refresh Data">
+                            <span>🔄</span>
+                        </button>
+                        <button class="action-btn export-btn" onclick="exportDashboard()" title="Export Data">
+                            <span>📥</span>
+                        </button>
+                        <div class="time-display" id="currentTime">--:--:--</div>
+                    </div>
+                </div>
+            </div>
 
-        <!-- CRUD Status Indicator -->
-        <div id="crudStatus" style="display: none; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 8px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; font-weight: 600;">
-          ✅ CRUD Functionality Active - Ready to manage inventory
-        </div>
+            <!-- Analytics Cards -->
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <div class="card-icon">📦</div>
+                    <div class="card-content">
+                        <div class="card-value" id="totalItems">0</div>
+                        <div class="card-label">Total Barang</div>
+                        <div class="card-trend positive">↗️ +12%</div>
+                    </div>
+                </div>
 
-        <table id="tabelBarang">
-          <thead>
-            <tr>
-              <th>Nama Barang</th>
-              <th>Stok Saat Ini</th>
-              <th>Minimum</th>
-              <th>Status</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- diisi lewat app.js -->
-          </tbody>
-        </table>
-      </div>
+                <div class="analytics-card">
+                    <div class="card-icon">🔄</div>
+                    <div class="card-content">
+                        <div class="card-value" id="activeLoans">0</div>
+                        <div class="card-label">Peminjaman Aktif</div>
+                        <div class="card-trend positive">↗️ +8%</div>
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="card-icon">👥</div>
+                    <div class="card-content">
+                        <div class="card-value" id="totalUsers">0</div>
+                        <div class="card-label">Total Pengguna</div>
+                        <div class="card-trend positive">↗️ +15%</div>
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="card-icon">✅</div>
+                    <div class="card-content">
+                        <div class="card-value" id="returnRate">0%</div>
+                        <div class="card-label">Tingkat Pengembalian</div>
+                        <div class="card-trend positive">↗️ +5%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Tren Peminjaman 30 Hari Terakhir</h3>
+                        <div class="chart-controls">
+                            <select id="chartPeriod" class="chart-select">
+                                <option value="7d">7 Hari</option>
+                                <option value="30d" selected>30 Hari</option>
+                                <option value="90d">3 Bulan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="borrowingTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Status Stok Barang</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="stockStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="actions-grid">
+                    <button class="quick-action-btn" onclick="openBarangModal('add')">
+                        <div class="action-icon">➕</div>
+                        <div class="action-text">Tambah Barang</div>
+                    </button>
+                    <button class="quick-action-btn" onclick="openTransaksiModal()">
+                        <div class="action-icon">📝</div>
+                        <div class="action-text">Input Transaksi</div>
+                    </button>
+                    <button class="quick-action-btn" onclick="generateReport()">
+                        <div class="action-icon">📊</div>
+                        <div class="action-text">Generate Report</div>
+                    </button>
+                    <button class="quick-action-btn" onclick="showUserManagement()">
+                        <div class="action-icon">👥</div>
+                        <div class="action-text">Kelola User</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <div class="activity-header">
+                    <h3>Aktivitas Terbaru</h3>
+                    <button class="view-all-btn" onclick="viewAllActivity()">Lihat Semua</button>
+                </div>
+                <div class="activity-list" id="recentActivity">
+                    <div class="activity-item loading">
+                        <div class="activity-icon">⏳</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Memuat aktivitas...</div>
+                            <div class="activity-time">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Management Table -->
+            <div class="table-section">
+                <div class="table-header">
+                    <div class="table-info">
+                        <h3>Manajemen Inventaris</h3>
+                        <p>Kelola stok barang dan informasi inventaris</p>
+                    </div>
+                    <div class="table-actions">
+                        <div class="search-container">
+                            <input type="text" id="searchBarang" placeholder="Cari barang..." class="search-input">
+                            <span class="search-icon">🔍</span>
+                        </div>
+                        <button class="add-btn" onclick="openBarangModal('add')">
+                            <span class="btn-icon">➕</span>
+                            Tambah Barang
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="tabelBarang">
+                        <thead>
+                            <tr>
+                                <th>Nama Barang</th>
+                                <th>Stok</th>
+                                <th>Minimum</th>
+                                <th>Status</th>
+                                <th>Terakhir Update</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <div class="table-stats">
+                        <span id="tableStats">Menampilkan 0 dari 0 barang</span>
+                    </div>
+                    <div class="table-pagination">
+                        <button class="page-btn" id="prevPage" disabled>‹</button>
+                        <span class="page-info" id="pageInfo">Halaman 1</span>
+                        <button class="page-btn" id="nextPage" disabled>›</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Modal Tambah/Edit Barang -->
-  <div class="modal-bg" id="modalBarang">
-    <div class="modal">
-      <h3 id="modalBarangTitle">Tambah Stok Barang</h3>
-
-      <div class="input-group">
-        <label for="formBarangNama">Nama Barang <span style="color: #ef4444;">*</span></label>
-        <input type="text" id="formBarangNama" placeholder="Masukkan nama barang" required>
-      </div>
-
-      <div style="display:flex; gap:10px;">
-        <div class="input-group" style="flex:1;">
-          <label for="formBarangStok">Stok Saat Ini <span style="color: #ef4444;">*</span></label>
-          <input type="number" id="formBarangStok" placeholder="0" min="0" required>
+    <!-- Modals -->
+    <!-- Barang Modal -->
+    <div class="modal-bg" id="modalBarang">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalBarangTitle">Tambah Barang</h3>
+                <button class="modal-close" onclick="closeBarangModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Nama Barang</label>
+                    <input type="text" id="formBarangNama" placeholder="Masukkan nama barang">
+                </div>
+                <div class="input-group">
+                    <label>Stok Awal</label>
+                    <input type="number" id="formBarangStok" placeholder="0" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Stok Minimum</label>
+                    <input type="number" id="formBarangMinimum" placeholder="5" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Kategori</label>
+                    <select id="formBarangKategori">
+                        <option value="">Pilih Kategori</option>
+                        <option value="elektronik">Elektronik</option>
+                        <option value="peralatan">Peralatan</option>
+                        <option value="aksesoris">Aksesoris</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeBarangModal()">Batal</button>
+                <button class="btn-primary" onclick="saveBarang()" id="saveBarangBtn">Simpan</button>
+            </div>
         </div>
-        <div class="input-group" style="flex:1;">
-          <label for="formBarangMinimum">Stok Minimum</label>
-          <input type="number" id="formBarangMinimum" placeholder="5" min="0" value="5">
-          <small style="color: #6b7280; font-size: 12px;">Notifikasi jika stok di bawah nilai ini</small>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="primary" onclick="saveBarang()">Simpan</button>
-        <button class="btn-red" onclick="closeBarangModal()">Batal</button>
-      </div>
     </div>
-  </div>
 
-  <!-- Modal Hapus Barang -->
-  <div class="modal-bg" id="modalDeleteBarang">
-    <div class="modal">
-      <h3>Hapus Data Barang</h3>
-      <p>Hapus data barang <strong id="deleteNamaBarang"></strong>?</p>
-
-      <div class="modal-buttons">
-        <button class="btn-green" onclick="closeDeleteBarang()">Tidak</button>
-        <button class="btn-red" onclick="confirmDeleteBarang()">Ya</button>
-      </div>
+    <!-- Transaksi Modal -->
+    <div class="modal-bg" id="modalTransaksi">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Input Transaksi Manual</h3>
+                <button class="modal-close" onclick="closeTransaksiModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Pilih Barang</label>
+                    <select id="transaksiBarang">
+                        <option value="">Pilih Barang</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Jumlah</label>
+                    <input type="number" id="transaksiJumlah" placeholder="Jumlah barang" min="1">
+                </div>
+                <div class="input-group">
+                    <label>Tipe Transaksi</label>
+                    <select id="transaksiTipe">
+                        <option value="masuk">Barang Masuk</option>
+                        <option value="keluar">Barang Keluar</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Catatan</label>
+                    <textarea id="transaksiCatatan" placeholder="Catatan transaksi (opsional)" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeTransaksiModal()">Batal</button>
+                <button class="btn-primary" onclick="saveTransaksi()" id="saveTransaksiBtn">Simpan Transaksi</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Copyright Footer -->
-  <footer class="copyright-footer">
-    <p>&copy; 2025 InvManage. All rights reserved.</p>
-    <div class="copyright-team">
-      <div class="team-member">
-        <div class="team-role">Software Architect & Developer</div>
-        <div class="team-name">
-          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
-            Alifito Rabbani Cahyono
-          </a>
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-bg" id="modalDeleteBarang">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h3>Hapus Barang</h3>
+                <button class="modal-close" onclick="closeDeleteBarang()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus barang <strong id="deleteNamaBarang"></strong>?</p>
+                <p class="warning-text">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDeleteBarang()">Batal</button>
+                <button class="btn-danger" onclick="confirmDeleteBarang()" id="deleteBarangBtn">Hapus</button>
+            </div>
         </div>
-      </div>
-      <div class="team-member">
-        <div class="team-role">UI/UX Architect & Developer</div>
-        <div class="team-name">
-          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
-            Satria Febry Andanu
-          </a>
-        </div>
-      </div>
-      <div class="team-member">
-        <div class="team-role">Data Analyst & Engineer</div>
-        <div class="team-name">
-          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
-            Naufal Thafhan
-          </a>
-        </div>
-      </div>
     </div>
-  </footer>
 
-  <script>
-    // Ensure all CRUD functions are available before DOMContentLoaded
-    function ensureCrudFunctions() {
-      const requiredFunctions = [
-        'checkAuth', 'getCurrentUser', 'loadBarang', 'applyBarangFilter',
-        'openBarangModal', 'closeBarangModal', 'saveBarang', 'openDeleteBarang',
-        'closeDeleteBarang', 'confirmDeleteBarang'
-      ];
+    <script>
+        // Dashboard Charts
+        let borrowingTrendChart, stockStatusChart;
 
-      const missingFunctions = requiredFunctions.filter(fn => typeof window[fn] !== 'function');
-      if (missingFunctions.length > 0) {
-        console.error('Missing required functions:', missingFunctions);
-        return false;
-      }
-      return true;
-    }
+        // Initialize dashboard
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Check authentication
+            if (!checkAuth('admin')) return;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      // Immediate initialization without waiting
-      const initDashboard = () => {
-        // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
-        // if (!checkAuth('admin')) return;
+            // Show welcome message
+            showWelcomeMessage();
 
-        console.log('Dashboard initialization starting...');
+            // Initialize dashboard
+            await initializeDashboard();
 
-        // Show welcome message immediately if needed
-        const currentUser = getCurrentUser();
-        const welcomeMessage = document.getElementById('welcomeMessage');
-        const welcomeNotification = document.getElementById('welcomeNotification');
-        const welcomeShownKey = `welcome_shown_admin_${currentUser?.id || 'unknown'}`;
-        const welcomeAlreadyShown = localStorage.getItem(welcomeShownKey);
+            // Update time display
+            updateTimeDisplay();
+            setInterval(updateTimeDisplay, 1000);
+        });
 
-        if (welcomeMessage && welcomeNotification && !welcomeAlreadyShown && currentUser) {
-          localStorage.setItem(welcomeShownKey, 'true');
-          const userName = currentUser.nama || 'Admin';
-          welcomeMessage.textContent = `${userName} telah berhasil login sebagai admin`;
+        function showWelcomeMessage() {
+            const currentUser = getCurrentUser();
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const welcomeNotification = document.getElementById('welcomeNotification');
 
-          welcomeNotification.style.display = 'block';
-          welcomeNotification.style.opacity = '0';
-          welcomeNotification.style.transform = 'translateY(-20px)';
+            const welcomeShownKey = `welcome_shown_admin_${currentUser?.id || 'unknown'}`;
+            const welcomeAlreadyShown = localStorage.getItem(welcomeShownKey);
 
-          // Use requestAnimationFrame for smoother animation
-          requestAnimationFrame(() => {
-            welcomeNotification.style.transition = 'all 0.5s ease';
-            welcomeNotification.style.opacity = '1';
-            welcomeNotification.style.transform = 'translateY(0)';
-          });
+            if (welcomeMessage && welcomeNotification && !welcomeAlreadyShown) {
+                localStorage.setItem(welcomeShownKey, 'true');
 
-          // Hide after 5 seconds
-          setTimeout(() => {
-            welcomeNotification.style.opacity = '0';
-            welcomeNotification.style.transform = 'translateY(-20px)';
-            setTimeout(() => {
-              welcomeNotification.style.display = 'none';
-            }, 500);
-          }, 5000);
+                const userName = currentUser && currentUser.nama ? currentUser.nama : 'Admin';
+                welcomeMessage.textContent = `${userName} telah login sebagai Administrator`;
+
+                welcomeNotification.style.display = 'block';
+                welcomeNotification.style.opacity = '0';
+                welcomeNotification.style.transform = 'translateY(-20px)';
+
+                setTimeout(() => {
+                    welcomeNotification.style.transition = 'all 0.5s ease';
+                    welcomeNotification.style.opacity = '1';
+                    welcomeNotification.style.transform = 'translateY(0)';
+                }, 100);
+
+                setTimeout(() => {
+                    welcomeNotification.style.opacity = '0';
+                    welcomeNotification.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        welcomeNotification.style.display = 'none';
+                    }, 500);
+                }, 4000);
+            }
+
+            // Update sidebar user info
+            if (currentUser) {
+                document.getElementById('sidebarUserName').textContent = currentUser.nama || 'Admin';
+                document.getElementById('sidebarUserInitial').textContent = (currentUser.nama || 'A').charAt(0).toUpperCase();
+            }
         }
 
-        // Search functionality is initialized in app.js
+        async function initializeDashboard() {
+            try {
+                showLoading("Memuat dashboard...");
 
-        // Load data immediately for instant response
-        loadBarang();
+                // Load data in parallel
+                await Promise.all([
+                    loadBarang(),
+                    loadDashboardStats(),
+                    loadRecentActivity()
+                ]);
 
-        console.log('Dashboard initialization complete');
-      };
+                // Initialize charts
+                initializeCharts();
 
-      // Check if functions are available, but don't wait
-      if (typeof checkAuth === 'function' && typeof getCurrentUser === 'function' &&
-          typeof loadBarang === 'function' && typeof applyBarangFilter === 'function') {
-        initDashboard();
-      } else {
-        // Fallback: wait briefly for functions to load
-        setTimeout(initDashboard, 200);
-      }
-    });
+                // Setup event listeners
+                setupEventListeners();
 
-    // Enhanced keyboard shortcuts for modal
-    document.addEventListener("keydown", (e) => {
-      const modal = document.getElementById("modalBarang");
-      if (modal && modal.style.display === "flex") {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          if (typeof saveBarang === 'function') {
-            saveBarang();
-          }
-        } else if (e.key === "Escape") {
-          if (typeof closeBarangModal === 'function') {
-            closeBarangModal();
-          }
+                hideLoading();
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                hideLoading();
+                showNotification("Gagal memuat dashboard", "error");
+            }
         }
-      }
 
-      const deleteModal = document.getElementById("modalDeleteBarang");
-      if (deleteModal && deleteModal.style.display === "flex") {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          if (typeof confirmDeleteBarang === 'function') {
-            confirmDeleteBarang();
-          }
-        } else if (e.key === "Escape") {
-          if (typeof closeDeleteBarang === 'function') {
-            closeDeleteBarang();
-          }
+        async function loadDashboardStats() {
+            try {
+                // Load data from API or use sample data
+                const [barangRes, peminjamanRes, usersRes] = await Promise.all([
+                    fetch(`${API_BASE}/barang/`).catch(() => null),
+                    fetch(`${API_BASE}/peminjaman/`).catch(() => null),
+                    fetch(`${API_BASE}/users/`).catch(() => null)
+                ]);
+
+                let barang = [], peminjaman = [], users = [];
+
+                if (barangRes?.ok) barang = await barangRes.json();
+                else barang = window.sampleBarang || [];
+
+                if (peminjamanRes?.ok) peminjaman = await peminjamanRes.json();
+                else peminjaman = window.samplePeminjaman || [];
+
+                if (usersRes?.ok) users = await usersRes.json();
+                else users = window.sampleUsers || [];
+
+                // Calculate stats
+                const totalItems = barang.length;
+                const activeLoans = peminjaman.filter(p => p.status === 'dipinjam').length;
+                const totalUsers = users.filter(u => u.role === 'user').length;
+
+                const returnedLoans = peminjaman.filter(p => p.status === 'dikembalikan').length;
+                const totalLoans = peminjaman.length;
+                const returnRate = totalLoans > 0 ? Math.round((returnedLoans / totalLoans) * 100) : 0;
+
+                // Update UI
+                document.getElementById('totalItems').textContent = totalItems;
+                document.getElementById('activeLoans').textContent = activeLoans;
+                document.getElementById('totalUsers').textContent = totalUsers;
+                document.getElementById('returnRate').textContent = `${returnRate}%`;
+
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
         }
-      }
-    });
 
-    // Optimized button click handlers with debouncing
-    let lastClickTime = 0;
-    document.addEventListener('click', (e) => {
-      const now = Date.now();
-      if (now - lastClickTime < 200) return; // Prevent rapid clicks
-      lastClickTime = now;
+        function initializeCharts() {
+            // Borrowing Trend Chart
+            const borrowingCtx = document.getElementById('borrowingTrendChart').getContext('2d');
+            borrowingTrendChart = new Chart(borrowingCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Peminjaman',
+                        data: [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
 
-      if (e.target.matches('[onclick*="openBarangModal"]')) {
-        console.log('➕ Add/Edit button clicked');
-        e.target.style.background = '#10b981'; // Visual feedback
-        setTimeout(() => e.target.style.background = '', 200);
-      }
-      if (e.target.matches('[onclick*="openDeleteBarang"]')) {
-        console.log('🗑️ Delete button clicked');
-        e.target.style.background = '#ef4444';
-        setTimeout(() => e.target.style.background = '', 200);
-      }
-      if (e.target.matches('[onclick*="saveBarang"]')) {
-        console.log('💾 Save button clicked');
-        e.target.style.transform = 'scale(0.95)';
-        setTimeout(() => e.target.style.transform = '', 200);
-      }
-    });
+            // Stock Status Chart
+            const stockCtx = document.getElementById('stockStatusChart').getContext('2d');
+            stockStatusChart = new Chart(stockCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stok Aman', 'Stok Rendah', 'Stok Kritis'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
 
-    // Test CRUD functionality
-    window.testCrud = function() {
-      console.log('🧪 Testing CRUD functionality...');
+            updateCharts();
+        }
 
-      let crudAvailable = true;
+        function updateCharts() {
+            // Update borrowing trend chart with sample data
+            const labels = [];
+            const data = [];
+            const now = new Date();
 
-      // Test modal opening
-      if (typeof openBarangModal === 'function') {
-        console.log('✅ openBarangModal function available');
-        openBarangModal('add');
-        setTimeout(() => {
-          if (typeof closeBarangModal === 'function') {
-            closeBarangModal();
-            console.log('✅ Modal open/close test passed');
-          }
-        }, 1000);
-      } else {
-        console.error('❌ openBarangModal function not available');
-        crudAvailable = false;
-      }
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }));
+                data.push(Math.floor(Math.random() * 20) + 5);
+            }
 
-      // Test data loading
-      if (typeof loadBarang === 'function') {
-        console.log('✅ loadBarang function available');
-      } else {
-        console.error('❌ loadBarang function not available');
-        crudAvailable = false;
-      }
+            borrowingTrendChart.data.labels = labels;
+            borrowingTrendChart.data.datasets[0].data = data;
+            borrowingTrendChart.update();
 
-      // Test save function
-      if (typeof saveBarang === 'function') {
-        console.log('✅ saveBarang function available');
-      } else {
-        console.error('❌ saveBarang function not available');
-        crudAvailable = false;
-      }
+            // Update stock status chart
+            stockStatusChart.data.datasets[0].data = [65, 25, 10]; // Sample data
+            stockStatusChart.update();
+        }
 
-      // Show status indicator
-      const statusEl = document.getElementById('crudStatus');
-      if (crudAvailable) {
-        statusEl.style.display = 'block';
-        statusEl.innerHTML = '✅ CRUD Functionality Active - Ready to manage inventory';
-        statusEl.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-        showNotification('CRUD functionality is working properly!', 'success');
-      } else {
-        statusEl.style.display = 'block';
-        statusEl.innerHTML = '❌ CRUD Functionality Issues - Check console for details';
-        statusEl.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-        showNotification('Some CRUD functions may not be working. Check console.', 'error');
-      }
+        async function loadRecentActivity() {
+            const activityList = document.getElementById('recentActivity');
 
-      showNotification('CRUD test completed. Check console for details.', 'info');
-    };
+            // Sample recent activities
+            const activities = [
+                {
+                    icon: '📦',
+                    title: 'Barang baru ditambahkan: Laptop Acer',
+                    time: '2 menit yang lalu',
+                    type: 'success'
+                },
+                {
+                    icon: '🔄',
+                    title: 'Peminjaman: Mouse Logitech oleh John Doe',
+                    time: '15 menit yang lalu',
+                    type: 'info'
+                },
+                {
+                    icon: '✅',
+                    title: 'Pengembalian: Keyboard Dell',
+                    time: '1 jam yang lalu',
+                    type: 'success'
+                },
+                {
+                    icon: '⚠️',
+                    title: 'Stok rendah: Printer HP (2 unit)',
+                    time: '2 jam yang lalu',
+                    type: 'warning'
+                },
+                {
+                    icon: '👤',
+                    title: 'User baru terdaftar: Jane Smith',
+                    time: '3 jam yang lalu',
+                    type: 'info'
+                }
+            ];
 
-    // Auto-test removed to prevent delays - manual testing available via testCrud()
-  </script>
-  <script src="app.js"></script>
+            activityList.innerHTML = '';
+
+            activities.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = `activity-item ${activity.type}`;
+                activityItem.innerHTML = `
+                    <div class="activity-icon">${activity.icon}</div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                `;
+                activityList.appendChild(activityItem);
+            });
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchBarang').addEventListener('input', debounce(() => {
+                applyBarangFilter();
+            }, 300));
+
+            // Chart period change
+            document.getElementById('chartPeriod').addEventListener('change', updateCharts);
+        }
+
+        function updateTimeDisplay() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        function refreshDashboard() {
+            showLoading("Menyegarkan data...");
+            setTimeout(async () => {
+                await initializeDashboard();
+                hideLoading();
+                showNotification("Dashboard berhasil diperbarui", "success");
+            }, 1000);
+        }
+
+        function exportDashboard() {
+            showNotification("Fitur export sedang dalam pengembangan", "info");
+        }
+
+        function generateReport() {
+            window.location.href = 'laporan.html';
+        }
+
+        function showUserManagement() {
+            showNotification("Fitur manajemen user sedang dalam pengembangan", "info");
+        }
+
+        function viewAllActivity() {
+            window.location.href = 'riwayat.html';
+        }
+    </script>
+
+    <script src="app.js?v=20251226"></script>
+    <script src="data.js"></script>
 </body>
 </html>

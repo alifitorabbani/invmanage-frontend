@@ -1,0 +1,165 @@
+Last login: Sat Dec 27 00:54:49 on ttys053
+user@Afras-MacBook-Pro ~ % sudo service postgresql start
+Password:
+sudo: service: command not found
+user@Afras-MacBook-Pro ~ % sudo service postgresql start
+sudo: service: command not found
+user@Afras-MacBook-Pro ~ % psql --version
+
+psql (PostgreSQL) 14.20 (Homebrew)
+user@Afras-MacBook-Pro ~ % brew services start postgresql
+
+Service `postgresql@14` already started, use `brew services restart postgresql@14` to restart.
+user@Afras-MacBook-Pro ~ % pg_isready
+
+/tmp:5432 - accepting connections
+user@Afras-MacBook-Pro ~ % psql postgres
+
+psql (14.20 (Homebrew))
+Type "help" for help.
+
+postgres=# \l
+                                                 List of databases
+      Name       |      Owner      | Encoding |   Collate   |    Ctype    |            Access privileges            
+-----------------+-----------------+----------+-------------+-------------+-----------------------------------------
+ afra            | user            | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ afras_inventory | postgres        | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ invdb           | user            | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ invmanage       | invmanage-fixed | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =Tc/"invmanage-fixed"                  +
+                 |                 |          |             |             | "invmanage-fixed"=CTc/"invmanage-fixed"+
+                 |                 |          |             |             | postgres=CTc/"invmanage-fixed"         +
+                 |                 |          |             |             | "impal-invmanage"=CTc/"invmanage-fixed"
+ postgres        | user            | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ template0       | user            | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/user                                +
+                 |                 |          |             |             | user=CTc/user
+ template1       | user            | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/user                                +
+                 |                 |          |             |             | user=CTc/user
+ user            | user            | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+(8 rows)
+
+postgres=# \du
+                                      List of roles
+    Role name    |                         Attributes                         | Member of 
+-----------------+------------------------------------------------------------+-----------
+ impal-invmanage |                                                            | {}
+ invmanage-fixed |                                                            | {}
+ invuser         | Superuser                                                  | {}
+ postgres        | Superuser                                                  | {}
+ user            | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+
+postgres=# \q
+user@Afras-MacBook-Pro ~ % cd path/to/frontend
+
+cd: no such file or directory: path/to/frontend
+user@Afras-MacBook-Pro ~ % ls
+
+Applications				db.sqlite3				infatica_agent.dat			Movies					tubes aka.zip
+backup					Desktop					invmanage				Music					tubes si cantik.go
+beijing-multisite-airquality-data-set	deteksi-gempa-web			invmanage-backend			Pictures				tubes std
+coba tubes 2.go				django visual studio code		invmanage-frontend			Public					tugas besar.go
+coba tubes 3.go				Documents				invmanage-impal				python -m ensurepip --default-pip	untitled_1ds
+coba tubes dka.py			Downloads				Library					requirements.txt			venv
+coba tubes.go				go					manage.py				stopwords-id.R				worldcloud.R
+user@Afras-MacBook-Pro ~ % cd frontend
+
+cd: no such file or directory: frontend
+user@Afras-MacBook-Pro ~ % invmanage-frontend
+
+zsh: command not found: invmanage-frontend
+user@Afras-MacBook-Pro ~ % cd invmanage-frontend
+
+user@Afras-MacBook-Pro invmanage-frontend % ls
+
+admin-login.html	dashboard.html		image.png		node_modules		profil.html		system-canvas.md	user-login.html
+admin-terms.html	data.js			index.html		package-lock.json	riwayat.html		user-dashboard.html	user-peminjaman.html
+app.js			feedback.html		laporan.html		package.json		style.css		user-feedback.html	user-profil.html
+user@Afras-MacBook-Pro invmanage-frontend % npm install
+
+
+up to date, audited 49 packages in 2s
+
+15 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+user@Afras-MacBook-Pro invmanage-frontend % touch .env
+
+user@Afras-MacBook-Pro invmanage-frontend % https://undainty-dorene-hypocoristically.ngrok-free.dev
+zsh: no such file or directory: https://undainty-dorene-hypocoristically.ngrok-free.dev
+user@Afras-MacBook-Pro invmanage-frontend % nano .env
+
+user@Afras-MacBook-Pro invmanage-frontend % touch .env
+nano .env
+
+
+  UW PICO 5.09                                                                                                     File: .env                                                                                                      Modified  
+
+VITE_API_URL=https://undainty-dorene-hypocoristically.ngrok-free.dev
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+File Name to write : /Users/user/invmanage-frontend/.env                                                                                                                                                                                     
+^G Get Help                            ^T  To Files                                                                                                                                                                                       
+^C Cancel                              TAB Complete                                                                                                                                                                                       

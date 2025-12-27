@@ -1,1051 +1,1282 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InvManage - Enterprise Inventory Management System</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-link {
-            color: #666;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            padding-top: 100px;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .stats-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stats-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .stats-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 0.5rem;
-        }
-
-        .stats-label {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .main-content {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .section-title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .refresh-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .data-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .data-table tr:hover {
-            background: #f8f9fa;
-        }
-
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-
-        .status-dipinjam {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-dikembalikan {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .status-masuk {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-keluar {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
-
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 1rem;
-            border-radius: 5px;
-            margin: 1rem 0;
-            border-left: 4px solid #dc3545;
-        }
-
-        .search-filter {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 0.9rem;
-        }
-
-        .filter-select {
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            min-width: 150px;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 2rem;
-        }
-
-        .page-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .page-btn:hover,
-        .page-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .tab-container {
-            margin-bottom: 2rem;
-        }
-
-        .tab-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            background: #f8f9fa;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            color: #666;
-        }
-
-        .tab-btn:hover,
-        .tab-btn.active {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-                padding-top: 80px;
-            }
-
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-links {
-                gap: 1rem;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .section-header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-
-            .search-filter {
-                flex-direction: column;
-            }
-
-            .data-table {
-                font-size: 0.8rem;
-            }
-
-            .data-table th,
-            .data-table td {
-                padding: 0.5rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <meta name="description" content="InvManage Enterprise - Professional Inventory Management System for modern businesses">
+    <meta name="keywords" content="inventory, management, enterprise, professional, system">
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">InvManage</div>
-            <nav class="nav-links">
-                <a href="#dashboard" class="nav-link active" onclick="showTab('dashboard')">Dashboard</a>
-                <a href="#peminjaman" class="nav-link" onclick="showTab('peminjaman')">Riwayat Peminjaman</a>
-                <a href="#feedback" class="nav-link" onclick="showTab('feedback')">Feedback</a>
-                <a href="#transaksi" class="nav-link" onclick="showTab('transaksi')">Transaksi</a>
-                <a href="#users" class="nav-link" onclick="showTab('users')">Users</a>
-                <a href="#barang" class="nav-link" onclick="showTab('barang')">Barang</a>
-            </nav>
+    <!-- Enhanced Animated Background -->
+    <div class="bg-elements">
+        <div class="bg-circle bg-circle-1"></div>
+        <div class="bg-circle bg-circle-2"></div>
+        <div class="bg-circle bg-circle-3"></div>
+        <div class="bg-circle bg-circle-4"></div>
+        <div class="bg-circle bg-circle-5"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1">⬡</div>
+            <div class="shape shape-2">⬢</div>
+            <div class="shape shape-3">⬣</div>
+            <div class="shape shape-4">▭</div>
+            <div class="shape shape-5">⬟</div>
+            <div class="shape shape-6">⬠</div>
         </div>
-    </header>
-
-    <div class="container">
-        <!-- Dashboard Tab -->
-        <div id="dashboard" class="tab-content active">
-            <div class="dashboard-grid">
-                <div class="stats-card">
-                    <i class="fas fa-users stats-icon" style="color: #667eea;"></i>
-                    <div class="stats-number" id="total-users">-</div>
-                    <div class="stats-label">Total Users</div>
-                </div>
-                <div class="stats-card">
-                    <i class="fas fa-boxes stats-icon" style="color: #764ba2;"></i>
-                    <div class="stats-number" id="total-items">-</div>
-                    <div class="stats-label">Total Items</div>
-                </div>
-                <div class="stats-card">
-                    <i class="fas fa-hand-holding stats-icon" style="color: #28a745;"></i>
-                    <div class="stats-number" id="total-loans">-</div>
-                    <div class="stats-label">Total Loans</div>
-                </div>
-                <div class="stats-card">
-                    <i class="fas fa-exchange-alt stats-icon" style="color: #ffc107;"></i>
-                    <div class="stats-number" id="total-transactions">-</div>
-                    <div class="stats-label">Total Transactions</div>
-                </div>
-            </div>
-
-            <div class="main-content">
-                <div class="section-header">
-                    <h2 class="section-title">System Overview</h2>
-                    <button class="refresh-btn" onclick="loadDashboardData()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-                <div id="dashboard-content">
-                    <div class="loading">Loading dashboard data...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Riwayat Peminjaman Tab -->
-        <div id="peminjaman" class="tab-content">
-            <div class="main-content">
-                <div class="section-header">
-                    <h2 class="section-title">Riwayat Peminjaman</h2>
-                    <button class="refresh-btn" onclick="loadPeminjamanData()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-
-                <div class="search-filter">
-                    <input type="text" class="search-input" id="peminjaman-search" placeholder="Cari berdasarkan nama user atau barang..." onkeyup="filterPeminjaman()">
-                    <select class="filter-select" id="peminjaman-status-filter" onchange="filterPeminjaman()">
-                        <option value="">Semua Status</option>
-                        <option value="dipinjam">Dipinjam</option>
-                        <option value="dikembalikan">Dikembalikan</option>
-                    </select>
-                </div>
-
-                <div id="peminjaman-content">
-                    <div class="loading">Loading riwayat peminjaman...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Feedback Tab -->
-        <div id="feedback" class="tab-content">
-            <div class="main-content">
-                <div class="section-header">
-                    <h2 class="section-title">Feedback Pengguna</h2>
-                    <button class="refresh-btn" onclick="loadFeedbackData()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-
-                <div class="search-filter">
-                    <input type="text" class="search-input" id="feedback-search" placeholder="Cari berdasarkan nama user atau pesan..." onkeyup="filterFeedback()">
-                    <select class="filter-select" id="feedback-sort" onchange="filterFeedback()">
-                        <option value="newest">Terbaru</option>
-                        <option value="oldest">Terlama</option>
-                    </select>
-                </div>
-
-                <div id="feedback-content">
-                    <div class="loading">Loading feedback data...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Transaksi Tab -->
-        <div id="transaksi" class="tab-content">
-            <div class="main-content">
-                <div class="section-header">
-                    <h2 class="section-title">Riwayat Transaksi</h2>
-                    <button class="refresh-btn" onclick="loadTransaksiData()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-
-                <div class="search-filter">
-                    <input type="text" class="search-input" id="transaksi-search" placeholder="Cari berdasarkan nama barang..." onkeyup="filterTransaksi()">
-                    <select class="filter-select" id="transaksi-type-filter" onchange="filterTransaksi()">
-                        <option value="">Semua Tipe</option>
-                        <option value="masuk">Masuk</option>
-                        <option value="keluar">Keluar</option>
-                    </select>
-                </div>
-
-                <div id="transaksi-content">
-                    <div class="loading">Loading riwayat transaksi...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Users Tab -->
-        <div id="users" class="tab-content">
-            <div class="main-content">
-                <div class="section-header">
-                    <h2 class="section-title">Manajemen Users</h2>
-                    <button class="refresh-btn" onclick="loadUsersData()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-
-                <div class="search-filter">
-                    <input type="text" class="search-input" id="users-search" placeholder="Cari berdasarkan nama atau email..." onkeyup="filterUsers()">
-                    <select class="filter-select" id="users-role-filter" onchange="filterUsers()">
-                        <option value="">Semua Role</option>
-                        <option value="admin">Admin</option>
-                        <option value="user">User</option>
-                    </select>
-                    <select class="filter-select" id="users-dept-filter" onchange="filterUsers()">
-                        <option value="">Semua Departemen</option>
-                        <option value="IT">IT</option>
-                        <option value="HR">HR</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Operations">Operations</option>
-                        <option value="Sales">Sales</option>
-                        <option value="Engineering">Engineering</option>
-                        <option value="Legal">Legal</option>
-                        <option value="Procurement">Procurement</option>
-                        <option value="Quality">Quality</option>
-                    </select>
-                </div>
-
-                <div id="users-content">
-                    <div class="loading">Loading users data...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Barang Tab -->
-        <div id="barang" class="tab-content">
-            <div class="main-content">
-                <div class="section-header">
-                    <h2 class="section-title">Manajemen Barang</h2>
-                    <button class="refresh-btn" onclick="loadBarangData()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-
-                <div class="search-filter">
-                    <input type="text" class="search-input" id="barang-search" placeholder="Cari berdasarkan nama barang..." onkeyup="filterBarang()">
-                    <select class="filter-select" id="barang-stock-filter" onchange="filterBarang()">
-                        <option value="">Semua Status Stok</option>
-                        <option value="available">Tersedia</option>
-                        <option value="low">Stok Rendah</option>
-                        <option value="out">Habis</option>
-                    </select>
-                </div>
-
-                <div id="barang-content">
-                    <div class="loading">Loading barang data...</div>
-                </div>
-            </div>
-        </div>
+        <!-- Animated Grid Background -->
+        <div class="grid-background"></div>
     </div>
 
-    <script>
-        const API_BASE = 'http://localhost:8001/api';
+    <!-- Navigation Bar -->
+    <nav class="enterprise-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="image.png" alt="InvManage Logo" class="nav-logo-img">
+                <span class="nav-logo-text">InvManage</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#features" class="nav-link">Fitur</a>
+                <a href="#about" class="nav-link">Tentang</a>
+                <a href="#contact" class="nav-link">Kontak</a>
+                <button class="nav-cta" onclick="scrollToAccess()">Akses Sistem</button>
+            </div>
+        </div>
+    </nav>
 
-        // Global data storage
-        let currentData = {
-            peminjaman: [],
-            feedback: [],
-            transaksi: [],
-            users: [],
-            barang: []
-        };
-
-        // Tab switching
-        function showTab(tabName) {
-            // Hide all tabs
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => tab.classList.remove('active'));
-
-            // Remove active class from nav links
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => link.classList.remove('active'));
-
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
-
-            // Add active class to clicked nav link
-            event.target.classList.add('active');
-
-            // Load data for the tab if not already loaded
-            switch(tabName) {
-                case 'dashboard':
-                    if (!currentData.peminjaman.length) loadDashboardData();
-                    break;
-                case 'peminjaman':
-                    if (!currentData.peminjaman.length) loadPeminjamanData();
-                    break;
-                case 'feedback':
-                    if (!currentData.feedback.length) loadFeedbackData();
-                    break;
-                case 'transaksi':
-                    if (!currentData.transaksi.length) loadTransaksiData();
-                    break;
-                case 'users':
-                    if (!currentData.users.length) loadUsersData();
-                    break;
-                case 'barang':
-                    if (!currentData.barang.length) loadBarangData();
-                    break;
-            }
-        }
-
-        // API fetch helper
-        async function fetchAPI(endpoint) {
-            try {
-                const response = await fetch(`${API_BASE}/${endpoint}/`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error(`Error fetching ${endpoint}:`, error);
-                throw error;
-            }
-        }
-
-        // Load dashboard data
-        async function loadDashboardData() {
-            try {
-                document.getElementById('dashboard-content').innerHTML = '<div class="loading">Loading dashboard data...</div>';
-
-                const [users, barang, peminjaman, transaksi] = await Promise.all([
-                    fetchAPI('users'),
-                    fetchAPI('barang'),
-                    fetchAPI('peminjaman'),
-                    fetchAPI('transaksi')
-                ]);
-
-                // Update stats
-                document.getElementById('total-users').textContent = users.length;
-                document.getElementById('total-items').textContent = barang.length;
-                document.getElementById('total-loans').textContent = peminjaman.length;
-                document.getElementById('total-transactions').textContent = transaksi.length;
-
-                // Store data
-                currentData.users = users;
-                currentData.barang = barang;
-                currentData.peminjaman = peminjaman;
-                currentData.transaksi = transaksi;
-
-                // Display recent activity
-                const recentLoans = peminjaman.slice(0, 5);
-                const recentTransactions = transaksi.slice(0, 5);
-
-                let html = `
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
-                        <div>
-                            <h3 style="margin-bottom: 1rem; color: #333;">Recent Loans</h3>
-                            <div style="max-height: 300px; overflow-y: auto;">
-                                ${recentLoans.map(loan => `
-                                    <div style="padding: 0.75rem; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <strong>${loan.barang_nama || 'Unknown Item'}</strong><br>
-                                            <small>${loan.user_nama || 'Unknown User'} • ${loan.jumlah} items</small>
-                                        </div>
-                                        <span class="status-badge status-${loan.status}">${loan.status}</span>
-                                    </div>
-                                `).join('')}
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge">🏆 Enterprise Grade Solution</span>
+                </div>
+                <h1 class="hero-title">
+                    <span class="title-gradient">InvManage</span>
+                    <span class="title-accent">Enterprise</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Sistem Manajemen Inventaris Profesional untuk Bisnis Modern.
+                    Kontrol penuh atas aset perusahaan dengan analitik real-time dan keamanan enterprise-grade.
+                </p>
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">🔒</div>
+                        <span>Keamanan Enterprise</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <span>Analytics Real-time</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⚡</div>
+                        <span>Performa Tinggi</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🌐</div>
+                        <span>Akses 24/7</span>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <button class="btn-primary hero-btn" onclick="scrollToAccess()">
+                        <span>Akses Dashboard</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                    <button class="btn-secondary hero-btn" onclick="scrollToFeatures()">
+                        <span>Pelajari Lebih Lanjut</span>
+                    </button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-dashboard-preview">
+                    <div class="preview-header">
+                        <div class="preview-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <div class="preview-title">InvManage Dashboard</div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="preview-stats">
+                            <div class="stat-item">
+                                <div class="stat-number">1,247</div>
+                                <div class="stat-label">Total Items</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">89</div>
+                                <div class="stat-label">Active Loans</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">156</div>
+                                <div class="stat-label">Users</div>
                             </div>
                         </div>
-                        <div>
-                            <h3 style="margin-bottom: 1rem; color: #333;">Recent Transactions</h3>
-                            <div style="max-height: 300px; overflow-y: auto;">
-                                ${recentTransactions.map(tx => `
-                                    <div style="padding: 0.75rem; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <strong>${tx.barang_nama || 'Unknown Item'}</strong><br>
-                                            <small>${tx.user_nama || 'System'} • ${tx.jumlah} items</small>
-                                        </div>
-                                        <span class="status-badge status-${tx.tipe}">${tx.tipe}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
+                        <div class="preview-chart">
+                            <div class="chart-bar" style="height: 60%"></div>
+                            <div class="chart-bar" style="height: 80%"></div>
+                            <div class="chart-bar" style="height: 40%"></div>
+                            <div class="chart-bar" style="height: 90%"></div>
+                            <div class="chart-bar" style="height: 70%"></div>
                         </div>
                     </div>
-                `;
+                </div>
+            </div>
+        </div>
+    </section>
 
-                document.getElementById('dashboard-content').innerHTML = html;
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Fitur Unggulan</h2>
+                <p>Teknologi terdepan untuk manajemen inventaris yang efisien</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-large">📊</div>
+                    <h3>Dashboard Analytics</h3>
+                    <p>Monitoring real-time dengan visualisasi data yang komprehensif untuk pengambilan keputusan yang tepat.</p>
+                    <ul>
+                        <li>Real-time inventory tracking</li>
+                        <li>Advanced reporting system</li>
+                        <li>Predictive analytics</li>
+                        <li>Custom dashboard widgets</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-large">👥</div>
+                    <h3>User Management</h3>
+                    <p>Sistem manajemen pengguna yang fleksibel dengan role-based access control untuk keamanan maksimal.</p>
+                    <ul>
+                        <li>Role-based permissions</li>
+                        <li>User activity monitoring</li>
+                        <li>Secure authentication</li>
+                        <li>Profile management</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-large">🔄</div>
+                    <h3>Borrowing System</h3>
+                    <p>Proses peminjaman dan pengembalian yang streamlined dengan tracking otomatis dan notifikasi.</p>
+                    <ul>
+                        <li>Automated approval workflow</li>
+                        <li>Due date tracking</li>
+                        <li>Overdue notifications</li>
+                        <li>Return confirmations</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-large">📱</div>
+                    <h3>Mobile Responsive</h3>
+                    <p>Akses penuh dari desktop hingga mobile dengan interface yang konsisten dan user-friendly.</p>
+                    <ul>
+                        <li>Responsive design</li>
+                        <li>Touch-optimized interface</li>
+                        <li>Offline capabilities</li>
+                        <li>Cross-device sync</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-large">🔒</div>
+                    <h3>Enterprise Security</h3>
+                    <p>Keamanan tingkat enterprise dengan enkripsi end-to-end dan audit trail yang komprehensif.</p>
+                    <ul>
+                        <li>End-to-end encryption</li>
+                        <li>Audit logging</li>
+                        <li>Two-factor authentication</li>
+                        <li>Data backup & recovery</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-large">⚡</div>
+                    <h3>High Performance</h3>
+                    <p>Arsitektur yang dioptimalkan untuk performa tinggi dengan caching dan lazy loading.</p>
+                    <ul>
+                        <li>Fast loading times</li>
+                        <li>Optimized queries</li>
+                        <li>Caching system</li>
+                        <li>Scalable architecture</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            } catch (error) {
-                document.getElementById('dashboard-content').innerHTML =
-                    '<div class="error">Error loading dashboard data. Please check if the backend server is running.</div>';
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item-large">
+                    <div class="stat-number-large">10,000+</div>
+                    <div class="stat-label-large">Items Managed</div>
+                    <div class="stat-description">Barang inventaris yang dikelola dengan sistematis</div>
+                </div>
+                <div class="stat-item-large">
+                    <div class="stat-number-large">500+</div>
+                    <div class="stat-label-large">Active Users</div>
+                    <div class="stat-description">Pengguna aktif yang memanfaatkan sistem</div>
+                </div>
+                <div class="stat-item-large">
+                    <div class="stat-number-large">99.9%</div>
+                    <div class="stat-label-large">Uptime</div>
+                    <div class="stat-description">Tingkat ketersediaan sistem yang tinggi</div>
+                </div>
+                <div class="stat-item-large">
+                    <div class="stat-number-large">24/7</div>
+                    <div class="stat-label-large">Support</div>
+                    <div class="stat-description">Dukungan teknis nonstop untuk kemudahan penggunaan</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Access Portal Section -->
+    <section id="access" class="access-section">
+        <div class="container">
+            <div class="access-container">
+                <div class="access-header">
+                    <h2>Portal Akses Sistem</h2>
+                    <p>Pilih level akses yang sesuai dengan kebutuhan Anda</p>
+                </div>
+
+                <div class="role-cards-enterprise">
+                    <!-- Admin Card -->
+                    <div class="role-card-enterprise admin-card">
+                        <div class="card-header">
+                            <div class="role-icon-large">👑</div>
+                            <div class="role-badge admin">Administrator</div>
+                        </div>
+                        <div class="card-content">
+                            <h4>System Administrator</h4>
+                            <p>Akses penuh ke seluruh sistem dengan kemampuan manajemen komprehensif untuk mengontrol dan mengoptimalkan operasi inventaris perusahaan.</p>
+                            <div class="permissions-list">
+                                <div class="permission-item">
+                                    <span class="permission-icon">📊</span>
+                                    <span>Dashboard & Analytics Lengkap</span>
+                                </div>
+                                <div class="permission-item">
+                                    <span class="permission-icon">👥</span>
+                                    <span>Manajemen User & Roles</span>
+                                </div>
+                                <div class="permission-item">
+                                    <span class="permission-icon">📋</span>
+                                    <span>Kontrol Inventaris Penuh</span>
+                                </div>
+                                <div class="permission-item">
+                                    <span class="permission-icon">🔧</span>
+                                    <span>Konfigurasi Sistem</span>
+                                </div>
+                                <div class="permission-item">
+                                    <span class="permission-icon">📈</span>
+                                    <span>Laporan & Reporting Advanced</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-admin-enterprise" onclick="selectRole('admin')">
+                                <span>Masuk sebagai Administrator</span>
+                                <span class="btn-icon">🏢</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- User Card -->
+                    <div class="role-card-enterprise user-card">
+                        <div class="card-header">
+                            <div class="role-icon-large">👤</div>
+                            <div class="role-badge user">Standard User</div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Standard User</h4>
+                            <p>Interface yang intuitif untuk mengelola peminjaman barang, tracking riwayat, dan memberikan feedback untuk meningkatkan sistem.</p>
+                            <div class="permissions-list">
+                                <div class="permission-item">
+                                    <span class="permission-icon">📦</span>
+                                    <span>Browse & Pinjam Barang</span>
+                                </div>
+                                <div class="permission-item">
+                                    <span class="permission-icon">📋</span>
+                                    <span>Riwayat Peminjaman</span>
+                                </div>
+                                <div class="permission-item">
+                                    <span class="permission-icon">💬</span>
+                                    <span>Feedback & Support</span>
+                                </div>
+                                <div class="permission-item">
+                                    <span class="permission-icon">👤</span>
+                                    <span>Manajemen Profil</span>
+                                </div>
+                                <div class="permission-item">
+                                    <span class="permission-icon">📱</span>
+                                    <span>Akses Mobile Friendly</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-user-enterprise" onclick="window.location.href='user-login.html'">
+                                <span>Masuk sebagai User</span>
+                                <span class="btn-icon">🚀</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demo Credentials Section -->
+                <div class="demo-section-enterprise">
+                    <div class="demo-header">
+                        <h3>🔐 Demo Credentials</h3>
+                        <p>Gunakan akun berikut untuk mendemonstrasikan fitur sistem</p>
+                    </div>
+                    <div class="demo-credentials-grid">
+                        <div class="demo-credential-card">
+                            <div class="credential-type admin">Administrator</div>
+                            <div class="credential-details">
+                                <div class="credential-item">
+                                    <span class="label">Email:</span>
+                                    <code>admin@enterprise.com</code>
+                                </div>
+                                <div class="credential-item">
+                                    <span class="label">Password:</span>
+                                    <code>admin2025</code>
+                                </div>
+                            </div>
+                            <button class="btn-copy" onclick="copyCredentials('admin@enterprise.com', 'admin2025')">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <div class="demo-credential-card">
+                            <div class="credential-type user">Standard User</div>
+                            <div class="credential-details">
+                                <div class="credential-item">
+                                    <span class="label">Email:</span>
+                                    <code>user@enterprise.com</code>
+                                </div>
+                                <div class="credential-item">
+                                    <span class="label">Password:</span>
+                                    <code>user2025</code>
+                                </div>
+                            </div>
+                            <button class="btn-copy" onclick="copyCredentials('user@enterprise.com', 'user2025')">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Tentang InvManage Enterprise</h2>
+                    <p>
+                        InvManage Enterprise adalah solusi manajemen inventaris terdepan yang dirancang khusus untuk
+                        bisnis modern. Dengan teknologi terkini dan interface yang intuitif, sistem ini memungkinkan
+                        perusahaan untuk mengelola aset mereka dengan efisien dan akurat.
+                    </p>
+                    <p>
+                        Didukung oleh tim developer berpengalaman dan arsitektur yang scalable, InvManage Enterprise
+                        siap mendukung pertumbuhan bisnis Anda dari startup hingga enterprise-level.
+                    </p>
+                    <div class="about-stats">
+                        <div class="about-stat">
+                            <div class="stat-number">3+</div>
+                            <div class="stat-text">Tahun Pengembangan</div>
+                        </div>
+                        <div class="about-stat">
+                            <div class="stat-number">50+</div>
+                            <div class="stat-text">Fitur Enterprise</div>
+                        </div>
+                        <div class="about-stat">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-text">Responsive Design</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-visual">
+                    <div class="about-image">
+                        <div class="image-overlay"></div>
+                        <div class="floating-elements">
+                            <div class="floating-element el-1">📊</div>
+                            <div class="floating-element el-2">🔒</div>
+                            <div class="floating-element el-3">⚡</div>
+                            <div class="floating-element el-4">📱</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="contact-content">
+                <h2>Hubungi Kami</h2>
+                <p>Butuh bantuan atau memiliki pertanyaan? Tim kami siap membantu Anda.</p>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">📧</div>
+                        <div class="contact-details">
+                            <h4>Email Support</h4>
+                            <p>support@invmanage.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div class="contact-details">
+                            <h4>Phone Support</h4>
+                            <p>+62 21 1234 5678</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">💬</div>
+                        <div class="contact-details">
+                            <h4>Live Chat</h4>
+                            <p>Available 24/7</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="enterprise-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="image.png" alt="InvManage Logo">
+                    <span>InvManage Enterprise</span>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <a href="#features">Features</a>
+                        <a href="#pricing">Pricing</a>
+                        <a href="#security">Security</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="#about">About</a>
+                        <a href="#careers">Careers</a>
+                        <a href="#press">Press</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Support</h4>
+                        <a href="#docs">Documentation</a>
+                        <a href="#help">Help Center</a>
+                        <a href="#contact">Contact</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 InvManage Enterprise. All rights reserved.</p>
+                <div class="footer-team">
+                    <div class="team-member">
+                        <div class="team-role">Software Architect & Developer</div>
+                        <div class="team-name">
+                            <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+                                Alifito Rabbani Cahyono
+                            </a>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <div class="team-role">UI/UX Architect & Developer</div>
+                        <div class="team-name">
+                            <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+                                Satria Febry Andanu
+                            </a>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <div class="team-role">Data Analyst & Engineer</div>
+                        <div class="team-name">
+                            <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+                                Naufal Thafhan
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Enterprise Landing Page Functionality
+
+        // Role selection function
+        function selectRole(role) {
+            if (role === 'admin') {
+                // Redirect to admin login
+                window.location.href = 'admin-login.html';
             }
         }
 
-        // Load peminjaman data
-        async function loadPeminjamanData() {
-            try {
-                document.getElementById('peminjaman-content').innerHTML = '<div class="loading">Loading riwayat peminjaman...</div>';
+        // Check for direct login parameter
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const direct = urlParams.get('direct');
 
-                const data = await fetchAPI('peminjaman');
-                currentData.peminjaman = data;
-
-                displayPeminjamanData(data);
-
-            } catch (error) {
-                document.getElementById('peminjaman-content').innerHTML =
-                    '<div class="error">Error loading peminjaman data. Please check if the backend server is running.</div>';
-            }
-        }
-
-        function displayPeminjamanData(data) {
-            if (data.length === 0) {
-                document.getElementById('peminjaman-content').innerHTML = '<p>No peminjaman records found.</p>';
-                return;
+            if (direct === 'login') {
+                // Show user login form instead of role selection
+                showUserLogin();
             }
 
-            let html = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>User</th>
-                            <th>Barang</th>
-                            <th>Jumlah</th>
-                            <th>Status</th>
-                            <th>Tanggal Pinjam</th>
-                            <th>Tanggal Kembali</th>
-                            <th>Catatan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            data.forEach(item => {
-            const tanggalPinjam = new Date(item.tanggal_pinjam).toLocaleDateString('id-ID');
-            const tanggalKembali = item.tanggal_kembali ? new Date(item.tanggal_kembali).toLocaleDateString('id-ID') : '-';
-
-            html += `
-                <tr>
-                    <td>${item.id}</td>
-                    <td>${item.user_nama || 'Unknown'}</td>
-                    <td>${item.barang_nama || 'Unknown'}</td>
-                    <td>${item.jumlah}</td>
-                    <td><span class="status-badge status-${item.status}">${item.status}</span></td>
-                    <td>${tanggalPinjam}</td>
-                    <td>${tanggalKembali}</td>
-                    <td>${item.catatan || '-'}</td>
-                </tr>
-            `;
+            // Initialize animations
+            initializeAnimations();
         });
 
-            html += '</tbody></table>';
-            document.getElementById('peminjaman-content').innerHTML = html;
+        // Smooth scrolling
+        function scrollToAccess() {
+            document.querySelector('.access-section').scrollIntoView({
+                behavior: 'smooth'
+            });
         }
 
-        // Load feedback data
-        async function loadFeedbackData() {
-            try {
-                document.getElementById('feedback-content').innerHTML = '<div class="loading">Loading feedback data...</div>';
-
-                const data = await fetchAPI('feedback');
-                currentData.feedback = data;
-
-                displayFeedbackData(data);
-
-            } catch (error) {
-                document.getElementById('feedback-content').innerHTML =
-                    '<div class="error">Error loading feedback data. Please check if the backend server is running.</div>';
-            }
+        function scrollToFeatures() {
+            document.querySelector('.features-section').scrollIntoView({
+                behavior: 'smooth'
+            });
         }
 
-        function displayFeedbackData(data) {
-            if (data.length === 0) {
-                document.getElementById('feedback-content').innerHTML = '<p>No feedback records found.</p>';
-                return;
-            }
+        // Copy credentials functionality
+        function copyCredentials(email, password) {
+            const text = `Email: ${email}\nPassword: ${password}`;
+            navigator.clipboard.writeText(text).then(() => {
+                // Show success feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = 'rgba(16, 185, 129, 0.3)';
+                btn.style.borderColor = 'rgba(16, 185, 129, 0.5)';
 
-            let html = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>User</th>
-                            <th>Pesan</th>
-                            <th>Tanggal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                }, 2000);
+            }).catch(() => {
+                alert('Failed to copy credentials');
+            });
+        }
 
-            data.forEach(item => {
-                const tanggal = new Date(item.tanggal).toLocaleDateString('id-ID');
+        // Initialize animations
+        function initializeAnimations() {
+            // Intersection Observer for scroll animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
 
-                html += `
-                    <tr>
-                        <td>${item.id}</td>
-                        <td>${item.user_nama || 'Anonymous'}</td>
-                        <td>${item.pesan}</td>
-                        <td>${tanggal}</td>
-                    </tr>
-                `;
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all sections
+            document.querySelectorAll('.features-section, .stats-section, .access-section, .about-section, .contact-section').forEach(section => {
+                observer.observe(section);
             });
 
-            html += '</tbody></table>';
-            document.getElementById('feedback-content').innerHTML = html;
+            // Add loading class removal after animations
+            setTimeout(() => {
+                document.body.classList.add('loaded');
+            }, 1000);
         }
 
-        // Load transaksi data
-        async function loadTransaksiData() {
-            try {
-                document.getElementById('transaksi-content').innerHTML = '<div class="loading">Loading riwayat transaksi...</div>';
+        // User login functionality (for direct login)
+        function showUserLogin() {
+            // Hide landing page content
+            document.querySelector('.hero-section').style.display = 'none';
+            document.querySelector('.features-section').style.display = 'none';
+            document.querySelector('.stats-section').style.display = 'none';
+            document.querySelector('.about-section').style.display = 'none';
+            document.querySelector('.contact-section').style.display = 'none';
 
-                const data = await fetchAPI('transaksi');
-                currentData.transaksi = data;
+            // Create user tabs and forms
+            const userPortalHTML = `
+                <!-- Enhanced Tabs -->
+                <div class="tabs">
+                    <button class="tab active" id="userTabLogin">
+                        <span class="tab-text">User Login</span>
+                    </button>
+                    <button class="tab inactive" id="userTabRegister">
+                        <span class="tab-text">User Register</span>
+                    </button>
+                </div>
 
-                displayTransaksiData(data);
+                <!-- User Login Form -->
+                <div id="userLoginForm" class="form-container">
+                    <div class="form-header">
+                        <h3>Standard User Login</h3>
+                        <p>Access your user account for inventory operations</p>
+                    </div>
 
-            } catch (error) {
-                document.getElementById('transaksi-content').innerHTML =
-                    '<div class="error">Error loading transaksi data. Please check if the backend server is running.</div>';
-            }
-        }
+                    <div class="input-group">
+                        <label>Username or Email Address</label>
+                        <input type="text" id="userLoginInputDirect" placeholder="Enter your username or email">
+                        <div class="input-underline"></div>
+                    </div>
 
-        function displayTransaksiData(data) {
-            if (data.length === 0) {
-                document.getElementById('transaksi-content').innerHTML = '<p>No transaksi records found.</p>';
-                return;
-            }
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="userLoginPasswordDirect" placeholder="Enter your password">
+                        <div class="input-underline"></div>
+                    </div>
 
-            let html = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Barang</th>
-                            <th>User</th>
-                            <th>Jumlah</th>
-                            <th>Tipe</th>
-                            <th>Catatan</th>
-                            <th>Tanggal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="userRememberMe">
+                            <span class="checkmark"></span>
+                            Remember my login
+                        </label>
+                        <a href="#" class="forgot-password">Forgot password?</a>
+                    </div>
+
+                    <button class="primary" onclick="doUserLoginDirect()">
+                        <span class="btn-content">
+                            <span class="btn-text">Access User Portal</span>
+                        </span>
+                    </button>
+
+                    <div class="form-footer">
+                        <p>Need administrator access? <a href="admin-login.html">Administrator Login</a></p>
+                    </div>
+                </div>
+
+                <!-- User Register Form -->
+                <div id="userRegisterForm" class="form-container" style="display:none;">
+                    <div class="form-header">
+                        <h3>Register Standard User</h3>
+                        <p>Create your user account for system access</p>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" id="userRegisterUsername" placeholder="Choose unique username">
+                        <div class="input-underline"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="userRegisterEmail" placeholder="Enter your email @gmail.com">
+                        <div class="input-underline"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="userRegisterPassword" placeholder="Create strong password">
+                        <div class="input-underline"></div>
+                    </div>
+
+                    <div class="terms-agreement">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="userAgreeTerms" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="admin-terms.html" target="_blank" class="terms-link">Terms & Conditions</a> for users
+                        </label>
+                    </div>
+
+                    <button class="primary" onclick="doUserRegisterDirect()">
+                        <span class="btn-content">
+                            <span class="btn-text">Create User Account</span>
+                        </span>
+                    </button>
+
+                    <div class="form-footer">
+                        <p>Already have an account? <a href="#" onclick="switchToUserLoginDirect()">Login here</a></p>
+                    </div>
+                </div>
             `;
 
-            data.forEach(item => {
-                const tanggal = new Date(item.created_at || item.tanggal).toLocaleDateString('id-ID');
+            // Create container for login forms and add to body
+            const loginContainer = document.createElement('div');
+            loginContainer.className = 'center-box';
+            loginContainer.innerHTML = userPortalHTML;
+            document.body.appendChild(loginContainer);
 
-                html += `
-                    <tr>
-                        <td>${item.id}</td>
-                        <td>${item.barang_nama || 'Unknown'}</td>
-                        <td>${item.user_nama || 'System'}</td>
-                        <td>${item.jumlah}</td>
-                        <td><span class="status-badge status-${item.tipe}">${item.tipe}</span></td>
-                        <td>${item.catatan || '-'}</td>
-                        <td>${tanggal}</td>
-                    </tr>
+            // Update header for user portal (only if elements exist)
+            const headerTitle = document.querySelector('.header-content h2');
+            const subtitle = document.querySelector('.subtitle');
+            const featureBadges = document.querySelector('.feature-badges');
+
+            if (headerTitle) headerTitle.innerHTML = '<span class="title-gradient">InvManage</span><span class="title-accent">User</span>';
+            if (subtitle) subtitle.textContent = 'Standard User Access Portal';
+            if (featureBadges) {
+                featureBadges.innerHTML = `
+                    <span class="badge">User Access</span>
+                    <span class="badge">Borrow Items</span>
+                    <span class="badge">Track History</span>
                 `;
-            });
-
-            html += '</tbody></table>';
-            document.getElementById('transaksi-content').innerHTML = html;
-        }
-
-        // Load users data
-        async function loadUsersData() {
-            try {
-                document.getElementById('users-content').innerHTML = '<div class="loading">Loading users data...</div>';
-
-                const data = await fetchAPI('users');
-                currentData.users = data;
-
-                displayUsersData(data);
-
-            } catch (error) {
-                document.getElementById('users-content').innerHTML =
-                    '<div class="error">Error loading users data. Please check if the backend server is running.</div>';
             }
+
+            // Setup tab switching
+            setupUserTabsDirect();
         }
 
-        function displayUsersData(data) {
-            if (data.length === 0) {
-                document.getElementById('users-content').innerHTML = '<p>No users found.</p>';
+        // User login function for direct login
+        async function doUserLoginDirect() {
+            const identifier = document.getElementById('userLoginInputDirect')?.value?.trim();
+            const password = document.getElementById('userLoginPasswordDirect')?.value;
+            const loginBtn = document.querySelector('.login-form button.btn-primary');
+
+            if (!identifier || !password) {
+                showNotification('Username/email and password are required', 'warning');
                 return;
             }
 
-            let html = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nama</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Departemen</th>
-                            <th>Phone</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            data.forEach(item => {
-                html += `
-                    <tr>
-                        <td>${item.id}</td>
-                        <td>${item.nama}</td>
-                        <td>${item.email}</td>
-                        <td><span class="status-badge" style="background: ${item.role === 'admin' ? '#dc3545' : '#28a745'}; color: white;">${item.role}</span></td>
-                        <td>${item.departemen || '-'}</td>
-                        <td>${item.phone || '-'}</td>
-                    </tr>
+            // Show loading state
+            if (loginBtn) {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = `
+                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                        <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: enterpriseSpin 1s linear infinite;"></div>
+                        Authenticating...
+                    </span>
                 `;
-            });
+            }
 
-            html += '</tbody></table>';
-            document.getElementById('users-content').innerHTML = html;
-        }
-
-        // Load barang data
-        async function loadBarangData() {
             try {
-                document.getElementById('barang-content').innerHTML = '<div class="loading">Loading barang data...</div>';
+                const res = await fetch(`${API_BASE}/login/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nama: identifier, password }),
+                });
 
-                const data = await fetchAPI('barang');
-                currentData.barang = data;
+                if (!res.ok) {
+                    if (loginBtn) {
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = `
+                            <span>Access User Portal</span>
+                        `;
+                    }
 
-                displayBarangData(data);
-
-            } catch (error) {
-                document.getElementById('barang-content').innerHTML =
-                    '<div class="error">Error loading barang data. Please check if the backend server is running.</div>';
-            }
-        }
-
-        function displayBarangData(data) {
-            if (data.length === 0) {
-                document.getElementById('barang-content').innerHTML = '<p>No barang found.</p>';
-                return;
-            }
-
-            let html = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nama</th>
-                            <th>Stok</th>
-                            <th>Harga</th>
-                            <th>Minimum</th>
-                            <th>Status Stok</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            data.forEach(item => {
-                let statusClass = 'status-dikembalikan'; // available
-                let statusText = 'Tersedia';
-
-                if (item.is_out_of_stock) {
-                    statusClass = 'status-keluar'; // out of stock
-                    statusText = 'Habis';
-                } else if (item.is_low_stock) {
-                    statusClass = 'status-dipinjam'; // low stock
-                    statusText = 'Stok Rendah';
+                    if (res.status === 400) {
+                        const errorData = await res.json();
+                        showNotification(errorData.error || 'Invalid username/email or password', 'error');
+                        return;
+                    } else if (res.status >= 500) {
+                        showNotification('Server is experiencing issues. Please try again later.', 'error');
+                        return;
+                    } else {
+                        showNotification('Failed to connect to server', 'error');
+                        return;
+                    }
                 }
 
-                html += `
-                    <tr>
-                        <td>${item.id}</td>
-                        <td>${item.nama}</td>
-                        <td>${item.stok}</td>
-                        <td>Rp ${item.harga?.toLocaleString('id-ID') || '0'}</td>
-                        <td>${item.minimum}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    </tr>
+                const data = await res.json();
+
+                if (data.success) {
+                    // Check if user has user role
+                    if (data.user.role !== 'user') {
+                        showNotification('This account is not a standard user account. Please use administrator login.', 'error');
+                        return;
+                    }
+
+                    // Set user access level
+                    const userWithAccess = { ...data.user, accessLevel: 'user' };
+                    setCurrentUser(userWithAccess);
+                    showNotification('Login successful! Redirecting to User Dashboard...', 'success');
+
+                    // Smooth transition before redirect
+                    setTimeout(() => {
+                        window.location.href = 'user-dashboard.html';
+                    }, 1000);
+                } else {
+                    if (loginBtn) {
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = `
+                            <span>Access User Portal</span>
+                        `;
+                    }
+                    showNotification(data.error || 'Login failed', 'error');
+                }
+            } catch (err) {
+                if (loginBtn) {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = `
+                        <span>Access User Portal</span>
+                    `;
+                }
+                console.error('User Login Error:', err);
+                showNotification('Failed to connect to server', 'error');
+            }
+        }
+
+        // Global switch functions for user tabs
+        let userLoginTab, userRegisterTab, userLoginForm, userRegisterForm;
+
+        function switchToUserLoginDirect() {
+            if (!userLoginTab || !userRegisterTab || !userLoginForm || !userRegisterForm) return;
+
+            userLoginTab.classList.add('active');
+            userLoginTab.classList.remove('inactive');
+            userRegisterTab.classList.remove('active');
+            userRegisterTab.classList.add('inactive');
+
+            // Smooth transition
+            userLoginForm.style.opacity = "0";
+            userRegisterForm.style.opacity = "0";
+
+            setTimeout(() => {
+                userLoginForm.style.display = "block";
+                userRegisterForm.style.display = "none";
+
+                setTimeout(() => {
+                    userLoginForm.style.opacity = "1";
+                }, 50);
+            }, 150);
+        }
+
+        function switchToUserRegisterDirect() {
+            if (!userLoginTab || !userRegisterTab || !userLoginForm || !userRegisterForm) return;
+
+            userRegisterTab.classList.add('active');
+            userRegisterTab.classList.remove('inactive');
+            userLoginTab.classList.remove('active');
+            userLoginTab.classList.add('inactive');
+
+            // Smooth transition
+            userLoginForm.style.opacity = "0";
+            userRegisterForm.style.opacity = "0";
+
+            setTimeout(() => {
+                userLoginForm.style.display = "none";
+                userRegisterForm.style.display = "block";
+
+                setTimeout(() => {
+                    userRegisterForm.style.opacity = "1";
+                }, 50);
+            }, 150);
+        }
+
+        // Setup user tab switching for direct login
+        function setupUserTabsDirect() {
+            userLoginTab = document.getElementById('userTabLogin');
+            userRegisterTab = document.getElementById('userTabRegister');
+            userLoginForm = document.getElementById('userLoginForm');
+            userRegisterForm = document.getElementById('userRegisterForm');
+
+            if (userLoginTab) userLoginTab.onclick = switchToUserLoginDirect;
+            if (userRegisterTab) userRegisterTab.onclick = switchToUserRegisterDirect;
+        }
+
+        // Navigate to admin login
+        function goToAdminLogin() {
+            window.location.href = "admin-login.html";
+        }
+
+        // User register function for direct login
+        async function doUserRegisterDirect() {
+            const nama = document.getElementById('userRegisterUsernameDirect')?.value?.trim();
+            const email = document.getElementById('userRegisterEmailDirect')?.value?.trim();
+            const password = document.getElementById('userRegisterPasswordDirect')?.value;
+            const registerBtn = document.getElementById('userRegisterFormDirect')?.querySelector('button.primary');
+
+            if (!nama || !email || !password) {
+                showNotification('Username, email, and password are required', 'warning');
+                return;
+            }
+
+            if (!email.includes('@gmail')) {
+                showNotification('Email must use @gmail.com domain', 'warning');
+                return;
+            }
+
+            // Show loading state
+            if (registerBtn) {
+                registerBtn.disabled = true;
+                registerBtn.innerHTML = `
+                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                        <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: enterpriseSpin 1s linear infinite;"></div>
+                        Creating Account...
+                    </span>
                 `;
-            });
+            }
 
-            html += '</tbody></table>';
-            document.getElementById('barang-content').innerHTML = html;
-        }
+            try {
+                const res = await fetch(`${API_BASE}/register/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nama, email, password }),
+                });
 
-        // Filter functions
-        function filterPeminjaman() {
-            const searchTerm = document.getElementById('peminjaman-search').value.toLowerCase();
-            const statusFilter = document.getElementById('peminjaman-status-filter').value;
+                if (!res.ok) {
+                    if (registerBtn) {
+                        registerBtn.disabled = false;
+                        registerBtn.innerHTML = `
+                            <span class="btn-content">
+                                <span class="btn-text">Create User Account</span>
+                            </span>
+                        `;
+                    }
 
-            let filtered = currentData.peminjaman.filter(item => {
-                const matchesSearch = item.user_nama?.toLowerCase().includes(searchTerm) ||
-                                    item.barang_nama?.toLowerCase().includes(searchTerm);
-                const matchesStatus = !statusFilter || item.status === statusFilter;
-                return matchesSearch && matchesStatus;
-            });
-
-            displayPeminjamanData(filtered);
-        }
-
-        function filterFeedback() {
-            const searchTerm = document.getElementById('feedback-search').value.toLowerCase();
-            const sortOrder = document.getElementById('feedback-sort').value;
-
-            let filtered = currentData.feedback.filter(item => {
-                return item.user_nama?.toLowerCase().includes(searchTerm) ||
-                       item.pesan?.toLowerCase().includes(searchTerm);
-            });
-
-            // Sort by date
-            filtered.sort((a, b) => {
-                const dateA = new Date(a.tanggal);
-                const dateB = new Date(b.tanggal);
-                return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
-            });
-
-            displayFeedbackData(filtered);
-        }
-
-        function filterTransaksi() {
-            const searchTerm = document.getElementById('transaksi-search').value.toLowerCase();
-            const typeFilter = document.getElementById('transaksi-type-filter').value;
-
-            let filtered = currentData.transaksi.filter(item => {
-                const matchesSearch = item.barang_nama?.toLowerCase().includes(searchTerm);
-                const matchesType = !typeFilter || item.tipe === typeFilter;
-                return matchesSearch && matchesType;
-            });
-
-            displayTransaksiData(filtered);
-        }
-
-        function filterUsers() {
-            const searchTerm = document.getElementById('users-search').value.toLowerCase();
-            const roleFilter = document.getElementById('users-role-filter').value;
-            const deptFilter = document.getElementById('users-dept-filter').value;
-
-            let filtered = currentData.users.filter(item => {
-                const matchesSearch = item.nama?.toLowerCase().includes(searchTerm) ||
-                                    item.email?.toLowerCase().includes(searchTerm);
-                const matchesRole = !roleFilter || item.role === roleFilter;
-                const matchesDept = !deptFilter || item.departemen === deptFilter;
-                return matchesSearch && matchesRole && matchesDept;
-            });
-
-            displayUsersData(filtered);
-        }
-
-        function filterBarang() {
-            const searchTerm = document.getElementById('barang-search').value.toLowerCase();
-            const stockFilter = document.getElementById('barang-stock-filter').value;
-
-            let filtered = currentData.barang.filter(item => {
-                const matchesSearch = item.nama?.toLowerCase().includes(searchTerm);
-                let matchesStock = true;
-
-                if (stockFilter) {
-                    if (stockFilter === 'available') matchesStock = !item.is_out_of_stock && !item.is_low_stock;
-                    else if (stockFilter === 'low') matchesStock = item.is_low_stock;
-                    else if (stockFilter === 'out') matchesStock = item.is_out_of_stock;
+                    if (res.status === 400) {
+                        const errorData = await res.json();
+                        showNotification(errorData.error || 'Registration data is invalid', 'error');
+                        return;
+                    } else if (res.status >= 500) {
+                        showNotification('Server is experiencing issues. Please try again later.', 'error');
+                        return;
+                    } else {
+                        showNotification('Failed to connect to server', 'error');
+                        return;
+                    }
                 }
 
-                return matchesSearch && matchesStock;
-            });
+                const data = await res.json();
 
-            displayBarangData(filtered);
+                if (data.success) {
+                    if (registerBtn) {
+                        registerBtn.disabled = false;
+                        registerBtn.innerHTML = `
+                            <span class="btn-content">
+                                <span class="btn-text">Create User Account</span>
+                            </span>
+                        `;
+                    }
+                    showNotification('Registration successful! Redirecting to login...', 'success');
+
+                    // Smooth transition to login tab
+                    setTimeout(() => {
+                        if (document.getElementById('userTabLoginDirect')) document.getElementById('userTabLoginDirect').click();
+                    }, 1500);
+                } else {
+                    if (registerBtn) {
+                        registerBtn.disabled = false;
+                        registerBtn.innerHTML = `
+                            <span class="btn-content">
+                                <span class="btn-text">Create User Account</span>
+                            </span>
+                        `;
+                    }
+                    showNotification(data.error || 'Registration failed', 'error');
+                }
+            } catch (err) {
+                if (registerBtn) {
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = `
+                        <span class="btn-content">
+                            <span class="btn-text">Create User Account</span>
+                        </span>
+                    `;
+                }
+                console.error('User Register Error:', err);
+                showNotification('Failed to connect to server', 'error');
+            }
         }
 
-        // Initialize
+        // Password reset functions for user
+        function openUserResetModal() {
+            const modal = document.getElementById("userResetPasswordModal");
+            modal.style.display = "flex";
+            modal.style.alignItems = "center";
+            modal.style.justifyContent = "center";
+
+            // Focus on email input
+            setTimeout(() => {
+                document.getElementById("userResetEmail").focus();
+            }, 100);
+        }
+
+        function closeUserResetModal() {
+            const modal = document.getElementById("userResetPasswordModal");
+            modal.style.display = "none";
+            document.getElementById("userResetEmail").value = "";
+        }
+
+        function closeUserResetSuccessModal() {
+            const modal = document.getElementById("userResetSuccessModal");
+            modal.style.display = "none";
+        }
+
+        function sendUserResetEmail() {
+            const email = document.getElementById("userResetEmail").value.trim();
+
+            if (!email) {
+                showNotification("Please enter your email address", "error");
+                return;
+            }
+
+            if (!email.includes("@gmail.com")) {
+                showNotification("Email must use @gmail.com domain", "error");
+                return;
+            }
+
+            // Simulate sending reset email
+            const resetBtn = event.target;
+            const originalText = resetBtn.textContent;
+            resetBtn.textContent = "Sending...";
+            resetBtn.disabled = true;
+
+            setTimeout(() => {
+                // Close reset modal
+                closeUserResetModal();
+
+                // Show success modal
+                const successModal = document.getElementById("userResetSuccessModal");
+                successModal.style.display = "flex";
+                successModal.style.alignItems = "center";
+                successModal.style.justifyContent = "center";
+
+                // Reset button
+                resetBtn.textContent = originalText;
+                resetBtn.disabled = false;
+
+                showNotification("Password reset link has been sent to your email", "success");
+            }, 2000);
+        }
+
+        // Google Sign-In initialization for user
+        function initializeUserGoogleSignIn() {
+            // Check if Google SDK is loaded
+            if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+                console.warn('Google Identity Services SDK not loaded yet, retrying...');
+                setTimeout(initializeUserGoogleSignIn, 1000);
+                return;
+            }
+
+            const clientId = 'YOUR_GOOGLE_CLIENT_ID_HERE'; // Replace with your actual Google Client ID
+
+            if (clientId === 'YOUR_GOOGLE_CLIENT_ID_HERE') {
+                // Show placeholder buttons with click handler for setup reminder
+                const googleBtns = document.querySelectorAll(".google-btn");
+                googleBtns.forEach(btn => {
+                    btn.innerHTML = '<span class="social-icon">🌐</span> Setup Google OAuth (User)';
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        showNotification("Google Client ID not configured. Please setup OAuth in Google Cloud Console first.", "warning");
+                    };
+                });
+                return;
+            }
+
+            try {
+                google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: handleUserGoogleSignIn,
+                    context: 'signin'
+                });
+
+                // Render Google Sign-In buttons for both login and register forms
+                const googleBtns = document.querySelectorAll(".google-btn");
+                googleBtns.forEach((btn, index) => {
+                    // Clear existing content
+                    btn.innerHTML = '';
+
+                    const buttonText = index === 0 ? 'continue_with' : 'signup_with';
+                    google.accounts.id.renderButton(btn, {
+                        theme: 'outline',
+                        size: 'large',
+                        text: buttonText,
+                        shape: 'rectangular',
+                        logo_alignment: 'left',
+                        width: '100%'
+                    });
+                });
+
+                console.log('Google Sign-In initialized successfully for user');
+            } catch (error) {
+                console.error('Failed to initialize Google Sign-In:', error);
+                // Fallback to manual button
+                const googleBtns = document.querySelectorAll(".google-btn");
+                googleBtns.forEach(btn => {
+                    btn.innerHTML = '<span class="social-icon">🌐</span> Google Login (Error)';
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        showNotification("Failed to load Google Sign-In. Check internet connection.", "error");
+                    };
+                });
+            }
+        }
+
+        // Handle Google Sign-In response for user
+        async function handleUserGoogleSignIn(response) {
+            if (!response.credential) {
+                showNotification("Failed to get credential from Google", "error");
+                return;
+            }
+
+            showLoading("Processing Google login...");
+
+            try {
+                // Send Google ID token to backend for user
+                const res = await fetch(`${API_BASE}/auth/google/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id_token: response.credential,
+                        role: 'user'
+                    }),
+                });
+
+                hideLoading();
+
+                if (!res.ok) {
+                    if (res.status === 400) {
+                        const errorData = await res.json();
+                        showNotification(errorData.error || "Google login failed", "error");
+                    } else if (res.status === 404) {
+                        showNotification("Google authentication endpoint not available in backend", "warning");
+                    } else {
+                        showNotification("Failed to connect to server", "error");
+                    }
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (data.success) {
+                    // Check if user has user role
+                    if (data.user.role !== 'user') {
+                        showNotification("This Google account is not a standard user account. Please use administrator login.", "error");
+                        return;
+                    }
+
+                    setCurrentUser(data.user);
+                    showNotification("Google login successful! Redirecting...", "success");
+
+                    // Smooth transition before redirect
+                    setTimeout(() => {
+                        window.location.href = "user-dashboard.html";
+                    }, 1000);
+                } else {
+                    showNotification(data.error || "Google login failed", "error");
+                }
+            } catch (err) {
+                hideLoading();
+                console.error('Google User Login Error:', err);
+                showNotification("Failed to connect to server", "error");
+            }
+        }
+
+        // Enhanced form validation for user register
         document.addEventListener('DOMContentLoaded', function() {
-            loadDashboardData();
+            // Email validation for user register
+            const userRegisterEmail = document.getElementById('userRegisterEmailDirect');
+            if (userRegisterEmail) {
+                userRegisterEmail.addEventListener('blur', function(e) {
+                    const email = e.target.value;
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    const isValid = email === '' || (emailRegex.test(email) && email.includes('@gmail.com'));
+
+                    e.target.classList.toggle('valid', isValid && email.length > 0);
+                    e.target.classList.toggle('invalid', !isValid && email.length > 0);
+                });
+            }
+
+            // Password validation for user register
+            const userRegisterPassword = document.getElementById('userRegisterPasswordDirect');
+            if (userRegisterPassword) {
+                userRegisterPassword.addEventListener('blur', function(e) {
+                    const password = e.target.value;
+                    const isValid = password === '' || password.length >= 4;
+
+                    e.target.classList.toggle('valid', isValid && password.length > 0);
+                    e.target.classList.toggle('invalid', !isValid && password.length > 0);
+                });
+            }
+
+            // Username validation for user register
+            const userRegisterUsername = document.getElementById('userRegisterUsernameDirect');
+            if (userRegisterUsername) {
+                userRegisterUsername.addEventListener('blur', function(e) {
+                    const username = e.target.value;
+                    const isValid = username === '' || username.length >= 3;
+
+                    e.target.classList.toggle('valid', isValid && username.length > 0);
+                    e.target.classList.toggle('invalid', !isValid && username.length > 0);
+                });
+            }
+
+            // Terms agreement validation for user register
+            const userAgreeTerms = document.getElementById('userAgreeTermsDirect');
+            if (userAgreeTerms) {
+                userAgreeTerms.addEventListener('change', function(e) {
+                    const registerBtn = document.getElementById('userRegisterFormDirect')?.querySelector('button.primary');
+                    if (registerBtn) {
+                        registerBtn.disabled = !e.target.checked;
+                        registerBtn.style.opacity = e.target.checked ? '1' : '0.6';
+                    }
+                });
+            }
+
+            // Remember me functionality
+            const userRememberMe = document.getElementById('userRememberMeDirect');
+            if (userRememberMe) {
+                userRememberMe.addEventListener('change', function(e) {
+                    if (e.target.checked) {
+                        showNotification("Remember me feature will save your login", "success", 3000);
+                    }
+                });
+            }
+        });
+
+        // Enter key support for user forms
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const userLoginInput = document.getElementById('userLoginInputDirect');
+                const userLoginPassword = document.getElementById('userLoginPasswordDirect');
+                const userRegisterUsername = document.getElementById('userRegisterUsernameDirect');
+                const userRegisterEmail = document.getElementById('userRegisterEmailDirect');
+                const userRegisterPassword = document.getElementById('userRegisterPasswordDirect');
+
+                // Login form navigation
+                if (userLoginInput && userLoginPassword && document.getElementById('userLoginForm') && document.getElementById('userLoginForm').style.display !== 'none') {
+                    if (document.activeElement === userLoginPassword) {
+                        doUserLoginDirect();
+                    } else if (document.activeElement === userLoginInput) {
+                        userLoginPassword.focus();
+                    }
+                }
+
+                // Register form navigation
+                if (userRegisterUsername && userRegisterEmail && userRegisterPassword && document.getElementById('userRegisterFormDirect') && document.getElementById('userRegisterFormDirect').style.display !== 'none') {
+                    if (document.activeElement === userRegisterPassword) {
+                        doUserRegisterDirect();
+                    } else if (document.activeElement === userRegisterUsername) {
+                        userRegisterEmail.focus();
+                    } else if (document.activeElement === userRegisterEmail) {
+                        userRegisterPassword.focus();
+                    }
+                }
+            }
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            const userResetModal = document.getElementById('userResetPasswordModal');
+            const userResetSuccessModal = document.getElementById('userResetSuccessModal');
+
+            if (userResetModal && e.target.id === 'userResetPasswordModal') {
+                closeUserResetModal();
+            }
+            if (userResetSuccessModal && e.target.id === 'userResetSuccessModal') {
+                closeUserResetSuccessModal();
+            }
+        });
+
+        // Enter key support for reset email
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const userResetEmail = document.getElementById('userResetEmail');
+                if (userResetEmail && document.activeElement === userResetEmail) {
+                    sendUserResetEmail();
+                }
+            }
         });
     </script>
+
+    <script src="app.js?v=20251226"></script>
 </body>
 </html>

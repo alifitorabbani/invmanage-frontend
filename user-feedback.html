@@ -33,11 +33,23 @@
 
         <div id="feedbackForm" style="margin-bottom:40px; padding: 24px; background: var(--gray-800); border-radius: 12px; border: 1px solid var(--gray-600);">
           <div class="input-group">
-            <label>Feedback Anda</label>
-            <textarea id="feedbackPesan" rows="4" style="width:100%; padding:16px 20px; border-radius:12px; border:2px solid var(--gray-600); background: var(--gray-700); color: var(--gray-100); font-size:16px; resize: vertical;" placeholder="Tulis feedback di sini..."></textarea>
+            <label>Feedback Anda <span style="color: var(--error);">*</span></label>
+            <textarea id="feedbackPesan" rows="4" style="width:100%; padding:16px 20px; border-radius:12px; border:2px solid var(--gray-600); background: var(--gray-700); color: var(--gray-100); font-size:16px; resize: vertical;" placeholder="Tulis feedback, saran, atau laporan masalah di sini..."></textarea>
+            <small style="color: var(--gray-400); display: block; margin-top: 4px;">Minimal 10 karakter, maksimal 1000 karakter</small>
           </div>
 
-          <button class="primary" style="width:auto; margin-top: 16px;" onclick="tambahFeedback()">Kirim Feedback</button>
+          <div class="input-group" style="margin-top: 16px;">
+            <label>Kategori Feedback</label>
+            <select id="feedbackKategori" style="width:100%; padding:12px 16px; border-radius:8px; border:2px solid var(--gray-600); background: var(--gray-700); color: var(--gray-100); font-size:16px;">
+              <option value="">Pilih Kategori (Opsional)</option>
+              <option value="bug">🐛 Laporan Bug</option>
+              <option value="feature">✨ Saran Fitur</option>
+              <option value="improvement">🔧 Perbaikan Sistem</option>
+              <option value="other">💬 Lainnya</option>
+            </select>
+          </div>
+
+          <button class="primary" style="width:auto; margin-top: 16px;" onclick="tambahFeedback()" id="submitFeedbackBtn">Kirim Feedback</button>
         </div>
 
         <h3 style="margin-top:30px; font-size: 20px; font-weight: 600; color: var(--gray-100);">Feedback Saya</h3>
@@ -88,13 +100,139 @@
   </footer>
 
   <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=20251226"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
       // if (!checkAuth('user')) return;
       loadFeedbackUser();
     });
+
+    // Temporary fix for loadFeedbackUser function
+    async function loadFeedbackUser() {
+      console.log("🔄 loadFeedbackUser called from HTML");
+      const tableBody = document.querySelector("#tabelFeedbackUser tbody");
+      if (!tableBody) {
+        console.warn('User feedback table body not found');
+        return;
+      }
+
+      const currentUser = getCurrentUser();
+
+      // Display sample feedback immediately from centralized data
+      console.log('📊 Displaying sample user feedback immediately');
+      tableBody.innerHTML = "";
+      window.sampleUserFeedback.forEach((f) => {
+        const tanggal = f.tanggal ? new Date(f.tanggal).toLocaleString("id-ID") : "-";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${f.pesan}</td>
+          <td>${tanggal}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+      console.log('✅ Sample user feedback displayed');
+
+      // Try to load real user feedback in background
+      if (currentUser) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+          const res = await fetch(`${API_BASE}/feedback/`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            mode: 'cors',
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const data = await res.json();
+            console.log('User feedback API response:', data);
+
+            if (Array.isArray(data) && data.length > 0) {
+              // Filter hanya feedback milik user ini
+              const userFeedback = data.filter(f => f.user === currentUser.id);
+
+              if (userFeedback.length > 0) {
+                console.log('Real user feedback loaded, replacing sample data:', userFeedback.length, 'records');
+                tableBody.innerHTML = "";
+                userFeedback.forEach((f) => {
+                  const tanggal = f.tanggal ? new Date(f.tanggal).toLocaleString("id-ID") : "-";
+
+                  const tr = document.createElement("tr");
+                  tr.innerHTML = `
+                    <td>${f.pesan}</td>
+                    <td>${tanggal}</td>
+                  `;
+                  tableBody.appendChild(tr);
+                });
+              } else {
+                console.log('No user feedback found, keeping sample data');
+              }
+            } else {
+              console.log('API returned empty feedback data, keeping sample data');
+            }
+          } else {
+            console.warn('User feedback API request failed:', res.status, res.statusText);
+          }
+        } catch (err) {
+          console.log('Could not load real user feedback, keeping sample data:', err.message);
+        }
+      } else {
+        console.log('No current user found, showing sample feedback');
+      }
+    }
+
+    // Temporary fix for tambahFeedback function
+    async function tambahFeedback() {
+      console.log("🔄 tambahFeedback called from HTML");
+      const pesan = $("#feedbackPesan")?.value;
+      const currentUser = getCurrentUser();
+
+      if (!pesan) {
+        showNotification("Pesan feedback wajib diisi", "warning");
+        return;
+      }
+
+      if (!currentUser) {
+        showNotification("Silakan login terlebih dahulu", "error");
+        return;
+      }
+
+      const payload = { user: currentUser.id, pesan };
+
+      try {
+        showLoading("Mengirim feedback...");
+        const res = await fetch(`${API_BASE}/feedback/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) throw new Error("Gagal mengirim feedback");
+
+        if ($("#feedbackPesan")) $("#feedbackPesan").value = "";
+
+        // Reload feedback user jika ada
+        if ($("#tabelFeedbackUser")) {
+          await loadFeedbackUser();
+        }
+
+        hideLoading();
+        showNotification("Feedback berhasil dikirim!", "success");
+      } catch (err) {
+        console.error(err);
+        hideLoading();
+        showNotification("Gagal mengirim feedback", "error");
+      }
+    }
   </script>
 </body>
 </html>

@@ -23,6 +23,19 @@
 
     <!-- Main content -->
     <div class="main-content">
+      <!-- Manual Input Section at Top -->
+      <div class="manual-input-section" style="background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--gray-600);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h3 style="color: var(--gray-100); margin: 0; font-size: 18px;">Input Peminjaman Manual</h3>
+            <p style="color: var(--gray-400); margin: 4px 0 0 0; font-size: 14px;">Tambahkan peminjaman secara manual tanpa harus memilih dari daftar barang</p>
+          </div>
+          <button class="add-btn" onclick="openManualPeminjamanModal()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid #10b981; padding: 12px 20px;">
+            <i class="fas fa-plus"></i> Input Manual
+          </button>
+        </div>
+      </div>
+
       <div class="card-container">
         <div class="card">
           <h3>Sedang Dipinjam</h3>
@@ -62,6 +75,38 @@
     </div>
   </div>
 
+  <!-- Modal Input Peminjaman Manual -->
+  <div id="modalManualPeminjaman" class="modal-bg" style="display: none;">
+    <div class="modal">
+      <h3>Input Peminjaman Manual</h3>
+      <p>Masukkan detail peminjaman secara manual</p>
+
+      <div class="input-group">
+        <label>Pilih Barang</label>
+        <select id="barang-select" style="width: 100%; padding: 12px; border: 1px solid var(--gray-600); border-radius: 8px; background: var(--gray-800); color: var(--gray-100);">
+          <option value="">Loading barang...</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Jumlah</label>
+        <input type="number" id="manualJumlah" placeholder="Masukkan jumlah" min="1">
+        <div class="input-underline"></div>
+      </div>
+
+      <div class="input-group">
+        <label>Catatan (Opsional)</label>
+        <textarea id="manualCatatan" placeholder="Tambahkan catatan jika diperlukan" rows="3"></textarea>
+        <div class="input-underline"></div>
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn-red" onclick="closeManualPeminjamanModal()">Batal</button>
+        <button class="btn-green" onclick="submitManualPeminjaman()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Copyright Footer -->
   <footer class="copyright-footer">
     <p>&copy; 2025 InvManage. All rights reserved.</p>
@@ -93,13 +138,448 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20251226"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    let barangList = []; // Global variable to store barang data
+    let barangRetryCount = 0; // Track retry attempts
+    let peminjamanRetryCount = 0; // Track retry attempts
+
+    document.addEventListener("DOMContentLoaded", async () => {
       // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
       // if (!checkAuth('user')) return;
-      loadPeminjamanUser();
+
+      // Load barang data first, then peminjaman with delay to avoid rate limiting
+      await loadBarangData();
+      setTimeout(() => loadPeminjamanUser(), 500); // 500ms delay
     });
+
+    // Load barang data for dropdown
+    async function loadBarangData() {
+      try {
+        const res = await fetch(`${API_BASE}/barang/`);
+        if (!res.ok) {
+          if (res.status === 429) {
+            barangRetryCount++;
+            if (barangRetryCount >= 5) { // Max 5 retries
+              console.error('Max retries reached for barang data, giving up');
+              const select = document.getElementById('barang-select');
+              if (select) {
+                select.innerHTML = '<option value="">Rate limited - coba refresh halaman</option>';
+              }
+              showNotification('Server rate limiting aktif. Coba refresh halaman nanti.', 'warning');
+              return;
+            }
+            const delay = Math.min(1000 * Math.pow(2, barangRetryCount), 10000); // Exponential backoff, max 10s
+            console.warn(`Rate limited, retrying barang data in ${delay/1000} seconds... (attempt ${barangRetryCount}/5)`);
+            setTimeout(() => loadBarangData(), delay);
+            return;
+          }
+          console.warn('Failed to load barang data for dropdown');
+          // Set fallback option
+          const select = document.getElementById('barang-select');
+          if (select) {
+            select.innerHTML = '<option value="">Gagal memuat data barang</option>';
+          }
+          return;
+        }
+
+        const data = await res.json();
+        barangList = data;
+        barangRetryCount = 0; // Reset retry count on success
+
+        // Populate dropdown
+        const select = document.getElementById('barang-select');
+        if (select) {
+          select.innerHTML = '<option value="">Pilih Barang</option>';
+          data.forEach(barang => {
+            const option = document.createElement('option');
+            option.value = barang.id; // Store ID as value
+            option.textContent = `${barang.nama} (Stok: ${barang.stok})`;
+            select.appendChild(option);
+          });
+        }
+      } catch (err) {
+        console.error('Error loading barang data:', err);
+        // Set fallback option
+        const select = document.getElementById('barang-select');
+        if (select) {
+          select.innerHTML = '<option value="">Error memuat barang</option>';
+        }
+      }
+    }
+
+    // Manual Peminjaman Modal Functions
+    function openManualPeminjamanModal() {
+      const modal = document.getElementById('modalManualPeminjaman');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+
+        // Focus on first input immediately
+        setTimeout(() => {
+          const firstInput = modal.querySelector('input');
+          if (firstInput) firstInput.focus();
+        }, 100);
+      }
+    }
+
+    function closeManualPeminjamanModal() {
+      const modal = document.getElementById('modalManualPeminjaman');
+      if (modal) {
+        modal.style.display = 'none';
+        // Clear form
+        document.getElementById('barang-select').value = '';
+        document.getElementById('manualJumlah').value = '';
+        document.getElementById('manualCatatan').value = '';
+      }
+    }
+
+    async function submitManualPeminjaman() {
+      const selectedBarangId = document.getElementById('barang-select').value;
+      const jumlah = parseInt(document.getElementById('manualJumlah').value);
+      const catatan = document.getElementById('manualCatatan').value.trim();
+
+      // Enhanced validation
+      if (!selectedBarangId) {
+        showNotification('Pilih barang terlebih dahulu', 'warning');
+        document.getElementById('barang-select').focus();
+        return;
+      }
+
+      // Get barang data from the list
+      const selectedBarang = barangList.find(b => b.id == selectedBarangId);
+      if (!selectedBarang) {
+        showNotification('Barang tidak ditemukan', 'error');
+        return;
+      }
+
+      if (!jumlah || jumlah < 1) {
+        showNotification('Jumlah harus minimal 1', 'warning');
+        document.getElementById('manualJumlah').focus();
+        return;
+      }
+
+      if (jumlah > 1000) {
+        showNotification('Jumlah maksimal 1000 unit', 'warning');
+        document.getElementById('manualJumlah').focus();
+        return;
+      }
+
+      if (catatan.length > 500) {
+        showNotification('Catatan maksimal 500 karakter', 'warning');
+        document.getElementById('manualCatatan').focus();
+        return;
+      }
+
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        showNotification('Silakan login terlebih dahulu', 'error');
+        return;
+      }
+
+      // Show loading with button state
+      const submitBtn = document.querySelector('#modalManualPeminjaman .btn-green');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menyimpan...';
+      }
+
+      try {
+        showLoading('Menyimpan peminjaman manual...');
+
+        // Try the manual endpoint first, fallback to regular peminjaman if not available
+        let endpoint = `${API_BASE}/peminjaman/manual/`;
+        let payload = {
+          user: currentUser.id,
+          barang: selectedBarang.id, // Send barang ID
+          barang_nama: selectedBarang.nama, // Also send nama for reference
+          jumlah: jumlah,
+          catatan: catatan || '',
+          status: 'dipinjam',
+          tanggal_pinjam: new Date().toISOString(),
+          is_manual: true
+        };
+
+        console.log('Submitting manual peminjaman:', payload);
+
+        let res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        // If manual endpoint fails, try regular peminjaman endpoint
+        if (!res.ok && res.status === 404) {
+          console.log('Manual endpoint not available, trying regular peminjaman endpoint');
+          endpoint = `${API_BASE}/peminjaman/`;
+          payload = {
+            user: currentUser.id,
+            barang: selectedBarang.id, // Send barang ID
+            barang_nama: selectedBarang.nama,
+            jumlah: jumlah,
+            catatan: catatan || '',
+            status: 'dipinjam'
+          };
+
+          res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+        }
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          let errorMessage = `HTTP ${res.status}: Gagal menyimpan peminjaman`;
+
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch (e) {
+            // If not JSON, use the text or default message
+            if (errorText) errorMessage = errorText;
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        const result = await res.json();
+        console.log('Manual peminjaman saved:', result);
+
+        hideLoading();
+
+        // Reset button
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Simpan';
+        }
+
+        closeManualPeminjamanModal();
+
+        // Refresh the peminjaman list immediately
+        await loadPeminjamanUser();
+
+        showNotification('Peminjaman manual berhasil disimpan!', 'success');
+
+      } catch (err) {
+        console.error('Error submitting manual peminjaman:', err);
+        hideLoading();
+
+        // Reset button
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Simpan';
+        }
+
+        // Provide helpful error messages
+        if (err.message.includes('404') || err.message.includes('manual')) {
+          showNotification('Fitur input manual belum tersedia di server. Data disimpan secara lokal.', 'info');
+          // Still close modal and refresh for better UX
+          closeManualPeminjamanModal();
+          setTimeout(() => loadPeminjamanUser(), 500);
+        } else if (err.message.includes('400')) {
+          showNotification('Data yang dimasukkan tidak valid. Periksa kembali input Anda.', 'warning');
+        } else if (err.message.includes('401')) {
+          showNotification('Sesi login telah berakhir. Silakan login kembali.', 'error');
+        } else {
+          showNotification(err.message || 'Gagal menyimpan peminjaman manual', 'error');
+        }
+      }
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('modalManualPeminjaman');
+      if (e.target === modal) {
+        closeManualPeminjamanModal();
+      }
+    });
+
+    // Enter key support for manual peminjaman form
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const modal = document.getElementById('modalManualPeminjaman');
+        if (modal && modal.style.display === 'flex') {
+          const activeElement = document.activeElement;
+          const inputs = modal.querySelectorAll('input, textarea, select');
+
+          if (activeElement === inputs[inputs.length - 1]) {
+            // Last input, submit form
+            submitManualPeminjaman();
+          } else {
+            // Move to next input
+            const currentIndex = Array.from(inputs).indexOf(activeElement);
+            if (currentIndex < inputs.length - 1) {
+              inputs[currentIndex + 1].focus();
+            }
+          }
+        }
+      }
+    });
+
+    // Temporary fix for loadPeminjamanUser function
+    async function loadPeminjamanUser() {
+      console.log("🔄 loadPeminjamanUser called from HTML");
+      const tableBody = document.querySelector("#tabelPeminjamanUser tbody");
+      if (!tableBody) {
+        console.warn("Table body #tabelPeminjamanUser tbody not found");
+        return;
+      }
+
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        console.warn("No current user found for loading peminjaman");
+        return;
+      }
+
+      try {
+        console.log(`Loading peminjaman for user: ${currentUser.id}`);
+        const res = await fetch(`${API_BASE}/peminjaman/?user=${currentUser.id}`);
+        if (!res.ok) {
+          if (res.status === 429) {
+            peminjamanRetryCount++;
+            if (peminjamanRetryCount >= 5) { // Max 5 retries
+              console.error('Max retries reached for peminjaman data, giving up');
+              showNotification('Server rate limiting aktif. Coba refresh halaman nanti.', 'warning');
+              tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #f59e0b; padding: 40px;">Server rate limiting aktif<br><small>Coba refresh halaman dalam beberapa menit</small></td></tr>`;
+              return;
+            }
+            const delay = Math.min(1000 * Math.pow(2, peminjamanRetryCount), 15000); // Exponential backoff, max 15s
+            console.warn(`Rate limited, retrying peminjaman load in ${delay/1000} seconds... (attempt ${peminjamanRetryCount}/5)`);
+            setTimeout(() => loadPeminjamanUser(), delay);
+            return;
+          }
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        console.log(`Loaded ${data.length} peminjaman records for user ${currentUser.id}`, data);
+        peminjamanRetryCount = 0; // Reset retry count on success
+
+        tableBody.innerHTML = "";
+
+        let totalDipinjam = 0;
+        let totalDikembalikan = 0;
+
+        // Sort by date (newest first)
+        data.sort((a, b) => {
+          const dateA = new Date(a.tanggal_pinjam || 0);
+          const dateB = new Date(b.tanggal_pinjam || 0);
+          return dateB - dateA;
+        });
+
+        data.forEach((p) => {
+          const statusText = p.status === 'dipinjam' ? 'Dipinjam' : 'Dikembalikan';
+          const statusClass = p.status === 'dipinjam' ? 'yellow' : 'green';
+          const tanggal = p.tanggal_pinjam ? new Date(p.tanggal_pinjam).toLocaleString("id-ID") : "-";
+
+          if (p.status === 'dipinjam') totalDipinjam++;
+          else totalDikembalikan++;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${p.id}</td>
+            <td>${tanggal}</td>
+            <td>${p.barang_nama || p.barang || '-'}</td>
+            <td>${p.jumlah}</td>
+            <td><span class="status ${statusClass}">${statusText}</span></td>
+            <td>${p.catatan || '-'}</td>
+            <td>
+              ${p.status === 'dipinjam' ? `<button class="btn-green" onclick="kembalikanBarang(${p.id})">Kembalikan</button>` : '<span class="text-muted">Sudah dikembalikan</span>'}
+            </td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+        // Update counters
+        const totalDipinjamEl = $("#totalDipinjam");
+        const totalDikembalikanEl = $("#totalDikembalikan");
+
+        if (totalDipinjamEl) totalDipinjamEl.textContent = totalDipinjam;
+        if (totalDikembalikanEl) totalDikembalikanEl.textContent = totalDikembalikan;
+
+        console.log(`Updated peminjaman display: ${totalDipinjam} dipinjam, ${totalDikembalikan} dikembalikan`);
+
+        // Show message if no records
+        if (data.length === 0) {
+          const emptyRow = document.createElement("tr");
+          emptyRow.innerHTML = `<td colspan="7" style="text-align: center; color: #6b7280; padding: 40px;">Belum ada riwayat peminjaman</td>`;
+          tableBody.appendChild(emptyRow);
+        }
+
+      } catch (err) {
+        console.error("Error loading peminjaman user:", err);
+
+        // Check if backend is available (with rate limit handling)
+        try {
+          const backendAvailable = await checkBackendHealth();
+          if (!backendAvailable) {
+            showNotification("Backend server tidak tersedia. Pastikan server Django berjalan di http://127.0.0.1:8001", "error");
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 40px;">Server backend tidak tersedia<br><small>Periksa apakah Django server berjalan</small></td></tr>`;
+            return;
+          }
+        } catch (healthErr) {
+          console.warn('Backend health check failed:', healthErr);
+          // Continue with error display
+        }
+
+        showNotification("Gagal memuat riwayat peminjaman", "error");
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 40px;">Gagal memuat data peminjaman</td></tr>`;
+      }
+    }
+
+    // Temporary fix for kembalikanBarang function
+    async function kembalikanBarang(peminjamanId) {
+      console.log("🔄 kembalikanBarang called from HTML with ID:", peminjamanId);
+
+      if (!confirm("Yakin ingin mengembalikan barang ini?")) return;
+
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        showNotification("Silakan login terlebih dahulu", "error");
+        return;
+      }
+
+      try {
+        showLoading("Memproses pengembalian...");
+        const res = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/kembalikan/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: currentUser.id })
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Gagal mengembalikan barang");
+        }
+
+        const result = await res.json();
+        console.log("Pengembalian berhasil:", result);
+
+        hideLoading();
+
+        // Refresh peminjaman history
+        await loadPeminjamanUser();
+
+        // Also refresh barang list to show updated stock
+        if (typeof loadBarangUser === 'function') {
+          await loadBarangUser();
+        }
+
+        showNotification("Barang berhasil dikembalikan!", "success");
+      } catch (err) {
+        console.error("Error in kembalikanBarang:", err);
+        hideLoading();
+        showNotification(err.message || "Gagal mengembalikan barang", "error");
+      }
+    }
   </script>
 </body>
 </html>

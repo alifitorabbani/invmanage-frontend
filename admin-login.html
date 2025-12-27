@@ -4,87 +4,53 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <title>InvManage - Admin Login</title>
 </head>
 <body>
 
-<!-- Animated Background Elements -->
-<div class="bg-elements">
-  <div class="bg-circle bg-circle-1"></div>
-  <div class="bg-circle bg-circle-2"></div>
-  <div class="bg-circle bg-circle-3"></div>
-  <div class="floating-shapes">
-    <div class="shape shape-1">⬡</div>
-    <div class="shape shape-2">⬢</div>
-    <div class="shape shape-3">⬣</div>
-    <div class="shape shape-4">▭</div>
-  </div>
-</div>
-
 <div id="authContainer" class="center-box">
-  <!-- Enhanced Logo Section -->
+  <!-- Simple Logo Section -->
   <div class="logo-container">
-    <div class="logo-glow">
-      <img src="image.png" alt="Logo" class="logo">
-    </div>
-    <div class="logo-particles">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
+    <img src="image.png" alt="Logo" class="logo">
   </div>
 
-  <!-- Enhanced Header -->
+  <!-- Simple Header -->
   <div class="header-content">
     <h2 class="main-title">
       <span class="title-gradient">InvManage</span>
       <span class="title-accent">Admin</span>
     </h2>
     <p class="subtitle">
-      Administrator Login Panel
+      Administrator Access Portal
     </p>
-    <div class="feature-badges">
-      <span class="badge">Secure Access</span>
-      <span class="badge">Admin Panel</span>
-      <span class="badge">Full Control</span>
-    </div>
   </div>
 
-  <!-- Role Indicator -->
-  <div class="role-indicator">
-    <span class="role-badge admin">Administrator</span>
-    <button class="change-role-btn" onclick="goToUserLogin()">Switch to User Login</button>
-  </div>
-
-  <!-- Enhanced Tabs -->
+  <!-- Simple Tabs -->
   <div class="tabs">
     <button class="tab active" id="tabLogin">
-      <span class="tab-text">Login Admin</span>
+      <span class="tab-text">Admin Login</span>
     </button>
     <button class="tab inactive" id="tabRegister">
-      <span class="tab-text">Register Admin</span>
+      <span class="tab-text">Admin Register</span>
     </button>
   </div>
 
-  <!-- Enhanced Login Form -->
-  <div id="loginForm" class="form-container">
+  <!-- Admin Login Form -->
+  <form id="loginForm" class="form-container" onsubmit="return false;">
     <div class="form-header">
-      <h3>Login Administrator</h3>
-      <p>Masuk ke panel kontrol sistem InvManage</p>
+      <h3>Administrator Login</h3>
+      <p>Access admin panel for system management</p>
     </div>
 
     <div class="input-group">
-      <label>
-        Username Admin
-      </label>
-      <input type="text" id="loginUsername" placeholder="Enter admin username">
+      <label>Admin Username</label>
+      <input type="text" id="adminLoginUsername" placeholder="Enter admin username">
       <div class="input-underline"></div>
     </div>
 
     <div class="input-group">
-      <label>
-        Password Admin
-      </label>
-      <input type="password" id="loginPassword" placeholder="Enter admin password">
+      <label>Password</label>
+      <input type="password" id="adminLoginPassword" placeholder="Enter admin password">
       <div class="input-underline"></div>
     </div>
 
@@ -92,56 +58,44 @@
       <label class="remember-me">
         <input type="checkbox" id="rememberMe">
         <span class="checkmark"></span>
-        Ingat saya
+        Remember my login
       </label>
-      <a href="#" class="forgot-password">Lupa password?</a>
+      <a href="#" class="forgot-password">Forgot password?</a>
     </div>
 
-    <button class="primary login-btn" onclick="doAdminLogin()">
+    <button type="button" class="primary" onclick="doAdminLogin()">
       <span class="btn-content">
-        <span class="btn-text">Access Admin Panel</span>
+        <span class="btn-text">Login Admin</span>
       </span>
     </button>
 
-    <div class="divider">
-      <span>or</span>
+    <div class="form-footer">
+      <p>Need user access? <a href="index.html?direct=login">User Login</a></p>
     </div>
+  </form>
 
-    <div class="social-login">
-      <button class="social-btn google-btn">
-        Continue with Google (Admin)
-      </button>
-    </div>
-  </div>
-
-  <!-- Enhanced Register Form -->
+  <!-- Admin Register Form -->
   <div id="registerForm" class="form-container" style="display:none;">
     <div class="form-header">
-      <h3>Daftar sebagai Administrator</h3>
-      <p>Buat akun admin untuk mengelola sistem InvManage</p>
+      <h3>Register Administrator</h3>
+      <p>Create admin account for system management</p>
     </div>
 
     <div class="input-group">
-      <label>
-        Username Admin
-      </label>
-      <input type="text" id="registerUsername" placeholder="Choose unique admin username">
+      <label>Admin Name</label>
+      <input type="text" id="registerUsername" placeholder="Enter admin name">
       <div class="input-underline"></div>
     </div>
 
     <div class="input-group">
-      <label>
-        Email Admin
-      </label>
-      <input type="email" id="registerEmail" placeholder="Enter admin email @gmail.com">
+      <label>Password</label>
+      <input type="password" id="registerPassword" placeholder="Create admin password">
       <div class="input-underline"></div>
     </div>
 
     <div class="input-group">
-      <label>
-        Password Admin
-      </label>
-      <input type="password" id="registerPassword" placeholder="Create strong admin password">
+      <label>Admin Code</label>
+      <input type="text" id="registerAdminCode" placeholder="Enter admin code">
       <div class="input-underline"></div>
     </div>
 
@@ -149,80 +103,32 @@
       <label class="checkbox-container">
         <input type="checkbox" id="agreeTerms" required>
         <span class="checkmark"></span>
-        Saya setuju dengan <a href="admin-terms.html" target="_blank" class="terms-link">Syarat & Ketentuan</a> untuk admin
+        I agree to the <a href="admin-terms.html" target="_blank" class="terms-link">Terms & Conditions</a> for administrators
       </label>
     </div>
 
-    <button class="primary register-btn" onclick="doAdminRegister()">
+    <button class="primary" onclick="doAdminRegister()">
       <span class="btn-content">
         <span class="btn-text">Create Admin Account</span>
       </span>
     </button>
 
-    <div class="divider">
-      <span>or</span>
-    </div>
-
-    <div class="social-login">
-      <button class="social-btn google-btn">
-        Register with Google (Admin)
-      </button>
-    </div>
-
     <div class="form-footer">
-      <p>Sudah punya akun admin? <a href="#" onclick="switchToLogin()">Masuk di sini</a></p>
+      <p>Already have an account? <a href="#" onclick="switchToLogin()">Login here</a></p>
     </div>
   </div>
 </div>
 
-<!-- Reset Password Modal -->
-<div id="resetPasswordModal" class="modal-bg">
-  <div class="modal">
-    <h3>Reset Admin Password</h3>
-    <p>Enter your admin email to receive password reset link</p>
-
-    <div class="input-group">
-      <label>
-        Email Admin
-      </label>
-      <input type="email" id="resetEmail" placeholder="Enter admin email @gmail.com">
-      <div class="input-underline"></div>
-    </div>
-
-    <div class="modal-buttons">
-      <button class="btn-red" onclick="closeResetModal()">Batal</button>
-      <button class="btn-green" onclick="sendResetEmail()">Kirim Link Reset</button>
-    </div>
-  </div>
-</div>
-
-<!-- Success Modal for Reset -->
-<div id="resetSuccessModal" class="modal-bg">
-  <div class="modal">
-    <h3>✅ Link Reset Terkirim!</h3>
-    <p>Kami telah mengirimkan link reset password ke email admin Anda. Silakan periksa inbox Anda dan ikuti instruksi untuk mereset password.</p>
-
-    <div class="modal-buttons">
-      <button class="btn-green" onclick="closeResetSuccessModal()">Tutup</button>
-    </div>
-  </div>
-</div>
-
-<!-- Welcome Message -->
-<div class="welcome-message">
-  <h3>Welcome to InvManage Admin Panel</h3>
-  <p>Manage inventory system with full control and administrator access</p>
-</div>
 
 <script>
   // Admin-specific login function
   async function doAdminLogin() {
-    const nama = document.getElementById("loginUsername")?.value?.trim();
-    const password = document.getElementById("loginPassword")?.value;
+    const nama = document.getElementById("adminLoginUsername")?.value?.trim();
+    const password = document.getElementById("adminLoginPassword")?.value;
     const loginBtn = document.getElementById("loginForm")?.querySelector("button.primary");
 
     if (!nama || !password) {
-      showNotification("Username dan password admin wajib diisi", "warning");
+      showNotification("Nama dan password admin wajib diisi", "warning");
       return;
     }
 
@@ -232,7 +138,7 @@
       loginBtn.innerHTML = `
         <span style="display: inline-flex; align-items: center; gap: 8px;">
           <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: enterpriseSpin 1s linear infinite;"></div>
-          Sedang Masuk...
+          Logging in...
         </span>
       `;
     }
@@ -249,15 +155,14 @@
           loginBtn.disabled = false;
           loginBtn.innerHTML = `
             <span class="btn-content">
-              <span class="btn-icon">👑</span>
-              <span class="btn-text">Masuk ke Admin Panel</span>
+              <span class="btn-text">Login Admin</span>
             </span>
           `;
         }
 
         if (res.status === 400) {
           const errorData = await res.json();
-          showNotification(errorData.error || "Username atau password admin salah", "error");
+          showNotification(errorData.error || "Username atau password salah", "error");
           return;
         } else if (res.status >= 500) {
           showNotification("Server mengalami masalah. Coba lagi nanti.", "error");
@@ -280,7 +185,7 @@
         // Set user access level based on login page (admin dashboard access)
         const userWithAccess = { ...data.user, accessLevel: 'admin' };
         setCurrentUser(userWithAccess);
-        showNotification("Login admin berhasil! Mengalihkan ke Dashboard Admin...", "success");
+        showNotification("Login berhasil! Mengalihkan ke Dashboard...", "success");
 
         // Smooth transition before redirect
         setTimeout(() => {
@@ -291,42 +196,40 @@
           loginBtn.disabled = false;
           loginBtn.innerHTML = `
             <span class="btn-content">
-              <span class="btn-icon">👑</span>
-              <span class="btn-text">Masuk ke Admin Panel</span>
+              <span class="btn-text">Login Admin</span>
             </span>
           `;
         }
-        showNotification(data.error || "Login admin gagal", "error");
+        showNotification(data.error || "Login gagal", "error");
       }
     } catch (err) {
       if (loginBtn) {
         loginBtn.disabled = false;
         loginBtn.innerHTML = `
           <span class="btn-content">
-            <span class="btn-icon">👑</span>
-            <span class="btn-text">Masuk ke Admin Panel</span>
+            <span class="btn-text">Login Admin</span>
           </span>
         `;
       }
       console.error('Admin Login Error:', err);
-      showNotification("Gagal terhubung ke server admin", "error");
+      showNotification("Gagal terhubung ke server", "error");
     }
   }
 
   // Admin-specific register function
   async function doAdminRegister() {
     const nama = document.getElementById("registerUsername")?.value?.trim();
-    const email = document.getElementById("registerEmail")?.value?.trim();
     const password = document.getElementById("registerPassword")?.value;
+    const adminCode = document.getElementById("registerAdminCode")?.value?.trim();
     const registerBtn = document.getElementById("registerForm")?.querySelector("button.primary");
 
-    if (!nama || !email || !password) {
-      showNotification("Username, email, dan password admin wajib diisi", "warning");
+    if (!nama || !password || !adminCode) {
+      showNotification("Nama, password, dan kode admin wajib diisi", "warning");
       return;
     }
 
-    if (!email.includes('@gmail')) {
-      showNotification("Email admin harus menggunakan domain @gmail", "warning");
+    if (adminCode !== 'ADMIN2025') {
+      showNotification("Kode admin salah!", "warning");
       return;
     }
 
@@ -345,7 +248,7 @@
       const res = await fetch(`${API_BASE}/admin/register/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nama, email, password, admin_code: 'ADMIN2025' }),
+        body: JSON.stringify({ nama, password, admin_code: adminCode }),
       });
 
       if (!res.ok) {
@@ -422,7 +325,7 @@
     window.location.href = "index.html?direct=login";
   }
 
-  // Enhanced Tab Switching with Animations
+  // Simple Tab Switching
   const loginTab = document.getElementById("tabLogin");
   const registerTab = document.getElementById("tabRegister");
   const loginForm = document.getElementById("loginForm");
@@ -434,18 +337,8 @@
     registerTab.classList.remove("active");
     registerTab.classList.add("inactive");
 
-    // Smooth transition
-    loginForm.style.opacity = "0";
-    registerForm.style.opacity = "0";
-
-    setTimeout(() => {
-      loginForm.style.display = "block";
-      registerForm.style.display = "none";
-
-      setTimeout(() => {
-        loginForm.style.opacity = "1";
-      }, 50);
-    }, 150);
+    loginForm.style.display = "block";
+    registerForm.style.display = "none";
   }
 
   function switchToRegister() {
@@ -454,62 +347,24 @@
     loginTab.classList.remove("active");
     loginTab.classList.add("inactive");
 
-    // Smooth transition
-    loginForm.style.opacity = "0";
-    registerForm.style.opacity = "0";
-
-    setTimeout(() => {
-      loginForm.style.display = "none";
-      registerForm.style.display = "block";
-
-      setTimeout(() => {
-        registerForm.style.opacity = "1";
-      }, 50);
-    }, 150);
+    loginForm.style.display = "none";
+    registerForm.style.display = "block";
   }
 
   loginTab.onclick = switchToLogin;
   registerTab.onclick = switchToRegister;
 
-  // Enhanced Enter key support
-  document.getElementById("loginPassword")?.addEventListener("keypress", (e) => {
+  // Enter key support
+  document.getElementById("adminLoginPassword")?.addEventListener("keypress", (e) => {
     if (e.key === "Enter") doAdminLogin();
   });
   document.getElementById("registerPassword")?.addEventListener("keypress", (e) => {
     if (e.key === "Enter") doAdminRegister();
   });
 
-  // Basic email validation for admin
-  document.getElementById("registerEmail")?.addEventListener("blur", (e) => {
-    const email = e.target.value;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const isValid = email === "" || (emailRegex.test(email) && email.includes("@gmail.com"));
-
-    e.target.classList.toggle("valid", isValid && email.length > 0);
-    e.target.classList.toggle("invalid", !isValid && email.length > 0);
-  });
-
-  // Basic password validation for admin
-  document.getElementById("registerPassword")?.addEventListener("blur", (e) => {
-    const password = e.target.value;
-    const isValid = password === "" || password.length >= 4;
-
-    e.target.classList.toggle("valid", isValid && password.length > 0);
-    e.target.classList.toggle("invalid", !isValid && password.length > 0);
-  });
-
-  // Basic username validation for admin
-  document.getElementById("registerUsername")?.addEventListener("blur", (e) => {
-    const username = e.target.value;
-    const isValid = username === "" || username.length >= 3;
-
-    e.target.classList.toggle("valid", isValid && username.length > 0);
-    e.target.classList.toggle("invalid", !isValid && username.length > 0);
-  });
-
   // Terms agreement validation
   document.getElementById("agreeTerms")?.addEventListener("change", (e) => {
-    const registerBtn = document.querySelector(".register-btn");
+    const registerBtn = document.querySelector("#registerForm .primary");
     if (registerBtn) {
       registerBtn.disabled = !e.target.checked;
       registerBtn.style.opacity = e.target.checked ? "1" : "0.6";
@@ -519,251 +374,20 @@
   // Remember me functionality
   document.getElementById("rememberMe")?.addEventListener("change", (e) => {
     if (e.target.checked) {
-      showNotification("Fitur 'Ingat Saya' akan menyimpan login admin Anda", "success", 3000);
+      showNotification("Remember me feature will save your login", "success", 3000);
     }
   });
-
-  // Reset Password functionality
-  document.querySelector(".forgot-password")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    openResetModal();
-  });
-
-  function openResetModal() {
-    const modal = document.getElementById("resetPasswordModal");
-    modal.style.display = "flex";
-    modal.style.alignItems = "center";
-    modal.style.justifyContent = "center";
-
-    // Focus on email input
-    setTimeout(() => {
-      document.getElementById("resetEmail").focus();
-    }, 100);
-  }
-
-  function closeResetModal() {
-    const modal = document.getElementById("resetPasswordModal");
-    modal.style.display = "none";
-    document.getElementById("resetEmail").value = "";
-  }
-
-  function closeResetSuccessModal() {
-    const modal = document.getElementById("resetSuccessModal");
-    modal.style.display = "none";
-  }
-
-  function sendResetEmail() {
-    const email = document.getElementById("resetEmail").value.trim();
-
-    if (!email) {
-      showNotification("Silakan masukkan email admin Anda", "error");
-      return;
-    }
-
-    if (!email.includes("@gmail.com")) {
-      showNotification("Email admin harus menggunakan domain @gmail.com", "error");
-      return;
-    }
-
-    // Simulate sending reset email
-    const resetBtn = event.target;
-    const originalText = resetBtn.textContent;
-    resetBtn.textContent = "Mengirim...";
-    resetBtn.disabled = true;
-
-    setTimeout(() => {
-      // Close reset modal
-      closeResetModal();
-
-      // Show success modal
-      const successModal = document.getElementById("resetSuccessModal");
-      successModal.style.display = "flex";
-      successModal.style.alignItems = "center";
-      successModal.style.justifyContent = "center";
-
-      // Reset button
-      resetBtn.textContent = originalText;
-      resetBtn.disabled = false;
-
-      showNotification("Link reset password admin telah dikirim ke email Anda", "success");
-    }, 2000);
-  }
-
-  // Close modals when clicking outside
-  document.getElementById("resetPasswordModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "resetPasswordModal") {
-      closeResetModal();
-    }
-  });
-
-  document.getElementById("resetSuccessModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "resetSuccessModal") {
-      closeResetSuccessModal();
-    }
-  });
-
-  // Enter key support for reset email
-  document.getElementById("resetEmail")?.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      sendResetEmail();
-    }
-  });
-
-
-  // Google Sign-In initialization for admin
-  function initializeGoogleSignIn() {
-    // Check if Google SDK is loaded
-    if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-      console.warn('Google Identity Services SDK not loaded yet, retrying...');
-      setTimeout(initializeGoogleSignIn, 1000);
-      return;
-    }
-
-    const clientId = 'YOUR_GOOGLE_CLIENT_ID_HERE'; // Replace with your actual Google Client ID
-
-    if (clientId === 'YOUR_GOOGLE_CLIENT_ID_HERE') {
-      // Show placeholder buttons with click handler for setup reminder
-      const googleBtns = document.querySelectorAll(".google-btn");
-      googleBtns.forEach(btn => {
-        btn.innerHTML = '<span class="social-icon">🌐</span> Setup Google OAuth (Admin)';
-        btn.onclick = (e) => {
-          e.preventDefault();
-          showNotification("Google Client ID belum dikonfigurasi. Silakan setup OAuth di Google Cloud Console terlebih dahulu.", "warning");
-        };
-      });
-      return;
-    }
-
-    try {
-      google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleSignIn,
-        context: 'signin'
-      });
-
-      // Render Google Sign-In buttons for both login and register forms
-      const googleBtns = document.querySelectorAll(".google-btn");
-      googleBtns.forEach((btn, index) => {
-        // Clear existing content
-        btn.innerHTML = '';
-
-        const buttonText = index === 0 ? 'continue_with' : 'signup_with';
-        google.accounts.id.renderButton(btn, {
-          theme: 'outline',
-          size: 'large',
-          text: buttonText,
-          shape: 'rectangular',
-          logo_alignment: 'left',
-          width: '100%'
-        });
-      });
-
-      console.log('Google Sign-In initialized successfully for admin');
-    } catch (error) {
-      console.error('Failed to initialize Google Sign-In:', error);
-      // Fallback to manual button
-      const googleBtns = document.querySelectorAll(".google-btn");
-      googleBtns.forEach(btn => {
-        btn.innerHTML = '<span class="social-icon">🌐</span> Google Login (Error)';
-        btn.onclick = (e) => {
-          e.preventDefault();
-          showNotification("Gagal memuat Google Sign-In. Periksa koneksi internet.", "error");
-        };
-      });
-    }
-  }
-
-  // Handle Google Sign-In response for admin
-  async function handleGoogleSignIn(response) {
-    if (!response.credential) {
-      showNotification("Gagal mendapatkan credential dari Google", "error");
-      return;
-    }
-
-    showLoading("Memproses login Google admin...");
-
-    try {
-      // Send Google ID token to backend for admin
-      const res = await fetch(`${API_BASE}/auth/google/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${response.credential}`
-        },
-        body: JSON.stringify({
-          id_token: response.credential,
-          role: 'admin'
-        }),
-      });
-
-      hideLoading();
-
-      if (!res.ok) {
-        if (res.status === 400) {
-          const errorData = await res.json();
-          showNotification(errorData.error || "Login Google admin gagal", "error");
-        } else if (res.status === 404) {
-          showNotification("Endpoint autentikasi Google belum tersedia di backend", "warning");
-        } else {
-          showNotification("Gagal terhubung ke server", "error");
-        }
-        return;
-      }
-
-      const data = await res.json();
-
-      if (data.success) {
-        // Check if user is admin
-        if (data.user.role !== 'admin') {
-          showNotification("Akun Google ini bukan akun administrator. Gunakan halaman login user.", "error");
-          return;
-        }
-
-        setCurrentUser(data.user);
-        showNotification("Login Google admin berhasil! Mengalihkan...", "success");
-
-        // Smooth transition before redirect
-        setTimeout(() => {
-          window.location.href = "dashboard.html";
-        }, 1000);
-      } else {
-        showNotification(data.error || "Login Google admin gagal", "error");
-      }
-    } catch (err) {
-      hideLoading();
-      console.error('Google Admin Login Error:', err);
-      showNotification("Gagal terhubung ke server admin", "error");
-    }
-  }
 
   // Initialize form states
   document.addEventListener("DOMContentLoaded", () => {
-    // Set initial opacity
-    loginForm.style.opacity = "1";
-    registerForm.style.opacity = "0";
-
-    // Initialize Google Sign-In
-    initializeGoogleSignIn();
-
-    // Add loading class removal after animations
-    setTimeout(() => {
-      document.body.classList.add("loaded");
-    }, 1000);
+    // Set initial display
+    loginForm.style.display = "block";
+    registerForm.style.display = "none";
   });
 
-  // Username input Enter key support
-  document.getElementById("loginUsername").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") document.getElementById("loginPassword").focus();
-  });
-  document.getElementById("registerUsername").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") document.getElementById("registerEmail").focus();
-  });
-  document.getElementById("registerEmail").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") document.getElementById("registerPassword").focus();
-  });
 </script>
 
-<script src="app.js"></script>
+<script src="app.js?v=20251226"></script>
 
 <!-- Copyright Footer -->
 <footer class="copyright-footer">

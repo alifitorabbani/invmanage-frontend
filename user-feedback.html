@@ -49,7 +49,7 @@
             </select>
           </div>
 
-          <button class="primary" style="width:auto; margin-top: 16px;" onclick="tambahFeedback()" id="submitFeedbackBtn">Kirim Feedback</button>
+          <button class="primary" style="width:auto; margin-top: 16px;" id="submitFeedbackBtn">Kirim Feedback</button>
         </div>
 
         <h3 style="margin-top:30px; font-size: 20px; font-weight: 600; color: var(--gray-100);">Feedback Saya</h3>
@@ -106,6 +106,12 @@
       // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
       // if (!checkAuth('user')) return;
       loadFeedbackUser();
+
+      // Attach event listener to feedback submit button
+      const submitBtn = document.getElementById('submitFeedbackBtn');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', submitFeedback);
+      }
     });
 
     // Temporary fix for loadFeedbackUser function
@@ -190,47 +196,40 @@
       }
     }
 
-    // Temporary fix for tambahFeedback function
-    async function tambahFeedback() {
-      console.log("🔄 tambahFeedback called from HTML");
-      const pesan = $("#feedbackPesan")?.value;
+    // Direct feedback submission without validations or notifications
+    async function submitFeedback() {
+      console.log("🔄 submitFeedback called from HTML");
+      const pesan = $("#feedbackPesan")?.value?.trim() || "";
+      const kategori = $("#feedbackKategori")?.value || "";
       const currentUser = getCurrentUser();
 
-      if (!pesan) {
-        showNotification("Pesan feedback wajib diisi", "warning");
-        return;
-      }
-
-      if (!currentUser) {
-        showNotification("Silakan login terlebih dahulu", "error");
-        return;
-      }
-
-      const payload = { user: currentUser.id, pesan };
+      const payload = {
+        user: currentUser ? currentUser.id : null,
+        pesan,
+        kategori: kategori || null
+      };
 
       try {
-        showLoading("Mengirim feedback...");
         const res = await fetch(`${API_BASE}/feedback/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
 
-        if (!res.ok) throw new Error("Gagal mengirim feedback");
+        if (res.ok) {
+          // Clear form on success
+          if ($("#feedbackPesan")) $("#feedbackPesan").value = "";
+          if ($("#feedbackKategori")) $("#feedbackKategori").value = "";
 
-        if ($("#feedbackPesan")) $("#feedbackPesan").value = "";
-
-        // Reload feedback user jika ada
-        if ($("#tabelFeedbackUser")) {
-          await loadFeedbackUser();
+          // Reload feedback user table if exists
+          if ($("#tabelFeedbackUser")) {
+            await loadFeedbackUser();
+          }
+        } else {
+          console.error("Failed to send feedback:", res.status);
         }
-
-        hideLoading();
-        showNotification("Feedback berhasil dikirim!", "success");
       } catch (err) {
-        console.error(err);
-        hideLoading();
-        showNotification("Gagal mengirim feedback", "error");
+        console.error("Error sending feedback:", err);
       }
     }
   </script>

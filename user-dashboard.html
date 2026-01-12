@@ -161,10 +161,6 @@
             <h3>Peminjaman Aktif Saya</h3>
             <p>Kelola peminjaman yang sedang berlangsung</p>
           </div>
-          <div class="table-actions">
-            <button class="btn-warning" id="bulkEditLoansBtn" onclick="openEditLoanModal()">Edit</button>
-            <button class="btn-danger" id="bulkDeleteLoansBtn" onclick="openDeleteLoanModal()">Hapus</button>
-          </div>
         </div>
 
         <div class="table-wrapper">
@@ -238,46 +234,6 @@
     </div>
   </div>
 
-  <!-- Enhanced Modal Pinjam Barang -->
-  <div class="modal-bg" id="modalPinjam">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Pinjam Barang</h3>
-        <button class="modal-close" onclick="closePinjamModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="item-preview">
-          <div class="item-preview-icon">📦</div>
-          <h4 id="pinjamNamaBarang" class="item-preview-title"></h4>
-          <p class="item-preview-subtitle">Barang tersedia untuk dipinjam</p>
-        </div>
-
-        <div class="input-group">
-          <label>Jumlah yang Dibutuhkan</label>
-          <input type="number" id="pinjamJumlah" placeholder="Masukkan jumlah" min="1" max="10">
-          <small style="color: var(--gray-400); font-size: 12px;">Maksimal 10 unit per peminjaman</small>
-        </div>
-
-        <div class="input-group">
-          <label>Alasan Peminjaman *</label>
-          <textarea id="pinjamAlasan" placeholder="Jelaskan alasan peminjaman barang ini..." rows="3" required style="resize: vertical; min-height: 80px;"></textarea>
-        </div>
-
-        <div class="loan-info">
-          <h5>📋 Informasi Peminjaman</h5>
-          <ul>
-            <li>Batas waktu pengembalian: 30 hari</li>
-            <li>Denda keterlambatan: Rp 1.000 per hari</li>
-            <li>Pastikan barang dalam kondisi baik saat dikembalikan</li>
-          </ul>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="closePinjamModal()">Batal</button>
-        <button class="btn-primary" onclick="konfirmasiPinjam()" id="pinjamBtn">Ajukan Peminjaman</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Success Modal -->
   <div class="modal-bg" id="modalSuccess">
@@ -779,7 +735,7 @@
             </div>
           </td>
           <td>
-            ${stok > 0 ? `<button class="btn-primary" onclick="openPinjamModal('${item.id}', '${item.nama}', ${stok})" style="font-size: 12px; padding: 8px 16px;">Pinjam</button>` : '<span class="text-muted">Tidak tersedia</span>'}
+            ${stok > 0 ? `<button class="btn-primary" onclick="pinjamBarangLangsung('${item.id}', '${item.nama}', ${stok})" style="font-size: 12px; padding: 8px 16px;">Pinjam</button>` : '<span class="text-muted">Tidak tersedia</span>'}
           </td>
         `;
         tableBody.appendChild(tr);
@@ -806,20 +762,28 @@
     // Enhanced modal functions
     let currentPinjamBarangId = null; // Global variable to store current barang ID
 
-    function openPinjamModal(id, nama, stok) {
-      currentPinjamBarangId = id; // Store the barang ID
-      document.getElementById('pinjamNamaBarang').textContent = nama;
-      document.getElementById('pinjamJumlah').max = stok;
-      document.getElementById('pinjamJumlah').value = "1";
-      document.getElementById('pinjamAlasan').value = "";
+    async function pinjamBarangLangsung(id, nama, stok) {
+      currentPinjamBarangId = id;
 
-      const modal = document.getElementById('modalPinjam');
-      modal.style.display = "flex";
-    }
+      // Prompt for jumlah
+      let jumlah = prompt(`Berapa unit ${nama} yang ingin dipinjam? (Maksimal ${stok})`);
+      if (jumlah === null) return; // Cancelled
 
-    function closePinjamModal() {
-      const modal = document.getElementById('modalPinjam');
-      modal.style.display = "none";
+      jumlah = parseInt(jumlah);
+      if (isNaN(jumlah) || jumlah < 1 || jumlah > stok) {
+        alert("Jumlah tidak valid. Harus antara 1 dan " + stok);
+        return;
+      }
+
+      // Prompt for alasan
+      let alasan = prompt("Alasan meminjam barang ini:");
+      if (alasan === null || alasan.trim() === "") {
+        alert("Alasan peminjaman wajib diisi");
+        return;
+      }
+
+      // Send to API
+      await kirimPeminjaman(jumlah, alasan);
     }
 
     function closeSuccessModal() {
@@ -880,29 +844,11 @@
         });
     }
 
-    // Temporary fix for konfirmasiPinjam function
-    async function konfirmasiPinjam() {
-      console.log("🔄 konfirmasiPinjam called from HTML");
-      const jumlah = Number($("#pinjamJumlah")?.value || 0);
-      const alasan = $("#pinjamAlasan")?.value || "";
+    async function kirimPeminjaman(jumlah, alasan) {
       const currentUser = getCurrentUser();
 
-      if (!jumlah || jumlah < 1) {
-        showNotification("Jumlah harus minimal 1", "warning");
-        return;
-      }
-
-      if (!alasan.trim()) {
-        showNotification("Alasan peminjaman wajib diisi", "warning");
-        document.getElementById('pinjamAlasan').focus();
-        return;
-      }
-
-      // Note: Stock validation removed for HTML implementation
-      // In full implementation, this would check against available stock
-
       if (!currentUser) {
-        showNotification("Silakan login terlebih dahulu", "error");
+        alert("Silakan login terlebih dahulu");
         return;
       }
 
@@ -931,7 +877,6 @@
         });
 
         console.log("Response status:", res.status);
-        console.log("Response headers:", Object.fromEntries(res.headers.entries()));
 
         if (!res.ok) {
           let errorMessage = `Server error: ${res.status}`;
@@ -941,7 +886,6 @@
               const errorData = await res.json();
               errorMessage = errorData.error || errorData.message || errorMessage;
             } else {
-              // If not JSON, read as text
               const textResponse = await res.text();
               console.error("Non-JSON response:", textResponse.substring(0, 500));
               errorMessage = "Server mengembalikan respons yang tidak valid. Periksa koneksi backend.";
@@ -956,28 +900,26 @@
         const result = await res.json();
         console.log("Peminjaman berhasil:", result);
 
-        closePinjamModal();
         hideLoading();
 
-        // Refresh both tables to show updated data
+        // Refresh tables
         await loadBarangUser();
-        if (typeof loadPeminjamanUser === 'function') {
-          await loadPeminjamanUser();
-        }
+        await loadUserLoans();
+        await loadUserStats();
 
-        showNotification("Request peminjaman berhasil dikirim! Menunggu approval dari admin.", "success");
+        alert("Request peminjaman berhasil dikirim! Menunggu approval dari admin.");
       } catch (err) {
-        console.error("Error in konfirmasiPinjam:", err);
+        console.error("Error in kirimPeminjaman:", err);
         hideLoading();
 
         // Check if backend is available
         const backendAvailable = await checkBackendHealth();
         if (!backendAvailable) {
-          showNotification("Backend server tidak tersedia. Pastikan server Django berjalan di http://127.0.0.1:8001", "error");
+          alert("Backend server tidak tersedia. Pastikan server Django berjalan di http://127.0.0.1:8001");
           return;
         }
 
-        showNotification(err.message || "Gagal meminjam barang", "error");
+        alert(err.message || "Gagal meminjam barang");
       }
     }
   </script>

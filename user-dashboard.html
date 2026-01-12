@@ -112,6 +112,15 @@
             <div class="card-trend positive">↗️ Aktif</div>
           </div>
         </div>
+
+        <div class="analytics-card stagger-5">
+          <div class="card-icon">⏳</div>
+          <div class="card-content">
+            <div class="card-value" id="pendingRequests">0</div>
+            <div class="card-label">Permintaan Pending</div>
+            <div class="card-trend info">Menunggu Approval</div>
+          </div>
+        </div>
       </div>
 
       <!-- Quick Actions for User -->
@@ -323,6 +332,11 @@
 
       // Start user notification polling
       startUserNotificationPolling();
+
+      // Periodic stats update every 30 seconds
+      setInterval(async () => {
+        await loadUserStats();
+      }, 30000);
     });
 
     function showUserWelcomeMessage() {
@@ -389,34 +403,37 @@
       try {
         const currentUser = getCurrentUser();
         if (!currentUser) return;
-
+    
         // Load user-specific stats
         const [barangRes, peminjamanRes] = await Promise.all([
           fetch(`${API_BASE}/barang/`).catch(() => null),
           fetch(`${API_BASE}/peminjaman/?user=${currentUser.id}`).catch(() => null)
         ]);
-
+    
         let availableItems = 0;
         let activeLoans = 0;
         let completedLoans = 0;
-
+        let pendingRequests = 0;
+    
         if (barangRes?.ok) {
           const barang = await barangRes.json();
           availableItems = barang.filter(b => b.stok > 0).length;
         }
-
+    
         if (peminjamanRes?.ok) {
           const peminjaman = await peminjamanRes.json();
           activeLoans = peminjaman.filter(p => p.status === 'dipinjam').length;
           completedLoans = peminjaman.filter(p => p.status === 'dikembalikan').length;
+          pendingRequests = peminjaman.filter(p => p.status === 'pending' || p.status === 'pending_approval').length;
         }
-
+    
         // Update UI
         document.getElementById('totalAvailableItems').textContent = availableItems;
         document.getElementById('myActiveLoans').textContent = activeLoans;
         document.getElementById('myCompletedLoans').textContent = completedLoans;
+        document.getElementById('pendingRequests').textContent = pendingRequests;
         document.getElementById('feedbackCount').textContent = '3'; // Sample data
-
+    
       } catch (error) {
         console.error('Error loading user stats:', error);
       }

@@ -331,6 +331,11 @@ function showNotification(message, type = "success", duration = 4000) {
 
   document.body.appendChild(notification);
 
+  // Show the notification
+  requestAnimationFrame(() => {
+      notification.classList.add("show");
+  });
+
   // Auto remove after duration
   const timeoutId = setTimeout(() => {
     if (notification.parentElement) {

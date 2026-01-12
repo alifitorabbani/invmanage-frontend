@@ -420,9 +420,24 @@ async function doUserLogin() {
     const password = document.getElementById("userLoginPassword")?.value;
     const loginBtn = document.querySelector("#loginForm .btn-primary-enterprise-full");
 
-    if (!identifier || !password) {
+    if (!identifier && !password) {
         showNotification("Username/email and password are required", "warning");
         return;
+    } else if (!identifier) {
+        showNotification("Username/email is required", "warning");
+        return;
+    } else if (!password) {
+        showNotification("Password is required", "warning");
+        return;
+    }
+
+    // Validate email if identifier contains @
+    if (identifier && identifier.includes('@')) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(identifier)) {
+            showNotification("Please enter a valid email address", "warning");
+            return;
+        }
     }
 
     // Show loading state
@@ -508,41 +523,16 @@ async function doUserLogin() {
 
 // Password validation function
 function validatePassword(password) {
-    let strength = 'weak';
-    let valid = false;
-    let message = '';
-
-    // Check for letters only (weak)
-    if (/^[a-zA-Z]+$/.test(password)) {
-        strength = 'weak';
-        message = 'Weak: Letters only';
+    if (password.length < 8) {
+        return { valid: false, strength: 'weak', message: 'Password must be at least 8 characters long' };
     }
-    // Check for 8+ chars with letters and at least 1 number (normal)
-    else if (password.length >= 8 && /[a-zA-Z]/.test(password) && /\d/.test(password)) {
-        strength = 'normal';
-        valid = true;
-        message = 'Normal: Good password';
+    if (!/\d/.test(password)) {
+        return { valid: false, strength: 'weak', message: 'Password must contain at least 1 number' };
     }
-    // Check for normal + 1 symbol (strong)
-    else if (password.length >= 8 && /[a-zA-Z]/.test(password) && /\d/.test(password) && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-        strength = 'strong';
-        valid = true;
-        message = 'Strong: Excellent password';
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        return { valid: false, strength: 'weak', message: 'Password must contain at least 1 symbol' };
     }
-    else {
-        // Invalid combinations
-        if (password.length < 8) {
-            message = 'Password must be at least 8 characters long';
-        } else if (!/[a-zA-Z]/.test(password)) {
-            message = 'Password must contain letters';
-        } else if (!/\d/.test(password)) {
-            message = 'Password must contain at least 1 number';
-        } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-            message = 'Password must contain at least 1 symbol for strong';
-        }
-    }
-
-    return { valid, strength, message };
+    return { valid: true, strength: 'strong', message: 'Strong: Excellent password' };
 }
 
 // Update password strength indicator
@@ -563,13 +553,31 @@ async function doUserRegister() {
     const password = document.getElementById("registerPassword")?.value;
     const registerBtn = document.querySelector("#registerForm .btn-primary-enterprise-full");
 
-    if (!nama || !email || !password) {
+    if (!nama && !email && !password) {
         showNotification("Username, email, and password are required", "warning");
+        return;
+    } else if (!nama && !email) {
+        showNotification("Username and email are required", "warning");
+        return;
+    } else if (!nama && !password) {
+        showNotification("Username and password are required", "warning");
+        return;
+    } else if (!email && !password) {
+        showNotification("Email and password are required", "warning");
+        return;
+    } else if (!nama) {
+        showNotification("Username is required", "warning");
+        return;
+    } else if (!email) {
+        showNotification("Email is required", "warning");
+        return;
+    } else if (!password) {
+        showNotification("Password is required", "warning");
         return;
     }
 
     if (!email.includes('@')) {
-        showNotification("Email must contain '@' symbol", "warning");
+        showNotification("Email salah. Harus memasukkan email yang benar menggunakan tanda @", "warning");
         return;
     }
 

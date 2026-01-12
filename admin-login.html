@@ -147,6 +147,11 @@
                             </div>
 
                             <div class="input-group-enterprise">
+                                <label>Email Address</label>
+                                <input type="email" id="registerEmail" placeholder="Enter email @gmail.com">
+                            </div>
+
+                            <div class="input-group-enterprise">
                                 <label>Password</label>
                                 <input type="password" id="registerPassword" placeholder="Create admin password">
                                 <div id="passwordStrength" class="password-strength">
@@ -437,8 +442,14 @@ async function doAdminLogin() {
     const password = document.getElementById("adminLoginPassword")?.value;
     const loginBtn = document.querySelector("#loginForm .btn-primary-enterprise-full");
 
-    if (!nama || !password) {
+    if (!nama && !password) {
         showNotification("Admin username and password are required", "warning");
+        return;
+    } else if (!nama) {
+        showNotification("Admin username is required", "warning");
+        return;
+    } else if (!password) {
+        showNotification("Password is required", "warning");
         return;
     }
 
@@ -525,41 +536,16 @@ async function doAdminLogin() {
 
 // Password validation function
 function validatePassword(password) {
-    let strength = 'weak';
-    let valid = false;
-    let message = '';
-
-    // Check for letters only (weak)
-    if (/^[a-zA-Z]+$/.test(password)) {
-        strength = 'weak';
-        message = 'Weak: Letters only';
+    if (password.length < 8) {
+        return { valid: false, strength: 'weak', message: 'Password must be at least 8 characters long' };
     }
-    // Check for 8+ chars with letters and at least 1 number (normal)
-    else if (password.length >= 8 && /[a-zA-Z]/.test(password) && /\d/.test(password)) {
-        strength = 'normal';
-        valid = true;
-        message = 'Normal: Good password';
+    if (!/\d/.test(password)) {
+        return { valid: false, strength: 'weak', message: 'Password must contain at least 1 number' };
     }
-    // Check for normal + 1 symbol (strong)
-    else if (password.length >= 8 && /[a-zA-Z]/.test(password) && /\d/.test(password) && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-        strength = 'strong';
-        valid = true;
-        message = 'Strong: Excellent password';
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        return { valid: false, strength: 'weak', message: 'Password must contain at least 1 symbol' };
     }
-    else {
-        // Invalid combinations
-        if (password.length < 8) {
-            message = 'Password must be at least 8 characters long';
-        } else if (!/[a-zA-Z]/.test(password)) {
-            message = 'Password must contain letters';
-        } else if (!/\d/.test(password)) {
-            message = 'Password must contain at least 1 number';
-        } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-            message = 'Password must contain at least 1 symbol for strong';
-        }
-    }
-
-    return { valid, strength, message };
+    return { valid: true, strength: 'strong', message: 'Strong: Excellent password' };
 }
 
 // Update password strength indicator
@@ -576,11 +562,35 @@ function updatePasswordStrength(strength, message) {
 // Admin-specific register function
 async function doAdminRegister() {
     const nama = document.getElementById("registerUsername")?.value?.trim();
+    const email = document.getElementById("registerEmail")?.value?.trim();
     const password = document.getElementById("registerPassword")?.value;
     const registerBtn = document.querySelector("#registerForm .btn-primary-enterprise-full");
 
-    if (!nama || !password) {
+    if (!nama && !email && !password) {
+        showNotification("Name, email, and password are required", "warning");
+        return;
+    } else if (!nama && !email) {
+        showNotification("Name and email are required", "warning");
+        return;
+    } else if (!nama && !password) {
         showNotification("Name and password are required", "warning");
+        return;
+    } else if (!email && !password) {
+        showNotification("Email and password are required", "warning");
+        return;
+    } else if (!nama) {
+        showNotification("Name is required", "warning");
+        return;
+    } else if (!email) {
+        showNotification("Email is required", "warning");
+        return;
+    } else if (!password) {
+        showNotification("Password is required", "warning");
+        return;
+    }
+
+    if (!email.includes('@')) {
+        showNotification("Email salah. Harus memasukkan email yang benar menggunakan tanda @", "warning");
         return;
     }
 
@@ -605,7 +615,7 @@ async function doAdminRegister() {
         const res = await fetch(`${API_BASE}/admin/register/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nama, password }),
+            body: JSON.stringify({ nama, email, password }),
         });
 
         if (!res.ok) {
@@ -708,6 +718,19 @@ document.getElementById("registerPassword")?.addEventListener("keypress", (e) =>
 
 // Enhanced form validation
 document.addEventListener('DOMContentLoaded', function() {
+    // Email validation for admin register
+    const registerEmail = document.getElementById('registerEmail');
+    if (registerEmail) {
+        registerEmail.addEventListener('blur', function(e) {
+            const email = e.target.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValid = email === '' || (emailRegex.test(email) && email.includes('@'));
+
+            e.target.classList.toggle('valid', isValid && email.length > 0);
+            e.target.classList.toggle('invalid', !isValid && email.length > 0);
+        });
+    }
+
     // Password validation for admin register
     const registerPassword = document.getElementById('registerPassword');
     if (registerPassword) {
@@ -850,10 +873,12 @@ document.addEventListener('keypress', function(e) {
         }
 
         // Register form navigation
-        if (registerUsername && registerPassword && registerForm && !registerForm.classList.contains('hidden')) {
+        if (registerUsername && registerEmail && registerPassword && registerForm && !registerForm.classList.contains('hidden')) {
             if (document.activeElement === registerPassword) {
                 doAdminRegister();
             } else if (document.activeElement === registerUsername) {
+                registerEmail.focus();
+            } else if (document.activeElement === registerEmail) {
                 registerPassword.focus();
             }
         }

@@ -11,113 +11,108 @@
     <meta name="keywords" content="inventory, management, enterprise, professional, system">
 </head>
 <body>
-    <!-- Enhanced Animated Background -->
-    <div class="bg-elements">
-        <div class="bg-circle bg-circle-1"></div>
-        <div class="bg-circle bg-circle-2"></div>
-        <div class="bg-circle bg-circle-3"></div>
-        <div class="bg-circle bg-circle-4"></div>
-        <div class="bg-circle bg-circle-5"></div>
-        <div class="floating-shapes">
-            <div class="shape shape-1">⬡</div>
-            <div class="shape shape-2">⬢</div>
-            <div class="shape shape-3">⬣</div>
-            <div class="shape shape-4">▭</div>
-            <div class="shape shape-5">⬟</div>
-            <div class="shape shape-6">⬠</div>
-        </div>
-        <!-- Animated Grid Background -->
-        <div class="grid-background"></div>
+    <!-- Enterprise Background -->
+    <div class="enterprise-bg">
+        <div class="bg-gradient-primary"></div>
+        <div class="bg-gradient-secondary"></div>
+        <div class="enterprise-grid"></div>
     </div>
 
-    <!-- Navigation Bar -->
+    <!-- Enterprise Navigation -->
     <nav class="enterprise-nav">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="image.png" alt="InvManage Logo" class="nav-logo-img">
-                <span class="nav-logo-text">InvManage</span>
+                <div class="nav-logo-icon">🏢</div>
+                <span class="nav-logo-text">InvManage Enterprise</span>
             </div>
             <div class="nav-menu">
-                <a href="#features" class="nav-link">Fitur</a>
-                <a href="#about" class="nav-link">Tentang</a>
-                <a href="#contact" class="nav-link">Kontak</a>
-                <button class="nav-cta" onclick="scrollToAccess()">Akses Sistem</button>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+                <button class="nav-cta-enterprise" onclick="scrollToAccess()">
+                    <span>Access System</span>
+                    <span class="nav-arrow">→</span>
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span class="badge">🏆 Enterprise Grade Solution</span>
-                </div>
-                <h1 class="hero-title">
-                    <span class="title-gradient">InvManage</span>
-                    <span class="title-accent">Enterprise</span>
-                </h1>
-                <p class="hero-subtitle">
-                    Sistem Manajemen Inventaris Profesional untuk Bisnis Modern.
-                    Kontrol penuh atas aset perusahaan dengan analitik real-time dan keamanan enterprise-grade.
-                </p>
-                <div class="hero-features">
-                    <div class="feature-item">
-                        <div class="feature-icon">🔒</div>
-                        <span>Keamanan Enterprise</span>
+    <!-- Enterprise Hero Section -->
+    <section class="enterprise-hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge-enterprise">
+                        <span class="enterprise-badge">🏆 Enterprise-Grade Solution</span>
                     </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">📊</div>
-                        <span>Analytics Real-time</span>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">⚡</div>
-                        <span>Performa Tinggi</span>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">🌐</div>
-                        <span>Akses 24/7</span>
-                    </div>
-                </div>
-                <div class="hero-actions">
-                    <button class="btn-primary hero-btn" onclick="scrollToAccess()">
-                        <span>Akses Dashboard</span>
-                        <span class="btn-arrow">→</span>
-                    </button>
-                    <button class="btn-secondary hero-btn" onclick="scrollToFeatures()">
-                        <span>Pelajari Lebih Lanjut</span>
-                    </button>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="hero-dashboard-preview">
-                    <div class="preview-header">
-                        <div class="preview-dots">
-                            <span></span><span></span><span></span>
+                    <h1 class="hero-title-enterprise">
+                        <span class="title-main">InvManage</span>
+                        <span class="title-accent-enterprise">Enterprise</span>
+                    </h1>
+                    <p class="hero-subtitle-enterprise">
+                        Professional Inventory Management System for Modern Businesses.
+                        Complete control over company assets with real-time analytics and enterprise-grade security.
+                    </p>
+                    <div class="hero-features-enterprise">
+                        <div class="feature-chip">
+                            <div class="chip-icon">🔒</div>
+                            <span>Enterprise Security</span>
                         </div>
-                        <div class="preview-title">InvManage Dashboard</div>
-                    </div>
-                    <div class="preview-content">
-                        <div class="preview-stats">
-                            <div class="stat-item">
-                                <div class="stat-number">1,247</div>
-                                <div class="stat-label">Total Items</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">89</div>
-                                <div class="stat-label">Active Loans</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">156</div>
-                                <div class="stat-label">Users</div>
-                            </div>
+                        <div class="feature-chip">
+                            <div class="chip-icon">📊</div>
+                            <span>Real-time Analytics</span>
                         </div>
-                        <div class="preview-chart">
-                            <div class="chart-bar" style="height: 60%"></div>
-                            <div class="chart-bar" style="height: 80%"></div>
-                            <div class="chart-bar" style="height: 40%"></div>
-                            <div class="chart-bar" style="height: 90%"></div>
-                            <div class="chart-bar" style="height: 70%"></div>
+                        <div class="feature-chip">
+                            <div class="chip-icon">⚡</div>
+                            <span>High Performance</span>
+                        </div>
+                        <div class="feature-chip">
+                            <div class="chip-icon">🌐</div>
+                            <span>24/7 Access</span>
+                        </div>
+                    </div>
+                    <div class="hero-actions-enterprise">
+                        <button class="btn-primary-enterprise" onclick="scrollToAccess()">
+                            <span>Access Dashboard</span>
+                            <span class="btn-arrow-enterprise">→</span>
+                        </button>
+                        <button class="btn-secondary-enterprise" onclick="scrollToFeatures()">
+                            <span>Learn More</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="hero-visual-enterprise">
+                    <div class="dashboard-preview-enterprise">
+                        <div class="preview-header-enterprise">
+                            <div class="preview-controls">
+                                <span class="control-dot"></span>
+                                <span class="control-dot"></span>
+                                <span class="control-dot"></span>
+                            </div>
+                            <div class="preview-title-enterprise">InvManage Dashboard</div>
+                        </div>
+                        <div class="preview-content-enterprise">
+                            <div class="preview-metrics">
+                                <div class="metric-card">
+                                    <div class="metric-value">1,247</div>
+                                    <div class="metric-label">Total Items</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">89</div>
+                                    <div class="metric-label">Active Loans</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">156</div>
+                                    <div class="metric-label">Users</div>
+                                </div>
+                            </div>
+                            <div class="preview-chart-enterprise">
+                                <div class="chart-bar-enterprise chart-bar-60"></div>
+                                <div class="chart-bar-enterprise chart-bar-80"></div>
+                                <div class="chart-bar-enterprise chart-bar-40"></div>
+                                <div class="chart-bar-enterprise chart-bar-90"></div>
+                                <div class="chart-bar-enterprise chart-bar-70"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -125,74 +120,74 @@
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="features-section">
+    <!-- Enterprise Features Section -->
+    <section id="features" class="enterprise-features">
         <div class="container">
-            <div class="section-header">
-                <h2>Fitur Unggulan</h2>
-                <p>Teknologi terdepan untuk manajemen inventaris yang efisien</p>
+            <div class="section-header-enterprise">
+                <h2>Enterprise Features</h2>
+                <p>Cutting-edge technology for efficient inventory management</p>
             </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon-large">📊</div>
+            <div class="features-grid-enterprise">
+                <div class="feature-card-enterprise stagger-1">
+                    <div class="feature-icon-enterprise">📊</div>
                     <h3>Dashboard Analytics</h3>
-                    <p>Monitoring real-time dengan visualisasi data yang komprehensif untuk pengambilan keputusan yang tepat.</p>
-                    <ul>
+                    <p>Real-time monitoring with comprehensive data visualization for informed decision making.</p>
+                    <ul class="feature-list">
                         <li>Real-time inventory tracking</li>
                         <li>Advanced reporting system</li>
                         <li>Predictive analytics</li>
                         <li>Custom dashboard widgets</li>
                     </ul>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-large">👥</div>
+                <div class="feature-card-enterprise stagger-2">
+                    <div class="feature-icon-enterprise">👥</div>
                     <h3>User Management</h3>
-                    <p>Sistem manajemen pengguna yang fleksibel dengan role-based access control untuk keamanan maksimal.</p>
-                    <ul>
+                    <p>Flexible user management system with role-based access control for maximum security.</p>
+                    <ul class="feature-list">
                         <li>Role-based permissions</li>
                         <li>User activity monitoring</li>
                         <li>Secure authentication</li>
                         <li>Profile management</li>
                     </ul>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-large">🔄</div>
+                <div class="feature-card-enterprise stagger-3">
+                    <div class="feature-icon-enterprise">🔄</div>
                     <h3>Borrowing System</h3>
-                    <p>Proses peminjaman dan pengembalian yang streamlined dengan tracking otomatis dan notifikasi.</p>
-                    <ul>
+                    <p>Streamlined borrowing and return process with automatic tracking and notifications.</p>
+                    <ul class="feature-list">
                         <li>Automated approval workflow</li>
                         <li>Due date tracking</li>
                         <li>Overdue notifications</li>
                         <li>Return confirmations</li>
                     </ul>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-large">📱</div>
+                <div class="feature-card-enterprise stagger-4">
+                    <div class="feature-icon-enterprise">📱</div>
                     <h3>Mobile Responsive</h3>
-                    <p>Akses penuh dari desktop hingga mobile dengan interface yang konsisten dan user-friendly.</p>
-                    <ul>
+                    <p>Full access from desktop to mobile with consistent and user-friendly interface.</p>
+                    <ul class="feature-list">
                         <li>Responsive design</li>
                         <li>Touch-optimized interface</li>
                         <li>Offline capabilities</li>
                         <li>Cross-device sync</li>
                     </ul>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-large">🔒</div>
+                <div class="feature-card-enterprise stagger-5">
+                    <div class="feature-icon-enterprise">🔒</div>
                     <h3>Enterprise Security</h3>
-                    <p>Keamanan tingkat enterprise dengan enkripsi end-to-end dan audit trail yang komprehensif.</p>
-                    <ul>
+                    <p>Enterprise-grade security with end-to-end encryption and comprehensive audit trails.</p>
+                    <ul class="feature-list">
                         <li>End-to-end encryption</li>
                         <li>Audit logging</li>
                         <li>Two-factor authentication</li>
                         <li>Data backup & recovery</li>
                     </ul>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon-large">⚡</div>
+                <div class="feature-card-enterprise stagger-6">
+                    <div class="feature-icon-enterprise">⚡</div>
                     <h3>High Performance</h3>
-                    <p>Arsitektur yang dioptimalkan untuk performa tinggi dengan caching dan lazy loading.</p>
-                    <ul>
+                    <p>Optimized architecture for high performance with caching and lazy loading.</p>
+                    <ul class="feature-list">
                         <li>Fast loading times</li>
                         <li>Optimized queries</li>
                         <li>Caching system</li>
@@ -203,120 +198,124 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="stats-section">
+    <!-- Enterprise Stats Section -->
+    <section class="enterprise-stats">
         <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item-large">
-                    <div class="stat-number-large">10,000+</div>
-                    <div class="stat-label-large">Items Managed</div>
-                    <div class="stat-description">Barang inventaris yang dikelola dengan sistematis</div>
+            <div class="stats-grid-enterprise">
+                <div class="stat-card-enterprise stagger-1">
+                    <div class="stat-icon-enterprise">📦</div>
+                    <div class="stat-number-enterprise">10,000+</div>
+                    <div class="stat-label-enterprise">Items Managed</div>
+                    <div class="stat-description-enterprise">Systematically managed inventory items</div>
                 </div>
-                <div class="stat-item-large">
-                    <div class="stat-number-large">500+</div>
-                    <div class="stat-label-large">Active Users</div>
-                    <div class="stat-description">Pengguna aktif yang memanfaatkan sistem</div>
+                <div class="stat-card-enterprise stagger-2">
+                    <div class="stat-icon-enterprise">👥</div>
+                    <div class="stat-number-enterprise">500+</div>
+                    <div class="stat-label-enterprise">Active Users</div>
+                    <div class="stat-description-enterprise">Active users utilizing the system</div>
                 </div>
-                <div class="stat-item-large">
-                    <div class="stat-number-large">99.9%</div>
-                    <div class="stat-label-large">Uptime</div>
-                    <div class="stat-description">Tingkat ketersediaan sistem yang tinggi</div>
+                <div class="stat-card-enterprise stagger-3">
+                    <div class="stat-icon-enterprise">⚡</div>
+                    <div class="stat-number-enterprise">99.9%</div>
+                    <div class="stat-label-enterprise">Uptime</div>
+                    <div class="stat-description-enterprise">High system availability rate</div>
                 </div>
-                <div class="stat-item-large">
-                    <div class="stat-number-large">24/7</div>
-                    <div class="stat-label-large">Support</div>
-                    <div class="stat-description">Dukungan teknis nonstop untuk kemudahan penggunaan</div>
+                <div class="stat-card-enterprise stagger-4">
+                    <div class="stat-icon-enterprise">🛠️</div>
+                    <div class="stat-number-enterprise">24/7</div>
+                    <div class="stat-label-enterprise">Support</div>
+                    <div class="stat-description-enterprise">Non-stop technical support for ease of use</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Access Portal Section -->
-    <section id="access" class="access-section">
+    <!-- Enterprise Access Portal Section -->
+    <section id="access" class="enterprise-access">
         <div class="container">
-            <div class="access-container">
-                <div class="access-header">
-                    <h2>Portal Akses Sistem</h2>
-                    <p>Pilih level akses yang sesuai dengan kebutuhan Anda</p>
+            <div class="access-container-enterprise">
+                <div class="access-header-enterprise">
+                    <h2>System Access Portal</h2>
+                    <p>Choose the access level that suits your needs</p>
                 </div>
 
-                <div class="role-cards-enterprise">
+                <div class="role-cards-enterprise-new">
                     <!-- Admin Card -->
-                    <div class="role-card-enterprise admin-card">
-                        <div class="card-header">
-                            <div class="role-icon-large">👑</div>
-                            <div class="role-badge admin">Administrator</div>
+                    <div class="role-card-enterprise-new admin-card-enterprise stagger-1">
+                        <div class="card-header-enterprise">
+                            <div class="role-icon-enterprise">👑</div>
+                            <div class="role-badge-enterprise admin">Administrator</div>
                         </div>
-                        <div class="card-content">
+                        <div class="card-content-enterprise">
                             <h4>System Administrator</h4>
-                            <p>Akses penuh ke seluruh sistem dengan kemampuan manajemen komprehensif untuk mengontrol dan mengoptimalkan operasi inventaris perusahaan.</p>
-                            <div class="permissions-list">
-                                <div class="permission-item">
-                                    <span class="permission-icon">📊</span>
-                                    <span>Dashboard & Analytics Lengkap</span>
+                            <p>Full access to the entire system with comprehensive management capabilities to control and optimize company inventory operations.</p>
+                            <div class="permissions-list-enterprise">
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">📊</span>
+                                    <span>Complete Dashboard & Analytics</span>
                                 </div>
-                                <div class="permission-item">
-                                    <span class="permission-icon">👥</span>
-                                    <span>Manajemen User & Roles</span>
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">👥</span>
+                                    <span>User & Role Management</span>
                                 </div>
-                                <div class="permission-item">
-                                    <span class="permission-icon">📋</span>
-                                    <span>Kontrol Inventaris Penuh</span>
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">📋</span>
+                                    <span>Full Inventory Control</span>
                                 </div>
-                                <div class="permission-item">
-                                    <span class="permission-icon">🔧</span>
-                                    <span>Konfigurasi Sistem</span>
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">🔧</span>
+                                    <span>System Configuration</span>
                                 </div>
-                                <div class="permission-item">
-                                    <span class="permission-icon">📈</span>
-                                    <span>Laporan & Reporting Advanced</span>
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">📈</span>
+                                    <span>Advanced Reports & Analytics</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-actions">
-                            <button class="btn-admin-enterprise" onclick="selectRole('admin')">
-                                <span>Masuk sebagai Administrator</span>
-                                <span class="btn-icon">🏢</span>
+                        <div class="card-actions-enterprise">
+                            <button class="btn-admin-enterprise-new" onclick="selectRole('admin')">
+                                <span>Login as Administrator</span>
+                                <span class="btn-icon-enterprise">🏢</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- User Card -->
-                    <div class="role-card-enterprise user-card">
-                        <div class="card-header">
-                            <div class="role-icon-large">👤</div>
-                            <div class="role-badge user">Standard User</div>
+                    <div class="role-card-enterprise-new user-card-enterprise stagger-2">
+                        <div class="card-header-enterprise">
+                            <div class="role-icon-enterprise">👤</div>
+                            <div class="role-badge-enterprise user">Standard User</div>
                         </div>
-                        <div class="card-content">
+                        <div class="card-content-enterprise">
                             <h4>Standard User</h4>
-                            <p>Interface yang intuitif untuk mengelola peminjaman barang, tracking riwayat, dan memberikan feedback untuk meningkatkan sistem.</p>
-                            <div class="permissions-list">
-                                <div class="permission-item">
-                                    <span class="permission-icon">📦</span>
-                                    <span>Browse & Pinjam Barang</span>
+                            <p>Intuitive interface to manage item borrowing, track history, and provide feedback to improve the system.</p>
+                            <div class="permissions-list-enterprise">
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">📦</span>
+                                    <span>Browse & Borrow Items</span>
                                 </div>
-                                <div class="permission-item">
-                                    <span class="permission-icon">📋</span>
-                                    <span>Riwayat Peminjaman</span>
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">📋</span>
+                                    <span>Borrowing History</span>
                                 </div>
-                                <div class="permission-item">
-                                    <span class="permission-icon">💬</span>
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">💬</span>
                                     <span>Feedback & Support</span>
                                 </div>
-                                <div class="permission-item">
-                                    <span class="permission-icon">👤</span>
-                                    <span>Manajemen Profil</span>
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">👤</span>
+                                    <span>Profile Management</span>
                                 </div>
-                                <div class="permission-item">
-                                    <span class="permission-icon">📱</span>
-                                    <span>Akses Mobile Friendly</span>
+                                <div class="permission-item-enterprise">
+                                    <span class="permission-icon-enterprise">📱</span>
+                                    <span>Mobile-Friendly Access</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-actions">
-                            <button class="btn-user-enterprise" onclick="window.location.href='user-login.html'">
-                                <span>Masuk sebagai User</span>
-                                <span class="btn-icon">🚀</span>
+                        <div class="card-actions-enterprise">
+                            <button class="btn-user-enterprise-new" onclick="window.location.href='user-login.html'">
+                                <span>Login as User</span>
+                                <span class="btn-icon-enterprise">🚀</span>
                             </button>
                         </div>
                     </div>
@@ -367,75 +366,69 @@
         </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="about-section">
+    <!-- Enterprise About Section -->
+    <section id="about" class="enterprise-about">
         <div class="container">
-            <div class="about-content">
-                <div class="about-text">
-                    <h2>Tentang InvManage Enterprise</h2>
+            <div class="about-grid-enterprise">
+                <div class="about-content-enterprise">
+                    <h2>About InvManage Enterprise</h2>
                     <p>
-                        InvManage Enterprise adalah solusi manajemen inventaris terdepan yang dirancang khusus untuk
-                        bisnis modern. Dengan teknologi terkini dan interface yang intuitif, sistem ini memungkinkan
-                        perusahaan untuk mengelola aset mereka dengan efisien dan akurat.
+                        InvManage Enterprise is a leading inventory management solution designed specifically for
+                        modern businesses. With cutting-edge technology and intuitive interface, this system enables
+                        companies to manage their assets efficiently and accurately.
                     </p>
                     <p>
-                        Didukung oleh tim developer berpengalaman dan arsitektur yang scalable, InvManage Enterprise
-                        siap mendukung pertumbuhan bisnis Anda dari startup hingga enterprise-level.
+                        Supported by an experienced developer team and scalable architecture, InvManage Enterprise
+                        is ready to support your business growth from startup to enterprise-level.
                     </p>
-                    <div class="about-stats">
-                        <div class="about-stat">
-                            <div class="stat-number">3+</div>
-                            <div class="stat-text">Tahun Pengembangan</div>
+                    <div class="about-stats-enterprise">
+                        <div class="about-stat-enterprise">
+                            <div class="stat-number-about">3+</div>
+                            <div class="stat-text-about">Years of Development</div>
                         </div>
-                        <div class="about-stat">
-                            <div class="stat-number">50+</div>
-                            <div class="stat-text">Fitur Enterprise</div>
+                        <div class="about-stat-enterprise">
+                            <div class="stat-number-about">50+</div>
+                            <div class="stat-text-about">Enterprise Features</div>
                         </div>
-                        <div class="about-stat">
-                            <div class="stat-number">100%</div>
-                            <div class="stat-text">Responsive Design</div>
+                        <div class="about-stat-enterprise">
+                            <div class="stat-number-about">100%</div>
+                            <div class="stat-text-about">Responsive Design</div>
                         </div>
                     </div>
                 </div>
-                <div class="about-visual">
-                    <div class="about-image">
-                        <div class="image-overlay"></div>
-                        <div class="floating-elements">
-                            <div class="floating-element el-1">📊</div>
-                            <div class="floating-element el-2">🔒</div>
-                            <div class="floating-element el-3">⚡</div>
-                            <div class="floating-element el-4">📱</div>
-                        </div>
+                <div class="about-visual-enterprise">
+                    <div class="about-dashboard-preview">
+                        <div class="preview-overlay"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="contact-section">
+    <!-- Enterprise Contact Section -->
+    <section id="contact" class="enterprise-contact">
         <div class="container">
-            <div class="contact-content">
-                <h2>Hubungi Kami</h2>
-                <p>Butuh bantuan atau memiliki pertanyaan? Tim kami siap membantu Anda.</p>
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-icon">📧</div>
-                        <div class="contact-details">
+            <div class="contact-content-enterprise">
+                <h2>Contact Us</h2>
+                <p>Need help or have questions? Our team is ready to assist you.</p>
+                <div class="contact-grid-enterprise">
+                    <div class="contact-card-enterprise">
+                        <div class="contact-icon-enterprise">📧</div>
+                        <div class="contact-details-enterprise">
                             <h4>Email Support</h4>
                             <p>support@invmanage.com</p>
                         </div>
                     </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">📞</div>
-                        <div class="contact-details">
+                    <div class="contact-card-enterprise">
+                        <div class="contact-icon-enterprise">📞</div>
+                        <div class="contact-details-enterprise">
                             <h4>Phone Support</h4>
                             <p>+62 21 1234 5678</p>
                         </div>
                     </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">💬</div>
-                        <div class="contact-details">
+                    <div class="contact-card-enterprise">
+                        <div class="contact-icon-enterprise">💬</div>
+                        <div class="contact-details-enterprise">
                             <h4>Live Chat</h4>
                             <p>Available 24/7</p>
                         </div>
@@ -445,60 +438,68 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="enterprise-footer">
+    <!-- Enterprise Footer -->
+    <footer class="enterprise-footer-new">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <img src="image.png" alt="InvManage Logo">
-                    <span>InvManage Enterprise</span>
-                </div>
-                <div class="footer-links">
-                    <div class="footer-column">
-                        <h4>Product</h4>
-                        <a href="#features">Features</a>
-                        <a href="#pricing">Pricing</a>
-                        <a href="#security">Security</a>
+            <div class="footer-content-enterprise">
+                <div class="footer-main">
+                    <div class="footer-brand">
+                        <div class="footer-logo-enterprise">
+                            <div class="footer-logo-icon">🏢</div>
+                            <span>InvManage Enterprise</span>
+                        </div>
+                        <p class="footer-description">
+                            Professional inventory management system for modern businesses.
+                            Complete control over company assets with real-time analytics.
+                        </p>
                     </div>
-                    <div class="footer-column">
-                        <h4>Company</h4>
-                        <a href="#about">About</a>
-                        <a href="#careers">Careers</a>
-                        <a href="#press">Press</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Support</h4>
-                        <a href="#docs">Documentation</a>
-                        <a href="#help">Help Center</a>
-                        <a href="#contact">Contact</a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 InvManage Enterprise. All rights reserved.</p>
-                <div class="footer-team">
-                    <div class="team-member">
-                        <div class="team-role">Software Architect & Developer</div>
-                        <div class="team-name">
-                            <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
-                                Alifito Rabbani Cahyono
-                            </a>
+                    <div class="footer-links-enterprise">
+                        <div class="footer-column-enterprise">
+                            <h4>Product</h4>
+                            <a href="#features">Features</a>
+                            <a href="#pricing">Pricing</a>
+                            <a href="#security">Security</a>
+                        </div>
+                        <div class="footer-column-enterprise">
+                            <h4>Company</h4>
+                            <a href="#about">About</a>
+                            <a href="#careers">Careers</a>
+                            <a href="#press">Press</a>
+                        </div>
+                        <div class="footer-column-enterprise">
+                            <h4>Support</h4>
+                            <a href="#docs">Documentation</a>
+                            <a href="#help">Help Center</a>
+                            <a href="#contact">Contact</a>
                         </div>
                     </div>
-                    <div class="team-member">
-                        <div class="team-role">UI/UX Architect & Developer</div>
-                        <div class="team-name">
-                            <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
-                                Satria Febry Andanu
-                            </a>
+                </div>
+                <div class="footer-bottom-enterprise">
+                    <p>&copy; 2025 InvManage Enterprise. All rights reserved.</p>
+                    <div class="footer-team-enterprise">
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">Software Architect & Developer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+                                    Alifito Rabbani Cahyono
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="team-member">
-                        <div class="team-role">Data Analyst & Engineer</div>
-                        <div class="team-name">
-                            <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
-                                Naufal Thafhan
-                            </a>
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">UI/UX Architect & Developer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+                                    Satria Febry Andanu
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">Data Analyst & Engineer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+                                    Naufal Thafhan
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1277,6 +1278,6 @@
         });
     </script>
 
-    <script src="app.js?v=20251226"></script>
+    <script src="app.js?v=20251227"></script>
 </body>
 </html>

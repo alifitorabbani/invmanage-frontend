@@ -14,11 +14,26 @@
       <h1>InvManage Admin</h1>
 
       <div class="menu">
-        <a href="dashboard.html" class="menu-item">Dashboard</a>
-        <a href="riwayat.html" class="menu-item">Riwayat Transaksi</a>
-        <a href="laporan.html" class="menu-item">📊 Laporan & Analitik</a>
-        <a href="profil.html" class="menu-item">Profil</a>
-        <a href="feedback.html" class="menu-item active">Feedback</a>
+        <a href="dashboard.html" class="menu-item">📊 Dashboard</a>
+        <a href="admin-verification.html" class="menu-item">✅ Verification</a>
+        <a href="riwayat.html" class="menu-item">📋 Riwayat Transaksi</a>
+        <a href="laporan.html" class="menu-item">📈 Laporan & Analitik</a>
+        <a href="profil.html" class="menu-item">👤 Profil</a>
+        <a href="feedback.html" class="menu-item active">💬 Feedback</a>
+      </div>
+
+      <!-- User Info Section -->
+      <div class="sidebar-user">
+        <div class="user-avatar">
+          <span id="sidebarUserInitial">A</span>
+        </div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+        <button class="logout-btn" onclick="if(confirm('Apakah Anda yakin ingin keluar?')) { localStorage.clear(); sessionStorage.clear(); window.location.href = 'index.html'; }" title="Logout">
+          <span>🚪</span>
+        </button>
       </div>
     </div>
 
@@ -44,6 +59,13 @@
             <!-- diisi lewat app.js -->
           </tbody>
         </table>
+
+        <!-- Pagination Controls -->
+        <div id="feedbackPagination" class="pagination-container" style="display: none;">
+          <button id="feedbackPrevPage" class="btn-secondary" onclick="changeFeedbackPage(-1)">« Previous</button>
+          <span id="feedbackPageInfo">Page 1 of 1</span>
+          <button id="feedbackNextPage" class="btn-secondary" onclick="changeFeedbackPage(1)">Next »</button>
+        </div>
       </div>
     </div>
   </div>
@@ -82,21 +104,126 @@
   <script>
     console.log('Feedback page loading...');
 
-    function ensureFeedbackFunctions() {
-      const requiredFunctions = [
-        'loadFeedback', 'showNotification', 'sanitizeInput'
-      ];
+    let currentFeedbackSection = 0;
+    let allFeedbackData = [];
 
-      const missingFunctions = requiredFunctions.filter(fn => typeof window[fn] !== 'function');
-      if (missingFunctions.length > 0) {
-        console.log('⏳ Missing functions:', missingFunctions.join(', '));
-        return false;
+    // Define loadFeedback function locally for this page
+    window.loadFeedback = async function() {
+      console.log('🔄 loadFeedback function called (local)');
+
+      const tableBody = document.querySelector("#tabelFeedback tbody");
+      if (!tableBody) {
+        console.error('❌ Feedback table body not found');
+        return;
       }
-      console.log('✅ All Feedback functions available');
-      return true;
+
+      console.log('✅ Loading feedback...');
+
+      // Show loading state
+      tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">🔄 Loading feedback...</td></tr>';
+
+      // Display sample data first
+      const sampleData = window.sampleFeedback || [];
+      console.log('Sample feedback data available:', sampleData.length, 'items');
+
+      if (sampleData.length > 0) {
+        allFeedbackData = [...sampleData];
+        displayFeedback();
+        console.log('✅ Sample feedback displayed');
+      }
+
+      // Try to load real feedback from backend
+      try {
+        console.log('🔄 Attempting to load real feedback from API...');
+
+        const response = await fetch('http://localhost:8001/api/feedback/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        console.log('API response status:', response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Real feedback loaded:', data.length, 'records');
+
+          if (Array.isArray(data) && data.length > 0) {
+            allFeedbackData = [...data];
+            displayFeedback();
+            console.log('✅ Real feedback displayed');
+          }
+        } else {
+          console.log('API request failed, keeping sample data');
+        }
+      } catch (err) {
+        console.error('Error loading real feedback:', err.message);
+        console.log('Keeping sample data due to error');
+      }
+    };
+
+    function displayFeedback() {
+      const tableBody = document.querySelector("#tabelFeedback tbody");
+      if (!tableBody) return;
+
+      const itemsPerSection = 10;
+      const totalSections = Math.ceil(allFeedbackData.length / itemsPerSection);
+
+      if (totalSections === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">Tidak ada feedback</td></tr>';
+        document.getElementById('feedbackPagination').style.display = 'none';
+        return;
+      }
+
+      const startIndex = currentFeedbackSection * itemsPerSection;
+      const endIndex = Math.min(startIndex + itemsPerSection, allFeedbackData.length);
+      const sectionData = allFeedbackData.slice(startIndex, endIndex);
+
+      tableBody.innerHTML = "";
+      sectionData.forEach((f) => {
+        const namaUser = f.user_nama || f.user || "Unknown";
+        const tanggal = f.tanggal ? new Date(f.tanggal).toLocaleString("id-ID") : "-";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${namaUser}</td>
+          <td>${f.pesan || '-'}</td>
+          <td>${tanggal}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      // Update pagination
+      const pagination = document.getElementById('feedbackPagination');
+      const pageInfo = document.getElementById('feedbackPageInfo');
+      const prevBtn = document.getElementById('feedbackPrevPage');
+      const nextBtn = document.getElementById('feedbackNextPage');
+
+      if (totalSections > 1) {
+        pagination.style.display = 'flex';
+        pageInfo.textContent = `Section ${currentFeedbackSection + 1} of ${totalSections}`;
+        prevBtn.disabled = currentFeedbackSection === 0;
+        nextBtn.disabled = currentFeedbackSection === totalSections - 1;
+      } else {
+        pagination.style.display = 'none';
+      }
     }
 
-    function initFeedback() {
+    function changeFeedbackPage(delta) {
+      const itemsPerSection = 10;
+      const totalSections = Math.ceil(allFeedbackData.length / itemsPerSection);
+      const newSection = currentFeedbackSection + delta;
+
+      if (newSection >= 0 && newSection < totalSections) {
+        currentFeedbackSection = newSection;
+        displayFeedback();
+      }
+    }
+
+    // Simple initialization
+    function initFeedbackPage() {
       console.log('🚀 Initializing Feedback page...');
 
       // Check if table exists
@@ -107,32 +234,22 @@
       }
       console.log('✅ Feedback table body found');
 
-      // Load data immediately
-      if (typeof loadFeedback === 'function') {
-        console.log('🔄 Calling loadFeedback...');
-        loadFeedback();
-      } else {
-        console.error('❌ loadFeedback function not available');
-        tableBody.innerHTML = '<tr><td colspan="3" style="color: red;">❌ Function not loaded</td></tr>';
-      }
+      // Load data
+      window.loadFeedback();
     }
 
-    // Wait for functions to be available
-    function waitForFeedbackFunctions() {
-      if (ensureFeedbackFunctions()) {
-        initFeedback();
-      } else {
-        setTimeout(waitForFeedbackFunctions, 50);
-      }
-    }
+    // Initialize when page loads
+    window.addEventListener("load", () => {
+      console.log('💬 Feedback window load fired');
+      initFeedbackPage();
+    });
 
     document.addEventListener("DOMContentLoaded", () => {
       console.log('💬 Feedback DOMContentLoaded fired');
-      // Start waiting for functions
-      setTimeout(waitForFeedbackFunctions, 10);
+      setTimeout(initFeedbackPage, 100);
     });
   </script>
   <script src="data.js"></script>
-  <script src="app.js?v=20251226"></script>
+  <script src="app.js?v=20251227"></script>
 </body>
 </html>

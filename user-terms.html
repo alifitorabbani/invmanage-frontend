@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
+  <title>Syarat & Ketentuan User - InvManage</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .terms-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .terms-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .terms-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .terms-subtitle {
+      color: #64748b;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .terms-section {
+      margin-bottom: 35px;
+    }
+
+    .terms-section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #667eea;
+      display: inline-block;
+    }
+
+    .terms-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #374151;
+      margin: 25px 0 12px 0;
+    }
+
+    .terms-section p {
+      color: #4b5563;
+      line-height: 1.7;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+
+    .terms-section ul {
+      margin: 15px 0;
+      padding-left: 25px;
+    }
+
+    .terms-section li {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .terms-highlight {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+      margin: 20px 0;
+    }
+
+    .terms-highlight h4 {
+      color: #1e40af;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .terms-highlight p {
+      color: #1e3a8a;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      margin-top: 30px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+
+    .user-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .terms-container {
+        padding: 25px;
+        margin: 10px;
+      }
+
+      .terms-header h1 {
+        font-size: 24px;
+      }
+    }
+
+    /* Copyright Footer for User Terms */
+    .copyright-footer-user {
+      background: rgba(0,0,0,0.9);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 20px 0;
+      margin-top: 40px;
+      text-align: center;
+      color: rgba(255,255,255,0.8);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .copyright-team-user {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .team-member-user {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .team-role-user {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .team-name-user {
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
+    }
+
+    .team-name-user a {
+      color: #10b981;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .team-name-user a:hover {
+      color: #34d399;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="terms-container">
+  <div class="terms-header">
+    <h1>Syarat & Ketentuan User <span class="user-badge">Standard User</span></h1>
+    <p class="terms-subtitle">InvManage - Sistem Manajemen Inventaris untuk User Standard</p>
+  </div>
+
+  <div class="terms-section">
+    <h2>1. Pendahuluan</h2>
+    <p>Selamat datang di InvManage User Portal. Syarat dan ketentuan ini mengatur penggunaan akun user standard sistem manajemen inventaris kami. Dengan membuat akun user, Anda menyetujui untuk terikat oleh syarat dan ketentuan ini.</p>
+
+    <div class="terms-highlight">
+      <h4>🎯 Fokus pada Performa</h4>
+      <p>Sistem ini dirancang untuk memberikan performa tinggi dengan waktu respons cepat dan interface yang user-friendly.</p>
+    </div>
+  </div>
+
+  <div class="terms-section">
+    <h2>2. Definisi</h2>
+    <ul>
+      <li><strong>"User"</strong> atau <strong>"Pengguna Standard"</strong> merujuk kepada Anda sebagai pengguna akun standard</li>
+      <li><strong>"Sistem"</strong> merujuk kepada InvManage - platform manajemen inventaris</li>
+      <li><strong>"Barang"</strong> merujuk kepada item inventaris yang dapat dipinjam</li>
+      <li><strong>"Peminjaman"</strong> merujuk kepada proses meminjam dan mengembalikan barang</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>3. Kewajiban User</h2>
+    <p>Sebagai user InvManage, Anda berkewajiban untuk:</p>
+    <ul>
+      <li>🔐 <strong>Keamanan Akun</strong>: Menjaga kerahasiaan kredensial login dan tidak membagikannya</li>
+      <li>📦 <strong>Penggunaan Barang</strong>: Menggunakan barang yang dipinjam dengan bertanggung jawab</li>
+      <li>⏰ <strong>Pengembalian Tepat Waktu</strong>: Mengembalikan barang sesuai jadwal yang ditentukan</li>
+      <li>📝 <strong>Pelaporan Kerusakan</strong>: Melaporkan kerusakan atau kehilangan barang segera</li>
+      <li>💬 <strong>Feedback Konstruktif</strong>: Memberikan feedback yang membantu untuk perbaikan sistem</li>
+      <li>📊 <strong>Pemantauan Aktivitas</strong>: Memantau riwayat peminjaman dan aktivitas pribadi</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>4. Fitur yang Dapat Diakses</h2>
+    <p>User standard memiliki akses ke fitur-fitur berikut:</p>
+    <ul>
+      <li>📊 <strong>Dashboard Pribadi</strong>: Melihat ringkasan aktivitas dan status peminjaman</li>
+      <li>📦 <strong>Browse Inventaris</strong>: Melihat katalog barang yang tersedia</li>
+      <li>📋 <strong>Form Peminjaman</strong>: Mengajukan permohonan peminjaman barang</li>
+      <li>📅 <strong>Riwayat Peminjaman</strong>: Melihat history peminjaman dan pengembalian</li>
+      <li>💬 <strong>Feedback System</strong>: Memberikan penilaian dan komentar</li>
+      <li>👤 <strong>Profil Pengguna</strong>: Mengelola informasi pribadi dan preferensi</li>
+      <li>🔔 <strong>Notifikasi</strong>: Menerima pemberitahuan tentang status peminjaman</li>
+      <li>📈 <strong>Laporan Pribadi</strong>: Melihat statistik penggunaan pribadi</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>5. Kebijakan Performa Sistem</h2>
+    <h3>Waktu Respons</h3>
+    <ul>
+      <li>⏱️ <strong>Loading Dashboard</strong>: Maksimal 2 detik untuk halaman utama</li>
+      <li>🔍 <strong>Pencarian Barang</strong>: Hasil pencarian muncul dalam 1 detik</li>
+      <li>📝 <strong>Submit Form</strong>: Proses peminjaman selesai dalam 3 detik</li>
+      <li>📊 <strong>Generate Laporan</strong>: Laporan pribadi siap dalam 5 detik</li>
+    </ul>
+
+    <h3>Ketersediaan Sistem</h3>
+    <ul>
+      <li>🟢 <strong>Uptime</strong>: Sistem tersedia 99.5% dalam sebulan</li>
+      <li>🔄 <strong>Backup Otomatis</strong>: Data dicadangkan setiap 6 jam</li>
+      <li>🚨 <strong>Maintenance</strong>: Pemeliharaan terjadwal pada jam 02:00-04:00 WIB</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>6. Larangan dan Batasan</h2>
+    <p>User dilarang untuk:</p>
+    <ul>
+      <li>🚫 <strong>Misuse of System</strong>: Menyalahgunakan sistem untuk kepentingan di luar peminjaman</li>
+      <li>🔒 <strong>Data Tampering</strong>: Mencoba mengubah data sistem atau data pengguna lain</li>
+      <li>📤 <strong>Unauthorized Sharing</strong>: Membagikan akses akun kepada pihak lain</li>
+      <li>🗑️ <strong>Data Deletion</strong>: Menghapus data penting tanpa izin</li>
+      <li>🔐 <strong>Security Bypass</strong>: Mencoba melewati batasan keamanan sistem</li>
+      <li>📤 <strong>Spam Submission</strong>: Mengirim feedback atau permohonan berulang tanpa alasan</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>7. Kebijakan Peminjaman</h2>
+    <h3>Proses Peminjaman</h3>
+    <ul>
+      <li>📋 <strong>Permohonan</strong>: Ajukan peminjaman melalui form online</li>
+      <li>⏳ <strong>Persetujuan</strong>: Menunggu approval dari admin dalam 24 jam</li>
+      <li>📦 <strong>Pickup</strong>: Ambil barang di lokasi yang ditentukan</li>
+      <li>📅 <strong>Durasi</strong>: Maksimal peminjaman 30 hari per item</li>
+      <li>🔄 <strong>Perpanjangan</strong>: Dapat diperpanjang maksimal 2 kali</li>
+    </ul>
+
+    <h3>Tanggung Jawab</h3>
+    <ul>
+      <li>💰 <strong>Biaya Kerusakan</strong>: Bertanggung jawab atas kerusakan yang disebabkan</li>
+      <li>⚖️ <strong>Denda Keterlambatan</strong>: Denda Rp 1.000 per hari keterlambatan</li>
+      <li>📝 <strong>Laporan Kehilangan</strong>: Wajib melaporkan kehilangan dalam 24 jam</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>8. Kebijakan Privasi</h2>
+    <p>Data pribadi Anda akan:</p>
+    <ul>
+      <li>🔒 <strong>Dilindungi</strong>: Data dienkripsi dan disimpan dengan aman</li>
+      <li>📋 <strong>Digunakan Terbatas</strong>: Hanya untuk keperluan sistem manajemen inventaris</li>
+      <li>🚫 <strong>Tidak Dibagikan</strong>: Tidak akan dibagikan ke pihak ketiga tanpa izin</li>
+      <li>🗑️ <strong>Dapat Dihapus</strong>: Anda dapat meminta penghapusan data kapan saja</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>9. Penghentian Akses</h2>
+    <p>Akses user dapat dihentikan jika:</p>
+    <ul>
+      <li>❌ Melanggar syarat dan ketentuan ini</li>
+      <li>💰 Menunggak pembayaran denda lebih dari 30 hari</li>
+      <li>📦 Menyebabkan kerusakan berat pada barang sistem</li>
+      <li>🚪 Mengundurkan diri dari organisasi</li>
+      <li>⚖️ Pelanggaran kebijakan perusahaan</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h2>10. Persetujuan</h2>
+    <p>Dengan membuat akun user InvManage, Anda menyatakan bahwa:</p>
+    <ul>
+      <li>✅ Anda memahami dan menyetujui semua syarat dan ketentuan ini</li>
+      <li>✅ Anda akan menggunakan sistem sesuai dengan tujuan yang dimaksudkan</li>
+      <li>✅ Anda bertanggung jawab atas semua aktivitas di akun Anda</li>
+      <li>✅ Anda akan menjaga keamanan dan kerahasiaan kredensial login</li>
+      <li>✅ Anda akan mematuhi semua kebijakan dan prosedur yang berlaku</li>
+    </ul>
+
+    <div class="terms-highlight">
+      <h4>🎯 Komitmen untuk Performa Optimal</h4>
+      <p>Sebagai user, Anda berkontribusi pada performa sistem dengan menggunakan fitur-fitur yang tersedia secara efisien dan bertanggung jawab.</p>
+    </div>
+  </div>
+
+  <div style="text-align: center;">
+    <a href="user-login.html" class="back-button">
+      ← Kembali ke Login User
+    </a>
+  </div>
+
+  <!-- Copyright Footer -->
+  <footer class="copyright-footer-user">
+    <p>&copy; 2025 InvManage. All rights reserved.</p>
+    <div class="copyright-team-user">
+      <div class="team-member-user">
+        <div class="team-role-user">Software Architect & Developer</div>
+        <div class="team-name-user">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+            Alifito Rabbani Cahyono
+          </a>
+        </div>
+      </div>
+      <div class="team-member-user">
+        <div class="team-role-user">UI/UX Architect & Developer</div>
+        <div class="team-name-user">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+            Satria Febry Andanu
+          </a>
+        </div>
+      </div>
+      <div class="team-member-user">
+        <div class="team-role-user">Data Analyst & Engineer</div>
+        <div class="team-name-user">
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+            Naufal Thafhan
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html></content>
+</xai:function_call">The user has provided feedback on the name="User Terms">Created comprehensive user-specific terms and conditions page focusing on performance and accessible features
+
+<environment_details>
+# VSCode Visible Files
+user-terms.html
+
+# VSCode Open Tabs
+terms.html,README-Laporan.md,sample-data-generator.js,README-Sample-Data.md,admin-terms.html,test_frontend.html,sample-data.html,start-full-dev.sh,user-feedback.html,system-canvas.md,data.js,user-profil.html,package.json,start-dev.sh,dashboard.html,user-dashboard.html,user-peminjaman.html,app.js,riwayat.html,laporan.html
+
+# Current Time
+Current time in ISO 8601 UTC format: 2026-01-12T12:49:08.916Z
+User time zone: Asia/Jakarta, UTC+7:00
+
+# Current Cost
+$0.00
+
+# Current Mode
+<slug>code</slug>
+<name>Code</name>
+<model>xai/grok-code-fast-1</model>
+<tool_format>native</tool_format>
+You have not created a todo list yet. Create one with `update_todo_list` if your task is complicated or involves multiple steps.
+</environment_details>>@[+][<<xai:function_call name="apply_diff">
+<parameter name="path">user-login.html

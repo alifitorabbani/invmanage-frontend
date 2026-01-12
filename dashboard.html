@@ -7,8 +7,36 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
+    <script src="data.js"></script>
+    <script src="app.js?v=20251227"></script>
+    </head>
 <body>
+    <!-- Enterprise Background -->
+    <div class="enterprise-bg">
+        <div class="bg-gradient-primary"></div>
+        <div class="bg-gradient-secondary"></div>
+        <div class="enterprise-grid"></div>
+    </div>
+
+    <!-- Enterprise Navigation -->
+    <nav class="enterprise-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="nav-logo-icon">🏢</div>
+                <span class="nav-logo-text">InvManage Enterprise</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <button class="nav-cta-enterprise" onclick="window.location.href='admin-login.html'">
+                    <span>Admin Access</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
     <!-- Welcome Notification -->
     <div id="welcomeNotification" class="welcome-message">
         <h3 id="welcomeTitle">Selamat!</h3>
@@ -28,6 +56,10 @@
                 <a href="dashboard.html" class="menu-item active">
                     <span class="menu-icon">📊</span>
                     <span class="menu-text">Dashboard</span>
+                </a>
+                <a href="admin-verification.html" class="menu-item">
+                    <span class="menu-icon">✅</span>
+                    <span class="menu-text">Verification</span>
                 </a>
                 <a href="riwayat.html" class="menu-item">
                     <span class="menu-icon">📋</span>
@@ -56,7 +88,7 @@
                     <div class="user-name" id="sidebarUserName">Admin</div>
                     <div class="user-role">Administrator</div>
                 </div>
-                <button class="logout-btn" onclick="logout()" title="Logout">
+                <button class="logout-btn" title="Logout">
                     <span>🚪</span>
                 </button>
             </div>
@@ -72,14 +104,24 @@
                 </div>
                 <div class="header-right">
                     <div class="header-actions">
-                        <button class="action-btn refresh-btn" onclick="refreshDashboard()" title="Refresh Data">
+                        <button class="action-btn refresh-btn" title="Refresh Data">
                             <span>🔄</span>
                         </button>
-                        <button class="action-btn export-btn" onclick="exportDashboard()" title="Export Data">
+                        <button class="action-btn export-btn" title="Export Data">
                             <span>📥</span>
                         </button>
                         <div class="time-display" id="currentTime">--:--:--</div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Pending Approvals Alert -->
+            <div id="pendingAlert" class="info-state hidden">
+                <div class="info-icon">⏳</div>
+                <div class="info-title">Pending Approvals</div>
+                <div class="info-message">
+                    <span id="pendingCount">0</span> loan requests are waiting for your approval.
+                    <a href="admin-verification.html" class="pending-link">Review now</a>
                 </div>
             </div>
 
@@ -154,22 +196,38 @@
             <div class="quick-actions">
                 <h3>Quick Actions</h3>
                 <div class="actions-grid">
-                    <button class="quick-action-btn" onclick="openBarangModal('add')">
+                    <button class="quick-action-btn">
                         <div class="action-icon">➕</div>
                         <div class="action-text">Tambah Barang</div>
                     </button>
-                    <button class="quick-action-btn" onclick="openTransaksiModal()">
+                    <button class="quick-action-btn">
                         <div class="action-icon">📝</div>
                         <div class="action-text">Input Transaksi</div>
                     </button>
-                    <button class="quick-action-btn" onclick="generateReport()">
+                    <button class="quick-action-btn">
                         <div class="action-icon">📊</div>
                         <div class="action-text">Generate Report</div>
                     </button>
-                    <button class="quick-action-btn" onclick="showUserManagement()">
+                    <button class="quick-action-btn">
                         <div class="action-icon">👥</div>
                         <div class="action-text">Kelola User</div>
                     </button>
+                </div>
+            </div>
+
+            <!-- Quick Verification -->
+            <div class="quick-verification">
+                <div class="activity-header">
+                    <h3>Quick Verification</h3>
+                    <button class="view-all-btn">View All</button>
+                </div>
+                <div class="verification-list" id="quickVerificationList">
+                    <div class="verification-item loading">
+                        <div class="verification-icon">⏳</div>
+                        <div class="verification-content">
+                            <div class="verification-title">Loading pending approvals...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -177,7 +235,7 @@
             <div class="recent-activity">
                 <div class="activity-header">
                     <h3>Aktivitas Terbaru</h3>
-                    <button class="view-all-btn" onclick="viewAllActivity()">Lihat Semua</button>
+                    <button class="view-all-btn">Lihat Semua</button>
                 </div>
                 <div class="activity-list" id="recentActivity">
                     <div class="activity-item loading">
@@ -198,14 +256,46 @@
                         <p>Kelola stok barang dan informasi inventaris</p>
                     </div>
                     <div class="table-actions">
-                        <div class="search-container">
-                            <input type="text" id="searchBarang" placeholder="Cari barang..." class="search-input">
-                            <span class="search-icon">🔍</span>
+                        <div class="search-filters">
+                            <div class="search-container">
+                                <input type="text" id="searchBarang" placeholder="Cari barang..." class="search-input">
+                                <span class="search-icon">🔍</span>
+                                <button class="search-clear" id="clearSearch" title="Clear search">✕</button>
+                            </div>
+                            <div class="filter-container">
+                                <select id="statusFilter" class="filter-select">
+                                    <option value="">Semua Status</option>
+                                    <option value="Tersedia">Tersedia</option>
+                                    <option value="Stok Rendah">Stok Rendah</option>
+                                    <option value="Habis">Habis</option>
+                                </select>
+                                <select id="kategoriFilter" class="filter-select">
+                                    <option value="">Semua Kategori</option>
+                                    <option value="elektronik">Elektronik</option>
+                                    <option value="peralatan">Peralatan</option>
+                                    <option value="aksesoris">Aksesoris</option>
+                                    <option value="lainnya">Lainnya</option>
+                                </select>
+                            </div>
                         </div>
-                        <button class="add-btn" onclick="openBarangModal('add')">
-                            <span class="btn-icon">➕</span>
-                            Tambah Barang
-                        </button>
+                        <div class="action-buttons">
+                            <button class="edit-btn" title="Edit Barang" id="editSelectedBtn">
+                                <span class="btn-icon">✏️</span>
+                                Edit
+                            </button>
+                            <button class="delete-btn" title="Hapus Barang" id="deleteSelectedBtn">
+                                <span class="btn-icon">🗑️</span>
+                                Hapus
+                            </button>
+                            <button class="export-btn" title="Export Data">
+                                <span class="btn-icon">📥</span>
+                                Export
+                            </button>
+                            <button class="add-btn">
+                                <span class="btn-icon">➕</span>
+                                Tambah Barang
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -213,12 +303,12 @@
                     <table id="tabelBarang">
                         <thead>
                             <tr>
+                                <th>No</th>
                                 <th>Nama Barang</th>
                                 <th>Stok</th>
                                 <th>Minimum</th>
                                 <th>Status</th>
                                 <th>Terakhir Update</th>
-                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -231,10 +321,23 @@
                     <div class="table-stats">
                         <span id="tableStats">Menampilkan 0 dari 0 barang</span>
                     </div>
-                    <div class="table-pagination">
-                        <button class="page-btn" id="prevPage" disabled>‹</button>
-                        <span class="page-info" id="pageInfo">Halaman 1</span>
-                        <button class="page-btn" id="nextPage" disabled>›</button>
+                    <div class="table-controls">
+                        <div class="items-per-page">
+                            <label for="itemsPerPage">Tampilkan:</label>
+                            <select id="itemsPerPage" class="items-select">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                        <div class="table-pagination">
+                            <button class="page-btn" id="firstPage" disabled title="Halaman Pertama">«</button>
+                            <button class="page-btn" id="prevPage" disabled title="Sebelumnya">‹</button>
+                            <div class="page-numbers" id="pageNumbers"></div>
+                            <button class="page-btn" id="nextPage" disabled title="Selanjutnya">›</button>
+                            <button class="page-btn" id="lastPage" disabled title="Halaman Terakhir">»</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -335,9 +438,674 @@
         </div>
     </div>
 
+    <!-- Select Item Modal for Edit/Delete -->
+    <div class="modal-bg" id="modalSelectItem">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="selectItemTitle">Pilih Barang untuk Edit/Hapus</h3>
+                <button class="modal-close" onclick="closeSelectItemModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Pilih Barang</label>
+                    <select id="selectItemBarang" onchange="onItemSelected()">
+                        <option value="">Pilih Barang</option>
+                    </select>
+                </div>
+                <div class="input-group" id="quantityGroup" style="display: none;">
+                    <label id="quantityLabel">Jumlah yang akan dihapus</label>
+                    <input type="number" id="selectItemQuantity" placeholder="Masukkan jumlah" min="1">
+                    <small id="quantityHelp">Kosongkan untuk menghapus semua</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeSelectItemModal()">Batal</button>
+                <button class="btn-primary" onclick="confirmItemSelection()" id="confirmItemBtn">Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Dashboard Charts
         let borrowingTrendChart, stockStatusChart;
+
+        // Select Item Modal variables
+        let selectItemMode = 'edit'; // 'edit' or 'delete'
+
+        // Select Item Modal functions
+        function openSelectItemModal(mode) {
+            console.log('openSelectItemModal called with mode:', mode);
+            selectItemMode = mode;
+            const modal = document.getElementById('modalSelectItem');
+            if (!modal) {
+                alert('Modal select tidak ditemukan');
+                return;
+            }
+
+            modal.style.display = 'flex';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.background = 'rgba(0,0,0,0.8)';
+            modal.style.zIndex = '9999';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+
+            const title = document.getElementById('selectItemTitle');
+            const quantityGroup = document.getElementById('quantityGroup');
+            const quantityLabel = document.getElementById('quantityLabel');
+            const confirmBtn = document.getElementById('confirmItemBtn');
+
+            if (title) {
+                title.textContent = mode === 'edit' ? 'Pilih Barang untuk Edit' : 'Pilih Barang untuk Hapus';
+            }
+
+            if (quantityGroup) {
+                quantityGroup.style.display = mode === 'delete' ? 'block' : 'none';
+            }
+
+            if (quantityLabel) {
+                quantityLabel.textContent = mode === 'delete' ? 'Jumlah yang akan dihapus' : 'Jumlah';
+            }
+
+            if (confirmBtn) {
+                confirmBtn.textContent = mode === 'edit' ? 'Edit Barang' : 'Hapus Barang';
+            }
+
+            // Load barang options
+            loadBarangOptionsForSelection();
+        }
+
+        function closeSelectItemModal() {
+            const modal = document.getElementById('modalSelectItem');
+            if (modal) modal.style.display = "none";
+            const select = document.getElementById('selectItemBarang');
+            const quantity = document.getElementById('selectItemQuantity');
+            if (select) select.value = "";
+            if (quantity) quantity.value = "";
+            const quantityGroup = document.getElementById('quantityGroup');
+            if (quantityGroup) quantityGroup.style.display = "none";
+        }
+
+        function openEditModal() {
+            const namaBarang = prompt("Masukkan nama barang yang ingin diedit jumlahnya:");
+            if (namaBarang && namaBarang.trim()) {
+                const jumlahBaru = prompt("Masukkan jumlah baru untuk " + namaBarang.trim() + ":");
+                if (jumlahBaru !== null && jumlahBaru !== "") {
+                    editBarangByName(namaBarang.trim(), jumlahBaru);
+                }
+            }
+        }
+
+        async function editBarangByName(namaBarang, jumlahBaru) {
+            // Cari barang berdasarkan nama (case insensitive)
+            const item = barangCache.find(b => b.nama && b.nama.toLowerCase() === namaBarang.toLowerCase());
+
+            if (!item) {
+                showNotification("Barang dengan nama '" + namaBarang + "' tidak ditemukan", "error");
+                return;
+            }
+
+            const jumlahNum = Number(jumlahBaru);
+            if (isNaN(jumlahNum) || jumlahNum < 0) {
+                showNotification("Jumlah harus berupa angka positif", "error");
+                return;
+            }
+
+            // Update stok barang
+            try {
+                showLoading("Mengupdate jumlah barang...");
+
+                const backendAvailable = await checkBackendHealth();
+
+                if (backendAvailable) {
+                    const res = await fetch(`${API_BASE}/barang/${item.id}/`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            nama: item.nama,
+                            stok: jumlahNum,
+                            minimum: item.minimum,
+                            kategori: item.kategori,
+                            harga: 0
+                        }),
+                    });
+
+                    if (res.ok) {
+                        const result = await res.json();
+                        // Update cache
+                        const existingIndex = barangCache.findIndex(b => b.id === item.id);
+                        if (existingIndex >= 0) {
+                            barangCache[existingIndex] = { ...result, _synced: true };
+                        }
+                        apiCache.set('barang', barangCache);
+                        renderBarangData(barangCache);
+                        showNotification("Jumlah barang '" + item.nama + "' berhasil diupdate menjadi " + jumlahNum, "success");
+                    } else {
+                        throw new Error("Gagal mengupdate stok");
+                    }
+                } else {
+                    // Offline mode - update local cache
+                    const existingIndex = barangCache.findIndex(b => b.id === item.id);
+                    if (existingIndex >= 0) {
+                        barangCache[existingIndex] = { ...barangCache[existingIndex], stok: jumlahNum, _optimistic: true };
+                    }
+                    saveBarangToLocal(barangCache[existingIndex]);
+                    renderBarangData(barangCache);
+                    showNotification("Perubahan disimpan secara lokal dan akan disinkronkan nanti", "warning");
+                }
+
+                hideLoading();
+            } catch (error) {
+                console.error("Error updating barang:", error);
+                showNotification(error.message || "Gagal mengupdate jumlah barang", "error");
+                hideLoading();
+            }
+        }
+
+        function openDeleteModal() {
+            const namaBarang = prompt("Masukkan nama barang yang ingin dihapus:");
+            if (namaBarang && namaBarang.trim()) {
+                const jumlahHapus = prompt("Masukkan jumlah yang akan dihapus dari " + namaBarang.trim() + " (kosongkan untuk hapus semua):");
+                if (jumlahHapus !== null) { // Allow empty string for delete all
+                    deleteBarangByName(namaBarang.trim(), jumlahHapus);
+                }
+            }
+        }
+
+        async function deleteBarangByName(namaBarang, jumlahHapus) {
+            // Cari barang berdasarkan nama (case insensitive)
+            const item = barangCache.find(b => b.nama && b.nama.toLowerCase() === namaBarang.toLowerCase());
+
+            if (!item) {
+                showNotification("Barang dengan nama '" + namaBarang + "' tidak ditemukan", "error");
+                return;
+            }
+
+            let qty = null;
+            if (jumlahHapus && jumlahHapus.trim() !== "") {
+                qty = Number(jumlahHapus);
+                if (isNaN(qty) || qty <= 0) {
+                    showNotification("Jumlah harus berupa angka positif", "error");
+                    return;
+                }
+                if (qty > item.stok) {
+                    showNotification("Jumlah yang akan dihapus melebihi stok tersedia", "error");
+                    return;
+                }
+            }
+
+            // Show detailed confirmation
+            const detailMessage = qty === null
+                ? `Barang: ${item.nama}\nJumlah Stok: ${item.stok} unit\nStatus: ${item.stok > (item.minimum || 5) ? 'Tersedia' : item.stok > 0 ? 'Stok Rendah' : 'Habis'}\n\nAkan menghapus SEMUA stok barang ini.`
+                : `Barang: ${item.nama}\nJumlah yang akan dihapus: ${qty} unit\nSisa stok: ${item.stok - qty} unit\n\nAkan mengurangi stok barang ini.`;
+
+            showNotification(`Detail penghapusan:\n${detailMessage}`, "warning");
+
+            const confirmMessage = qty === null
+                ? `Apakah Anda yakin ingin menghapus semua ${item.nama} (${item.stok} unit)?`
+                : `Apakah Anda yakin ingin menghapus ${qty} unit dari ${item.nama}?`;
+
+            if (!confirm(confirmMessage)) return;
+
+            // Proceed with deletion
+            try {
+                showLoading(`Menghapus ${qty === null ? 'semua' : qty + ' unit'} ${item.nama}...`);
+
+                const backendAvailable = await checkBackendHealth();
+
+                if (backendAvailable) {
+                    // If quantity is specified and not all stock, we need to update stock instead of delete
+                    if (qty !== null && qty < item.stok) {
+                        const newStock = item.stok - qty;
+                        const res = await fetch(`${API_BASE}/barang/${item.id}/`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                nama: item.nama,
+                                stok: newStock,
+                                minimum: item.minimum,
+                                kategori: item.kategori,
+                                harga: 0
+                            }),
+                        });
+
+                        if (res.ok) {
+                            const result = await res.json();
+                            // Update cache
+                            const existingIndex = barangCache.findIndex(b => b.id === item.id);
+                            if (existingIndex >= 0) {
+                                barangCache[existingIndex] = { ...result, _synced: true };
+                            }
+                            apiCache.set('barang', barangCache);
+                            renderBarangData(barangCache);
+                            showNotification(`${qty} unit ${item.nama} berhasil dihapus`, "success");
+                        } else {
+                            throw new Error("Gagal mengupdate stok");
+                        }
+                    } else {
+                        // Delete entire item
+                        const res = await apiCall(`${API_BASE}/barang/${item.id}/`, {
+                            method: "DELETE",
+                        });
+
+                        if (res.ok) {
+                            // Remove from cache
+                            const originalIndex = barangCache.findIndex(b => b.id === item.id);
+                            barangCache.splice(originalIndex, 1);
+                            apiCache.set('barang', barangCache);
+                            renderBarangData(barangCache);
+                            showNotification(`${item.nama} berhasil dihapus seluruhnya`, "success");
+                        } else {
+                            throw new Error("Gagal menghapus barang");
+                        }
+                    }
+                } else {
+                    // Offline mode - add to queue
+                    if (qty !== null && qty < item.stok) {
+                        // Partial delete - update stock
+                        const newStock = item.stok - qty;
+                        addToOfflineQueue({
+                            type: 'update_barang',
+                            itemId: item.id,
+                            data: { ...item, stok: newStock }
+                        });
+                    } else {
+                        // Full delete
+                        addToOfflineQueue({
+                            type: 'delete_barang',
+                            itemId: item.id,
+                            data: item
+                        });
+                    }
+
+                    // Update local cache immediately
+                    if (qty !== null && qty < item.stok) {
+                        const existingIndex = barangCache.findIndex(b => b.id === item.id);
+                        if (existingIndex >= 0) {
+                            barangCache[existingIndex] = { ...barangCache[existingIndex], stok: item.stok - qty, _optimistic: true };
+                        }
+                        removeBarangFromLocal(item.id);
+                        saveBarangToLocal(barangCache[existingIndex]);
+                    } else {
+                        const originalIndex = barangCache.findIndex(b => b.id === item.id);
+                        barangCache.splice(originalIndex, 1);
+                        removeBarangFromLocal(item.id);
+                    }
+
+                    renderBarangData(barangCache);
+                    showNotification("Perubahan disimpan secara lokal dan akan disinkronkan nanti", "warning");
+                }
+
+                hideLoading();
+            } catch (error) {
+                console.error("Error deleting barang:", error);
+                showNotification(error.message || "Gagal menghapus barang", "error");
+                hideLoading();
+            }
+        }
+
+        function openAddModal() {
+            const namaBarang = prompt("Masukkan nama barang yang ingin ditambahkan:");
+            if (namaBarang && namaBarang.trim()) {
+                const jumlahStok = prompt("Masukkan jumlah stok awal untuk " + namaBarang.trim() + ":");
+                if (jumlahStok !== null && jumlahStok !== "") {
+                    const stokMinimum = prompt("Masukkan stok minimum untuk " + namaBarang.trim() + " (default 5):");
+                    if (stokMinimum !== null) {
+                        addBarangByName(namaBarang.trim(), jumlahStok, stokMinimum);
+                    }
+                }
+            }
+        }
+
+        async function addBarangByName(namaBarang, jumlahStok, stokMinimum) {
+            // Check if barang already exists (case insensitive)
+            const existingItem = barangCache.find(b => b.nama && b.nama.toLowerCase() === namaBarang.toLowerCase());
+
+            const stokNum = Number(jumlahStok);
+            if (isNaN(stokNum) || stokNum < 0) {
+                showNotification("Jumlah stok harus berupa angka positif", "error");
+                return;
+            }
+
+            let minNum = 5; // default
+            if (stokMinimum && stokMinimum.trim() !== "") {
+                minNum = Number(stokMinimum);
+                if (isNaN(minNum) || minNum < 0) {
+                    showNotification("Stok minimum harus berupa angka positif", "error");
+                    return;
+                }
+            }
+
+            if (existingItem) {
+                // Barang already exists - ask if want to add stock or create new
+                const action = confirm(`Barang "${namaBarang}" sudah ada dengan stok ${existingItem.stok}.\n\nPilih OK untuk MENAMBAH stok (${existingItem.stok} + ${stokNum} = ${existingItem.stok + stokNum})\nPilih Cancel untuk membuat barang baru dengan nama berbeda.`);
+
+                if (action) {
+                    // Add stock to existing item
+                    const newStock = existingItem.stok + stokNum;
+                    try {
+                        showLoading(`Menambah stok ${namaBarang}...`);
+
+                        const backendAvailable = await checkBackendHealth();
+
+                        if (backendAvailable) {
+                            const res = await fetch(`${API_BASE}/barang/${existingItem.id}/`, {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    nama: existingItem.nama,
+                                    stok: newStock,
+                                    minimum: existingItem.minimum,
+                                    kategori: existingItem.kategori,
+                                    harga: 0
+                                }),
+                            });
+
+                            if (res.ok) {
+                                const result = await res.json();
+                                // Update cache
+                                const existingIndex = barangCache.findIndex(b => b.id === existingItem.id);
+                                if (existingIndex >= 0) {
+                                    barangCache[existingIndex] = { ...result, _synced: true };
+                                }
+                                apiCache.set('barang', barangCache);
+                                renderBarangData(barangCache);
+                                showNotification(`Stok ${existingItem.nama} berhasil ditambahkan. Stok sekarang: ${newStock}`, "success");
+                            } else {
+                                throw new Error("Gagal menambah stok");
+                            }
+                        } else {
+                            // Offline mode - update local cache
+                            const existingIndex = barangCache.findIndex(b => b.id === existingItem.id);
+                            if (existingIndex >= 0) {
+                                barangCache[existingIndex] = { ...barangCache[existingIndex], stok: newStock, _optimistic: true };
+                            }
+                            saveBarangToLocal(barangCache[existingIndex]);
+                            renderBarangData(barangCache);
+                            showNotification("Perubahan disimpan secara lokal dan akan disinkronkan nanti", "warning");
+                        }
+
+                        hideLoading();
+                    } catch (error) {
+                        console.error("Error adding stock:", error);
+                        showNotification(error.message || "Gagal menambah stok", "error");
+                        hideLoading();
+                    }
+                } else {
+                    // User chose to create new - but name already exists
+                    showNotification(`Barang dengan nama "${namaBarang}" sudah ada. Gunakan nama yang berbeda.`, "warning");
+                }
+            } else {
+                // Create new barang
+                try {
+                    showLoading(`Menambahkan barang baru: ${namaBarang}...`);
+
+                    const payload = {
+                        nama: namaBarang,
+                        stok: stokNum,
+                        minimum: minNum,
+                        harga: 0,
+                        kategori: "lainnya" // default category
+                    };
+
+                    const backendAvailable = await checkBackendHealth();
+
+                    if (backendAvailable) {
+                        const res = await fetch(`${API_BASE}/barang/`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        });
+
+                        if (res.ok) {
+                            const result = await res.json();
+                            // Add to cache
+                            barangCache.push({ ...result, _synced: true });
+                            apiCache.set('barang', barangCache);
+                            renderBarangData(barangCache);
+                            showNotification(`Barang "${namaBarang}" berhasil ditambahkan dengan stok ${stokNum}`, "success");
+                        } else {
+                            throw new Error("Gagal menambah barang");
+                        }
+                    } else {
+                        // Offline mode - add to local cache
+                        const newItem = {
+                            ...payload,
+                            id: Date.now(),
+                            _local: true,
+                            created_at: new Date().toISOString()
+                        };
+                        barangCache.push(newItem);
+                        saveBarangToLocal(newItem);
+                        renderBarangData(barangCache);
+                        addToOfflineQueue({
+                            type: 'create_barang',
+                            data: payload
+                        });
+                        showNotification("Barang ditambahkan secara lokal dan akan disinkronkan nanti", "warning");
+                    }
+
+                    hideLoading();
+                } catch (error) {
+                    console.error("Error adding barang:", error);
+                    showNotification(error.message || "Gagal menambah barang", "error");
+                    hideLoading();
+                }
+            }
+        }
+
+        async function saveBarang() {
+            const nama = document.getElementById('formBarangNama')?.value?.trim();
+            const stok = document.getElementById('formBarangStok')?.value;
+            const minimum = document.getElementById('formBarangMinimum')?.value || 5;
+
+            if (!nama) {
+                alert('Nama barang wajib diisi');
+                return;
+            }
+
+            if (stok === '' || stok === null) {
+                alert('Stok wajib diisi');
+                return;
+            }
+
+            const stokNum = Number(stok);
+            const minNum = Number(minimum);
+
+            if (isNaN(stokNum) || stokNum < 0) {
+                alert('Stok harus berupa angka positif');
+                return;
+            }
+
+            alert('Barang akan disimpan: ' + nama + ' (Stok: ' + stokNum + ')');
+            closeBarangModal();
+            // Here you would normally save to backend
+        }
+
+        function loadBarangOptionsForSelection() {
+            const select = $("#selectItemBarang");
+            if (!select) return;
+
+            select.innerHTML = '<option value="">Pilih Barang</option>';
+
+            // Use current filtered data or all data
+            const dataToUse = barangFilteredData && barangFilteredData.length > 0 ? barangFilteredData : barangCache;
+
+            if (dataToUse && dataToUse.length > 0) {
+                dataToUse.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = `${item.nama} (Stok: ${item.stok})`;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        function onItemSelected() {
+            const select = $("#selectItemBarang");
+            const quantityGroup = $("#quantityGroup");
+
+            if (select && select.value && selectItemMode === 'delete' && quantityGroup) {
+                quantityGroup.style.display = "block";
+            }
+        }
+
+        function confirmItemSelection() {
+            const select = $("#selectItemBarang");
+            const quantity = $("#selectItemQuantity");
+
+            if (!select || !select.value) {
+                showNotification("Pilih barang terlebih dahulu", "warning");
+                return;
+            }
+
+            const itemId = parseInt(select.value);
+            const item = barangCache.find(b => b.id === itemId);
+
+            if (!item) {
+                showNotification("Barang tidak ditemukan", "error");
+                return;
+            }
+
+            if (selectItemMode === 'edit') {
+                // Open edit modal for selected item
+                openBarangModal('edit', itemId);
+                closeSelectItemModal();
+            } else if (selectItemMode === 'delete') {
+                // Handle delete with quantity
+                const qty = quantity && quantity.value ? parseInt(quantity.value) : null;
+
+                if (qty !== null && qty <= 0) {
+                    showNotification("Jumlah harus lebih dari 0", "warning");
+                    return;
+                }
+
+                if (qty !== null && qty > item.stok) {
+                    showNotification("Jumlah yang akan dihapus melebihi stok tersedia", "warning");
+                    return;
+                }
+
+                // Show detailed notification first
+                const detailMessage = qty === null
+                    ? `Barang: ${item.nama}\nJumlah Stok: ${item.stok} unit\nStatus: ${item.stok > (item.minimum || 5) ? 'Tersedia' : item.stok > 0 ? 'Stok Rendah' : 'Habis'}\n\nAkan menghapus SEMUA stok barang ini.`
+                    : `Barang: ${item.nama}\nJumlah yang akan dihapus: ${qty} unit\nSisa stok: ${item.stok - qty} unit\n\nAkan mengurangi stok barang ini.`;
+
+                showNotification(`Detail penghapusan:\n${detailMessage}`, "warning");
+
+                // Confirm delete
+                const confirmMessage = qty === null
+                    ? `Apakah Anda yakin ingin menghapus semua ${item.nama} (${item.stok} unit)?`
+                    : `Apakah Anda yakin ingin menghapus ${qty} unit dari ${item.nama}?`;
+
+                if (confirm(confirmMessage)) {
+                    performDeleteWithQuantity(itemId, qty);
+                }
+            }
+        }
+
+        async function performDeleteWithQuantity(itemId, quantity) {
+            const item = barangCache.find(b => b.id === itemId);
+            if (!item) return;
+
+            showLoading(`Menghapus ${quantity === null ? 'semua' : quantity + ' unit'} ${item.nama}...`);
+
+            try {
+                const backendAvailable = await checkBackendHealth();
+
+                if (backendAvailable) {
+                    // If quantity is specified and not all stock, we need to update stock instead of delete
+                    if (quantity !== null && quantity < item.stok) {
+                        const newStock = item.stok - quantity;
+                        const res = await fetch(`${API_BASE}/barang/${itemId}/`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                nama: item.nama,
+                                stok: newStock,
+                                minimum: item.minimum,
+                                kategori: item.kategori,
+                                harga: 0
+                            }),
+                        });
+
+                        if (res.ok) {
+                            const result = await res.json();
+                            // Update cache
+                            const existingIndex = barangCache.findIndex(b => b.id === itemId);
+                            if (existingIndex >= 0) {
+                                barangCache[existingIndex] = { ...result, _synced: true };
+                            }
+                            apiCache.set('barang', barangCache);
+                            renderBarangData(barangCache);
+                            showNotification(`${quantity} unit ${item.nama} berhasil dihapus`, "success");
+                        } else {
+                            throw new Error("Gagal mengupdate stok");
+                        }
+                    } else {
+                        // Delete entire item
+                        const res = await apiCall(`${API_BASE}/barang/${itemId}/`, {
+                            method: "DELETE",
+                        });
+
+                        if (res.ok) {
+                            // Remove from cache
+                            const originalIndex = barangCache.findIndex(b => b.id === itemId);
+                            barangCache.splice(originalIndex, 1);
+                            apiCache.set('barang', barangCache);
+                            renderBarangData(barangCache);
+                            showNotification(`${item.nama} berhasil dihapus seluruhnya`, "success");
+                        } else {
+                            throw new Error("Gagal menghapus barang");
+                        }
+                    }
+                } else {
+                    // Offline mode - add to queue
+                    if (quantity !== null && quantity < item.stok) {
+                        // Partial delete - update stock
+                        const newStock = item.stok - quantity;
+                        addToOfflineQueue({
+                            type: 'update_barang',
+                            itemId: itemId,
+                            data: { ...item, stok: newStock }
+                        });
+                    } else {
+                        // Full delete
+                        addToOfflineQueue({
+                            type: 'delete_barang',
+                            itemId: itemId,
+                            data: item
+                        });
+                    }
+
+                    // Update local cache immediately
+                    if (quantity !== null && quantity < item.stok) {
+                        const existingIndex = barangCache.findIndex(b => b.id === itemId);
+                        if (existingIndex >= 0) {
+                            barangCache[existingIndex] = { ...barangCache[existingIndex], stok: item.stok - quantity, _optimistic: true };
+                        }
+                        removeBarangFromLocal(itemId);
+                        saveBarangToLocal(barangCache[existingIndex]);
+                    } else {
+                        const originalIndex = barangCache.findIndex(b => b.id === itemId);
+                        barangCache.splice(originalIndex, 1);
+                        removeBarangFromLocal(itemId);
+                    }
+
+                    renderBarangData(barangCache);
+                    showNotification("Perubahan disimpan secara lokal dan akan disinkronkan nanti", "warning");
+                }
+
+                closeSelectItemModal();
+            } catch (error) {
+                console.error("Error deleting item:", error);
+                showNotification(error.message || "Gagal menghapus barang", "error");
+            } finally {
+                hideLoading();
+            }
+        }
 
         // Initialize dashboard
         document.addEventListener("DOMContentLoaded", async () => {
@@ -353,7 +1121,45 @@
             // Update time display
             updateTimeDisplay();
             setInterval(updateTimeDisplay, 1000);
+
+            // Start real-time updates
+            startRealTimeUpdates();
         });
+
+        function startRealTimeUpdates() {
+            // Poll for updates every 60 seconds to reduce API load
+            setInterval(async () => {
+                try {
+                    // Load sequentially to avoid rate limiting
+                    await loadDashboardStats();
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+                    await loadRecentActivity();
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+                    await loadQuickVerification();
+                } catch (error) {
+                    console.error('Error in real-time update:', error);
+                }
+            }, 60000); // 60 seconds
+
+            // Additional notification polling for pending requests - less frequent
+            setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/notifications/pending_requests/`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.count > 0) {
+                            // Show notification for new pending requests
+                            showNotification(`Ada ${data.count} permintaan peminjaman baru menunggu approval`, 'info');
+                            updatePendingBadge(data.count);
+                            // Refresh the verification data
+                            await loadQuickVerification();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching pending notifications:', error);
+                }
+            }, 120000); // 2 minutes
+        }
 
         function showWelcomeMessage() {
             const currentUser = getCurrentUser();
@@ -399,12 +1205,14 @@
             try {
                 showLoading("Memuat dashboard...");
 
-                // Load data in parallel
-                await Promise.all([
-                    loadBarang(),
-                    loadDashboardStats(),
-                    loadRecentActivity()
-                ]);
+                // Load data sequentially with delays to avoid rate limiting
+                await loadBarang();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+                await loadDashboardStats();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+                await loadRecentActivity();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+                await loadQuickVerification();
 
                 // Initialize charts
                 initializeCharts();
@@ -422,12 +1230,12 @@
 
         async function loadDashboardStats() {
             try {
-                // Load data from API or use sample data
-                const [barangRes, peminjamanRes, usersRes] = await Promise.all([
-                    fetch(`${API_BASE}/barang/`).catch(() => null),
-                    fetch(`${API_BASE}/peminjaman/`).catch(() => null),
-                    fetch(`${API_BASE}/users/`).catch(() => null)
-                ]);
+                // Load data from API sequentially with delays to avoid rate limiting
+                const barangRes = await fetch(`${API_BASE}/barang/`).catch(() => null);
+                await new Promise(resolve => setTimeout(resolve, 500)); // 0.5 second delay
+                const peminjamanRes = await fetch(`${API_BASE}/peminjaman/`).catch(() => null);
+                await new Promise(resolve => setTimeout(resolve, 500)); // 0.5 second delay
+                const usersRes = await fetch(`${API_BASE}/users/`).catch(() => null);
 
                 let barang = [], peminjaman = [], users = [];
 
@@ -444,6 +1252,7 @@
                 const totalItems = barang.length;
                 const activeLoans = peminjaman.filter(p => p.status === 'dipinjam').length;
                 const totalUsers = users.filter(u => u.role === 'user').length;
+                const pendingApprovals = peminjaman.filter(p => p.status === 'pending_approval').length;
 
                 const returnedLoans = peminjaman.filter(p => p.status === 'dikembalikan').length;
                 const totalLoans = peminjaman.length;
@@ -454,6 +1263,18 @@
                 document.getElementById('activeLoans').textContent = activeLoans;
                 document.getElementById('totalUsers').textContent = totalUsers;
                 document.getElementById('returnRate').textContent = `${returnRate}%`;
+
+                // Show pending approvals alert
+                const pendingAlert = document.getElementById('pendingAlert');
+                const pendingCountEl = document.getElementById('pendingCount');
+                if (pendingAlert && pendingCountEl) {
+                    if (pendingApprovals > 0) {
+                        pendingCountEl.textContent = pendingApprovals;
+                        pendingAlert.classList.remove('hidden');
+                    } else {
+                        pendingAlert.classList.add('hidden');
+                    }
+                }
 
             } catch (error) {
                 console.error('Error loading dashboard stats:', error);
@@ -548,54 +1369,309 @@
         async function loadRecentActivity() {
             const activityList = document.getElementById('recentActivity');
 
-            // Sample recent activities
-            const activities = [
-                {
-                    icon: '📦',
-                    title: 'Barang baru ditambahkan: Laptop Acer',
-                    time: '2 menit yang lalu',
-                    type: 'success'
-                },
-                {
-                    icon: '🔄',
-                    title: 'Peminjaman: Mouse Logitech oleh John Doe',
-                    time: '15 menit yang lalu',
-                    type: 'info'
-                },
-                {
-                    icon: '✅',
-                    title: 'Pengembalian: Keyboard Dell',
-                    time: '1 jam yang lalu',
-                    type: 'success'
-                },
-                {
-                    icon: '⚠️',
-                    title: 'Stok rendah: Printer HP (2 unit)',
-                    time: '2 jam yang lalu',
-                    type: 'warning'
-                },
-                {
-                    icon: '👤',
-                    title: 'User baru terdaftar: Jane Smith',
-                    time: '3 jam yang lalu',
-                    type: 'info'
+            try {
+                // Load data sequentially to avoid rate limiting
+                const peminjamanRes = await fetch(`${API_BASE}/peminjaman/`).catch(() => null);
+                let peminjaman = [];
+
+                if (peminjamanRes?.ok) {
+                    peminjaman = await peminjamanRes.json();
+                } else {
+                    peminjaman = window.samplePeminjaman || [];
                 }
-            ];
 
-            activityList.innerHTML = '';
+                // Load users data for names
+                const usersRes = await fetch(`${API_BASE}/users/`).catch(() => null);
+                let users = [];
 
-            activities.forEach(activity => {
-                const activityItem = document.createElement('div');
-                activityItem.className = `activity-item ${activity.type}`;
-                activityItem.innerHTML = `
-                    <div class="activity-icon">${activity.icon}</div>
-                    <div class="activity-content">
-                        <div class="activity-title">${activity.title}</div>
-                        <div class="activity-time">${activity.time}</div>
+                if (usersRes?.ok) {
+                    users = await usersRes.json();
+                } else {
+                    users = window.sampleUsers || [];
+                }
+
+                // Load barang data for names
+                const barangRes = await fetch(`${API_BASE}/barang/`).catch(() => null);
+                let barang = [];
+
+                if (barangRes?.ok) {
+                    barang = await barangRes.json();
+                } else {
+                    barang = window.sampleBarang || [];
+                }
+
+                // Create user and barang maps
+                const userMap = {};
+                users.forEach(u => userMap[u.id] = u.nama);
+
+                const barangMap = {};
+                barang.forEach(b => barangMap[b.id] = b.nama);
+
+                // Get recent activities (last 10)
+                const activities = [];
+
+                // Add verification activities
+                const verificationActivities = peminjaman
+                    .filter(p => p.status !== 'pending_approval')
+                    .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
+                    .slice(0, 5)
+                    .map(p => {
+                        const userName = userMap[p.user_id] || 'Unknown User';
+                        const barangName = barangMap[p.barang_id] || 'Unknown Item';
+                        const timeAgo = getTimeAgo(new Date(p.updated_at || p.created_at));
+
+                        let icon, title, type;
+                        if (p.status === 'approved') {
+                            icon = '✅';
+                            title = `Peminjaman disetujui: ${barangName} oleh ${userName}`;
+                            type = 'success';
+                        } else if (p.status === 'rejected') {
+                            icon = '❌';
+                            title = `Peminjaman ditolak: ${barangName} oleh ${userName}`;
+                            type = 'error';
+                        } else if (p.status === 'dipinjam') {
+                            icon = '📦';
+                            title = `Barang diambil: ${barangName} oleh ${userName}`;
+                            type = 'info';
+                        } else if (p.status === 'dikembalikan') {
+                            icon = '↩️';
+                            title = `Barang dikembalikan: ${barangName} oleh ${userName}`;
+                            type = 'success';
+                        }
+
+                        return { icon, title, time: timeAgo, type };
+                    });
+
+                activities.push(...verificationActivities);
+
+                // Add other activities (sample for now)
+                activities.push(
+                    {
+                        icon: '📦',
+                        title: 'Barang baru ditambahkan: Laptop Acer',
+                        time: '2 jam yang lalu',
+                        type: 'success'
+                    },
+                    {
+                        icon: '⚠️',
+                        title: 'Stok rendah: Printer HP (2 unit)',
+                        time: '3 jam yang lalu',
+                        type: 'warning'
+                    }
+                );
+
+                // Sort by time (most recent first) and take top 10
+                activities.sort((a, b) => {
+                    // Simple sort - in real app, parse time properly
+                    return 0; // Keep order as is
+                }).slice(0, 10);
+
+                activityList.innerHTML = '';
+
+                if (activities.length === 0) {
+                    activityList.innerHTML = `
+                        <div class="activity-item">
+                            <div class="activity-icon">📋</div>
+                            <div class="activity-content">
+                                <div class="activity-title">Belum ada aktivitas</div>
+                                <div class="activity-time">-</div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                activities.forEach(activity => {
+                    const activityItem = document.createElement('div');
+                    activityItem.className = `activity-item ${activity.type || ''}`;
+                    activityItem.innerHTML = `
+                        <div class="activity-icon">${activity.icon}</div>
+                        <div class="activity-content">
+                            <div class="activity-title">${activity.title}</div>
+                            <div class="activity-time">${activity.time}</div>
+                        </div>
+                    `;
+                    activityList.appendChild(activityItem);
+                });
+
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+                activityList.innerHTML = `
+                    <div class="activity-item error">
+                        <div class="activity-icon">⚠️</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Gagal memuat aktivitas</div>
+                            <div class="activity-time">-</div>
+                        </div>
                     </div>
                 `;
-                activityList.appendChild(activityItem);
-            });
+            }
+        }
+
+        async function loadQuickVerification() {
+            const verificationList = document.getElementById('quickVerificationList');
+
+            try {
+                // Load data sequentially to avoid rate limiting
+                const peminjamanRes = await fetch(`${API_BASE}/peminjaman/`).catch(() => null);
+                let peminjaman = [];
+
+                if (peminjamanRes?.ok) {
+                    peminjaman = await peminjamanRes.json();
+                } else {
+                    peminjaman = window.samplePeminjaman || [];
+                }
+
+                // Filter pending approvals
+                const pendingApprovals = peminjaman.filter(p => p.status === 'pending_approval').slice(0, 5); // Show max 5
+
+                // Load users and barang for names sequentially
+                const usersRes = await fetch(`${API_BASE}/users/`).catch(() => null);
+                let users = [];
+                if (usersRes?.ok) users = await usersRes.json();
+                else users = window.sampleUsers || [];
+
+                const barangRes = await fetch(`${API_BASE}/barang/`).catch(() => null);
+                let barang = [];
+                if (barangRes?.ok) barang = await barangRes.json();
+                else barang = window.sampleBarang || [];
+
+                const userMap = {};
+                users.forEach(u => userMap[u.id] = u.nama);
+
+                const barangMap = {};
+                barang.forEach(b => barangMap[b.id] = b.nama);
+
+                verificationList.innerHTML = '';
+
+                if (pendingApprovals.length === 0) {
+                    verificationList.innerHTML = `
+                        <div class="verification-item">
+                            <div class="verification-icon">✅</div>
+                            <div class="verification-content">
+                                <div class="verification-title">Tidak ada permintaan pending</div>
+                                <div class="verification-subtitle">Semua permintaan telah diproses</div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                pendingApprovals.forEach(approval => {
+                    const userName = userMap[approval.user_id] || 'Unknown User';
+                    const barangName = barangMap[approval.barang_id] || 'Unknown Item';
+                    const timeAgo = getTimeAgo(new Date(approval.created_at));
+
+                    const verificationItem = document.createElement('div');
+                    verificationItem.className = 'verification-item';
+                    verificationItem.innerHTML = `
+                        <div class="verification-icon">⏳</div>
+                        <div class="verification-content">
+                            <div class="verification-title">${userName} - ${barangName}</div>
+                            <div class="verification-subtitle">Jumlah: ${approval.jumlah} | ${timeAgo}</div>
+                            <div class="verification-reason">${approval.alasan_peminjaman || 'Tidak ada alasan'}</div>
+                        </div>
+                        <div class="verification-actions">
+                            <button class="btn-approve" onclick="quickApprove(${approval.id})" title="Approve">
+                                <span>✓</span>
+                            </button>
+                            <button class="btn-reject" onclick="quickReject(${approval.id})" title="Reject">
+                                <span>✗</span>
+                            </button>
+                        </div>
+                    `;
+                    verificationList.appendChild(verificationItem);
+                });
+
+            } catch (error) {
+                console.error('Error loading quick verification:', error);
+                verificationList.innerHTML = `
+                    <div class="verification-item error">
+                        <div class="verification-icon">⚠️</div>
+                        <div class="verification-content">
+                            <div class="verification-title">Gagal memuat data verifikasi</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function quickApprove(id) {
+            if (!confirm('Apakah Anda yakin ingin menyetujui permintaan ini?')) return;
+
+            try {
+                showLoading('Memproses approval...');
+                const response = await fetch(`${API_BASE}/peminjaman/${id}/verify/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({ status: 'dipinjam' }) // Langsung set ke dipinjam
+                });
+
+                if (response.ok) {
+                    showNotification('Permintaan berhasil disetujui', 'success');
+                    await loadQuickVerification();
+                    await loadDashboardStats();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Gagal menyetujui permintaan', 'error');
+                }
+            } catch (error) {
+                console.error('Error approving request:', error);
+                showNotification('Terjadi kesalahan saat memproses approval', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function quickReject(id) {
+            const reason = prompt('Masukkan alasan penolakan:');
+            if (reason === null) return; // Cancelled
+            if (!reason.trim()) {
+                showNotification('Alasan penolakan harus diisi', 'warning');
+                return;
+            }
+
+            try {
+                showLoading('Memproses penolakan...');
+                const response = await fetch(`${API_BASE}/peminjaman/${id}/verify/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({ status: 'cancelled', alasan_reject: reason }) // Menggunakan cancelled
+                });
+
+                if (response.ok) {
+                    showNotification('Permintaan berhasil ditolak', 'success');
+                    await loadQuickVerification();
+                    await loadDashboardStats();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Gagal menolak permintaan', 'error');
+                }
+            } catch (error) {
+                console.error('Error rejecting request:', error);
+                showNotification('Terjadi kesalahan saat memproses penolakan', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 1) return 'Baru saja';
+            if (diffMins < 60) return `${diffMins} menit yang lalu`;
+            if (diffHours < 24) return `${diffHours} jam yang lalu`;
+            return `${diffDays} hari yang lalu`;
         }
 
         function setupEventListeners() {
@@ -606,6 +1682,108 @@
 
             // Chart period change
             document.getElementById('chartPeriod').addEventListener('change', updateCharts);
+
+            // CRUD button event listeners
+            const addBtns = document.querySelectorAll('.add-btn');
+            addBtns.forEach(btn => {
+                btn.addEventListener('click', () => openAddModal());
+            });
+
+            const editBtn = document.querySelector('.edit-btn');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => openEditModal());
+            }
+
+            const deleteBtn = document.querySelector('.delete-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => openDeleteModal());
+            }
+
+            // Quick action buttons
+            const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+            quickActionBtns.forEach(btn => {
+                const text = btn.textContent.trim();
+                if (text.includes('Tambah Barang')) {
+                    btn.addEventListener('click', () => openAddModal());
+                } else if (text.includes('Input Transaksi')) {
+                    btn.addEventListener('click', () => openTransaksiModal());
+                } else if (text.includes('Generate Report')) {
+                    btn.addEventListener('click', () => generateReport());
+                } else if (text.includes('Kelola User')) {
+                    btn.addEventListener('click', () => showUserManagement());
+                }
+            });
+
+            // Action buttons in header
+            const refreshBtn = document.querySelector('.refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', refreshDashboard);
+                refreshBtn.removeAttribute('onclick');
+            }
+
+            const exportBtns = document.querySelectorAll('.export-btn');
+            exportBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Check if it's the table export or dashboard export
+                    if (btn.closest('.table-actions')) {
+                        exportTableData();
+                    } else {
+                        exportDashboard();
+                    }
+                });
+                btn.removeAttribute('onclick');
+            });
+
+            // View all buttons
+            const viewAllBtns = document.querySelectorAll('.view-all-btn');
+            viewAllBtns.forEach(btn => {
+                const text = btn.textContent.trim();
+                if (text === 'View All') {
+                    btn.addEventListener('click', () => window.location.href = 'admin-verification.html');
+                } else if (text === 'Lihat Semua') {
+                    btn.addEventListener('click', () => viewAllActivity());
+                }
+            });
+
+            // Event delegation for dynamically generated buttons
+            document.addEventListener('click', (e) => {
+                const target = e.target.closest('button');
+                if (!target) return;
+
+                // Quick approve/reject buttons in verification list
+                if (target.classList.contains('btn-approve')) {
+                    const onclick = target.getAttribute('onclick');
+                    if (onclick) {
+                        const idMatch = onclick.match(/quickApprove\((\d+)\)/);
+                        if (idMatch) {
+                            e.preventDefault();
+                            quickApprove(parseInt(idMatch[1]));
+                        }
+                    }
+                } else if (target.classList.contains('btn-reject')) {
+                    const onclick = target.getAttribute('onclick');
+                    if (onclick) {
+                        const idMatch = onclick.match(/quickReject\((\d+)\)/);
+                        if (idMatch) {
+                            e.preventDefault();
+                            quickReject(parseInt(idMatch[1]));
+                        }
+                    }
+                }
+            });
+
+            // Logout button
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    if (typeof adminLogout === 'function') {
+                        if (confirm('Apakah Anda yakin ingin keluar?')) adminLogout();
+                    } else {
+                        alert('Loading...');
+                    }
+                });
+                logoutBtn.removeAttribute('onclick');
+            }
         }
 
         function updateTimeDisplay() {
@@ -643,9 +1821,93 @@
         function viewAllActivity() {
             window.location.href = 'riwayat.html';
         }
+
+        function updatePendingBadge(count) {
+            // Update pending count in the alert
+            const pendingCountEl = document.getElementById('pendingCount');
+            if (pendingCountEl) {
+                pendingCountEl.textContent = count;
+            }
+
+            // Show/hide the alert based on count
+            const pendingAlert = document.getElementById('pendingAlert');
+            if (pendingAlert) {
+                if (count > 0) {
+                    pendingAlert.classList.remove('hidden');
+                } else {
+                    pendingAlert.classList.add('hidden');
+                }
+            }
+        }
     </script>
 
-    <script src="app.js?v=20251226"></script>
-    <script src="data.js"></script>
+    <!-- Enterprise Footer -->
+    <footer class="enterprise-footer-new">
+        <div class="container">
+            <div class="footer-content-enterprise">
+                <div class="footer-main">
+                    <div class="footer-brand">
+                        <div class="footer-logo-enterprise">
+                            <div class="footer-logo-icon">🏢</div>
+                            <span>InvManage Enterprise</span>
+                        </div>
+                        <p class="footer-description">
+                            Professional inventory management system for modern businesses.
+                            Complete control over company assets with real-time analytics.
+                        </p>
+                    </div>
+                    <div class="footer-links-enterprise">
+                        <div class="footer-column-enterprise">
+                            <h4>Product</h4>
+                            <a href="#features">Features</a>
+                            <a href="#pricing">Pricing</a>
+                            <a href="#security">Security</a>
+                        </div>
+                        <div class="footer-column-enterprise">
+                            <h4>Company</h4>
+                            <a href="index.html">About</a>
+                            <a href="#careers">Careers</a>
+                            <a href="#press">Press</a>
+                        </div>
+                        <div class="footer-column-enterprise">
+                            <h4>Support</h4>
+                            <a href="#docs">Documentation</a>
+                            <a href="#help">Help Center</a>
+                            <a href="#contact">Contact</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom-enterprise">
+                    <p>&copy; 2025 InvManage Enterprise. All rights reserved.</p>
+                    <div class="footer-team-enterprise">
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">Software Architect & Developer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+                                    Alifito Rabbani Cahyono
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">UI/UX Architect & Developer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+                                    Satria Febry Andanu
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">Data Analyst & Engineer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+                                    Naufal Thafhan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

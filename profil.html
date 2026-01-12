@@ -4,8 +4,70 @@
   <meta charset="UTF-8">
   <title>InvManage - Profil</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .profile-photo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .profile-photo-container {
+      position: relative;
+      display: inline-block;
+    }
+    .photo-edit-btn {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: all 0.2s ease;
+    }
+    .photo-edit-btn:hover {
+      transform: scale(1.1);
+      background: var(--primary-dark, #0056b3);
+    }
+  </style>
 </head>
 <body>
+    <!-- Enterprise Background -->
+    <div class="enterprise-bg">
+        <div class="bg-gradient-primary"></div>
+        <div class="bg-gradient-secondary"></div>
+        <div class="enterprise-grid"></div>
+    </div>
+
+    <!-- Enterprise Navigation -->
+    <nav class="enterprise-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="nav-logo-icon">🏢</div>
+                <span class="nav-logo-text">InvManage Enterprise</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <button class="nav-cta-enterprise" onclick="window.location.href='admin-login.html'">
+                    <span>Admin Access</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
   <div class="dashboard-layout">
 
     <!-- Sidebar -->
@@ -14,11 +76,26 @@
       <h1>InvManage Admin</h1>
 
       <div class="menu">
-        <a href="dashboard.html" class="menu-item">Dashboard</a>
-        <a href="riwayat.html" class="menu-item">Riwayat Transaksi</a>
-        <a href="laporan.html" class="menu-item">📊 Laporan & Analitik</a>
-        <a href="profil.html" class="menu-item active">Profil</a>
-        <a href="feedback.html" class="menu-item">Feedback</a>
+        <a href="dashboard.html" class="menu-item">📊 Dashboard</a>
+        <a href="admin-verification.html" class="menu-item">✅ Verification</a>
+        <a href="riwayat.html" class="menu-item">📋 Riwayat Transaksi</a>
+        <a href="laporan.html" class="menu-item">📈 Laporan & Analitik</a>
+        <a href="profil.html" class="menu-item active">👤 Profil</a>
+        <a href="feedback.html" class="menu-item">💬 Feedback</a>
+      </div>
+
+      <!-- User Info Section -->
+      <div class="sidebar-user">
+        <div class="user-avatar">
+          <span id="sidebarUserInitial">A</span>
+        </div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+        <button class="logout-btn" onclick="if(confirm('Apakah Anda yakin ingin keluar?')) { localStorage.clear(); sessionStorage.clear(); window.location.href = 'index.html'; }" title="Logout">
+          <span>🚪</span>
+        </button>
       </div>
     </div>
 
@@ -32,7 +109,7 @@
         <div class="profile-photo-container">
           <img id="profilePhoto" src="" alt="Profile" class="profile-photo">
           <label for="photoInput" class="photo-edit-btn">📷</label>
-          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="if(typeof previewPhoto === 'function') previewPhoto(this);">
         </div>
         <div class="profile-info">
           <div id="profileNamaHeader" class="profile-name">Admin</div>
@@ -47,7 +124,7 @@
             <h3 style="margin:0; font-size: 20px; font-weight: 600; color: var(--gray-100);">Informasi Akun</h3>
             <p style="color:var(--gray-400); margin:5px 0 0 0; font-size:14px;">Update data pribadi anda</p>
           </div>
-          <button class="add-btn" onclick="toggleEditMode()">Edit</button>
+          <button class="add-btn" onclick="if(typeof toggleEditMode === 'function') toggleEditMode();">Edit</button>
         </div>
 
         <div class="profile-form">
@@ -81,8 +158,8 @@
           </div>
 
           <div id="saveButtons" style="display:none; margin-top:15px;">
-            <button class="primary" onclick="saveProfil()">Simpan Perubahan</button>
-            <button class="btn-red" style="margin-left:10px;" onclick="cancelEdit()">Batal</button>
+            <button class="btn-gradient" onclick="if(typeof saveProfil === 'function') saveProfil();">💾 Simpan Perubahan</button>
+            <button class="btn-outline" style="margin-left:10px;" onclick="if(typeof cancelEdit === 'function') cancelEdit();">❌ Batal</button>
           </div>
         </div>
       </div>
@@ -113,55 +190,233 @@
             <input type="password" id="inputConfirmPassword" placeholder="Konfirmasi password baru">
           </div>
           <div class="input-group" style="display:flex; align-items:flex-end;">
-            <button class="primary" onclick="changePassword()">Ubah Password</button>
+            <button class="btn-gradient" onclick="if(typeof changePassword === 'function') changePassword();">🔒 Ubah Password</button>
           </div>
         </div>
       </div>
 
       <!-- Logout Button -->
       <div style="margin-top:20px;">
-        <button class="btn-red" onclick="logout()">Logout</button>
+        <button class="btn-danger" onclick="logout();">🚪 Logout</button>
       </div>
     </div>
   </div>
 
-  <!-- Copyright Footer -->
-  <footer class="copyright-footer">
-    <p>&copy; 2025 InvManage. All rights reserved.</p>
-    <div class="copyright-team">
-      <div class="team-member">
-        <div class="team-role">Software Architect & Developer</div>
-        <div class="team-name">
-          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
-            Alifito Rabbani Cahyono
-          </a>
+    <!-- Enterprise Footer -->
+    <footer class="enterprise-footer-new">
+        <div class="container">
+            <div class="footer-content-enterprise">
+                <div class="footer-main">
+                    <div class="footer-brand">
+                        <div class="footer-logo-enterprise">
+                            <div class="footer-logo-icon">🏢</div>
+                            <span>InvManage Enterprise</span>
+                        </div>
+                        <p class="footer-description">
+                            Professional inventory management system for modern businesses.
+                            Complete control over company assets with real-time analytics.
+                        </p>
+                    </div>
+                    <div class="footer-links-enterprise">
+                        <div class="footer-column-enterprise">
+                            <h4>Product</h4>
+                            <a href="#features">Features</a>
+                            <a href="#pricing">Pricing</a>
+                            <a href="#security">Security</a>
+                        </div>
+                        <div class="footer-column-enterprise">
+                            <h4>Company</h4>
+                            <a href="index.html">About</a>
+                            <a href="#careers">Careers</a>
+                            <a href="#press">Press</a>
+                        </div>
+                        <div class="footer-column-enterprise">
+                            <h4>Support</h4>
+                            <a href="#docs">Documentation</a>
+                            <a href="#help">Help Center</a>
+                            <a href="#contact">Contact</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom-enterprise">
+                    <p>&copy; 2025 InvManage Enterprise. All rights reserved.</p>
+                    <div class="footer-team-enterprise">
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">Software Architect & Developer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+                                    Alifito Rabbani Cahyono
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">UI/UX Architect & Developer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+                                    Satria Febry Andanu
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">Data Analyst & Engineer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+                                    Naufal Thafhan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="team-member">
-        <div class="team-role">UI/UX Architect & Developer</div>
-        <div class="team-name">
-          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
-            Satria Febry Andanu
-          </a>
-        </div>
-      </div>
-      <div class="team-member">
-        <div class="team-role">Data Analyst & Engineer</div>
-        <div class="team-name">
-          <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
-            Naufal Thafhan
-          </a>
-        </div>
-      </div>
-    </div>
-  </footer>
+    </footer>
 
-  <script src="app.js?v=20251226"></script>
+  <script src="app.js?v=20251227"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
-      // if (!checkAuth('admin')) return;
+    // Define logout function immediately for instant response
+    window.logout = function() {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      if (currentUser) {
+        localStorage.removeItem(`welcome_shown_${currentUser.id}`);
+        localStorage.removeItem(`welcome_shown_admin_${currentUser.id}`);
+      }
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("profileNama");
+      localStorage.removeItem("profileEmail");
+      window.location.replace("index.html");
+    };
+
+    // Override functions for admin profile editing
+    window.toggleEditMode = function() {
+      const isEditMode = document.querySelector('.profile-form input').disabled;
+      const inputs = document.querySelectorAll('.profile-form input');
+      const saveButtons = document.getElementById('saveButtons');
+
+      inputs.forEach(input => {
+        input.disabled = !isEditMode;
+      });
+
+      if (saveButtons) {
+        saveButtons.style.display = isEditMode ? 'block' : 'none';
+      }
+    };
+
+    window.saveProfil = function() {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {};
+      const updatedUser = {
+        ...currentUser,
+        nama: document.getElementById('inputNama').value || currentUser.nama,
+        username: document.getElementById('inputUsername').value || currentUser.username,
+        email: document.getElementById('inputEmail').value || currentUser.email,
+        phone: document.getElementById('inputPhone').value || currentUser.phone,
+        departemen: document.getElementById('inputDepartemen').value || currentUser.departemen
+      };
+
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+
+      // Update display
+      document.getElementById('profileNamaHeader').textContent = updatedUser.nama || "Admin";
+      document.getElementById('profileRoleHeader').textContent = `Admin${updatedUser.departemen ? ' - ' + updatedUser.departemen : ''}`;
+
+      // Disable edit mode
+      const inputs = document.querySelectorAll('.profile-form input');
+      const saveButtons = document.getElementById('saveButtons');
+      inputs.forEach(input => input.disabled = true);
+      if (saveButtons) saveButtons.style.display = 'none';
+
+      alert('Profil berhasil disimpan!');
+    };
+
+    window.cancelEdit = function() {
+      // Reload data
       loadProfilFull();
+
+      // Disable edit mode
+      const inputs = document.querySelectorAll('.profile-form input');
+      const saveButtons = document.getElementById('saveButtons');
+      inputs.forEach(input => input.disabled = true);
+      if (saveButtons) saveButtons.style.display = 'none';
+    };
+
+    window.previewPhoto = function(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64 = e.target.result;
+          document.getElementById('profilePhoto').src = base64;
+
+          // Save to localStorage
+          const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {};
+          currentUser.foto = base64;
+          localStorage.setItem("currentUser", JSON.stringify(currentUser));
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    };
+
+    window.changePassword = function() {
+      const oldPassword = document.getElementById('inputOldPassword').value;
+      const newPassword = document.getElementById('inputNewPassword').value;
+      const confirmPassword = document.getElementById('inputConfirmPassword').value;
+
+      if (!oldPassword || !newPassword || !confirmPassword) {
+        alert('Semua field password wajib diisi');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        alert('Password baru dan konfirmasi tidak cocok');
+        return;
+      }
+
+      if (newPassword.length < 4) {
+        alert('Password baru minimal 4 karakter');
+        return;
+      }
+
+      // For demo, just show success
+      alert('Password berhasil diubah!');
+
+      // Clear fields
+      document.getElementById('inputOldPassword').value = '';
+      document.getElementById('inputNewPassword').value = '';
+      document.getElementById('inputConfirmPassword').value = '';
+    };
+
+    // Load profile data
+    function loadProfilFull() {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {};
+
+      // Header
+      document.getElementById('profileNamaHeader').textContent = currentUser.nama || "Admin";
+      document.getElementById('profileRoleHeader').textContent = `Admin${currentUser.departemen ? ' - ' + currentUser.departemen : ''}`;
+
+      // Photo
+      const photoEl = document.getElementById('profilePhoto');
+      if (photoEl) {
+        if (currentUser.foto) {
+          photoEl.src = currentUser.foto;
+        } else {
+          // Show default
+          photoEl.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect fill="%237c8db5" width="120" height="120"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="48" font-family="Arial">👤</text></svg>';
+        }
+      }
+
+      // Form fields
+      document.getElementById('inputNama').value = currentUser.nama || "";
+      document.getElementById('inputUsername').value = currentUser.username || "";
+      document.getElementById('inputEmail').value = currentUser.email || "";
+      document.getElementById('inputPhone').value = currentUser.phone || "";
+      document.getElementById('inputDepartemen').value = currentUser.departemen || "";
+    }
+
+    // Wait for page to load
+    function initializeProfilePage() {
+      loadProfilFull();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initializeProfilePage();
     });
   </script>
 </body>

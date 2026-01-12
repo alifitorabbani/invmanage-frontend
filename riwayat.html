@@ -14,26 +14,95 @@
       <h1>InvManage Admin</h1>
 
       <div class="menu">
-        <a href="dashboard.html" class="menu-item">Dashboard</a>
-        <a href="riwayat.html" class="menu-item active">Riwayat Peminjaman</a>
-        <a href="laporan.html" class="menu-item">📊 Laporan & Analitik</a>
-        <a href="profil.html" class="menu-item">Profil</a>
-        <a href="feedback.html" class="menu-item">Feedback</a>
+        <a href="dashboard.html" class="menu-item">📊 Dashboard</a>
+        <a href="admin-verification.html" class="menu-item">✅ Verification</a>
+        <a href="riwayat.html" class="menu-item active">📋 Riwayat Transaksi</a>
+        <a href="laporan.html" class="menu-item">📈 Laporan & Analitik</a>
+        <a href="profil.html" class="menu-item">👤 Profil</a>
+        <a href="feedback.html" class="menu-item">💬 Feedback</a>
+      </div>
+
+      <!-- User Info Section -->
+      <div class="sidebar-user">
+        <div class="user-avatar">
+          <span id="sidebarUserInitial">A</span>
+        </div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+        <button class="logout-btn" onclick="if(confirm('Apakah Anda yakin ingin keluar?')) { localStorage.clear(); sessionStorage.clear(); window.location.href = 'index.html'; }" title="Logout">
+          <span>🚪</span>
+        </button>
       </div>
     </div>
 
     <!-- Main content -->
     <div class="main-content">
       <!-- Manual Input Section at Top -->
-      <div class="manual-input-section" style="background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--gray-600);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div class="collapsible-section manual-input-section" style="background: var(--gray-800); border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--gray-600); overflow: hidden;">
+        <div class="collapsible-header" onclick="toggleCollapsibleSection('manual-input')" style="padding: 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
           <div>
             <h3 style="color: var(--gray-100); margin: 0; font-size: 18px;">Input Peminjaman Manual</h3>
             <p style="color: var(--gray-400); margin: 4px 0 0 0; font-size: 14px;">Tambahkan peminjaman secara manual untuk user dan barang tertentu</p>
           </div>
-          <button class="add-btn" onclick="openPeminjamanAdminModal()" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); border: 1px solid #3b82f6; padding: 12px 20px;">
-            <i class="fas fa-plus"></i> Input Manual
-          </button>
+          <div class="collapsible-toggle">
+            <span class="toggle-icon">▼</span>
+          </div>
+        </div>
+        <div id="manual-input-content" class="collapsible-content" style="display: none; padding: 0 24px 24px 24px;">
+          <div class="input-group">
+            <label>Pilih User</label>
+            <select id="adminPeminjamanUser" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
+              <option value="">Pilih User</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Pilih Barang</label>
+            <select id="adminPeminjamanBarang" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
+              <option value="">Pilih Barang</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Jumlah</label>
+            <input type="number" id="adminPeminjamanJumlah" placeholder="Jumlah barang" min="1">
+          </div>
+
+          <div class="input-group">
+            <label>Status</label>
+            <select id="adminPeminjamanStatus" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
+              <option value="dipinjam">Dipinjam</option>
+              <option value="dikembalikan">Dikembalikan</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Catatan (opsional)</label>
+            <input type="text" id="adminPeminjamanCatatan" placeholder="Catatan peminjaman">
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top: 16px;">
+            <button class="primary" onclick="savePeminjamanAdmin()">Simpan</button>
+            <button class="btn-red" onclick="resetManualInputForm()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Peminjaman Section -->
+      <div id="detail-section" class="collapsible-section detail-section" style="background: var(--gray-800); border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--gray-600); overflow: hidden; display: none;">
+        <div class="collapsible-header" onclick="toggleCollapsibleSection('detail')" style="padding: 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="color: var(--gray-100); margin: 0; font-size: 18px;">Detail Peminjaman</h3>
+            <p style="color: var(--gray-400); margin: 4px 0 0 0; font-size: 14px;">Informasi lengkap peminjaman yang dipilih</p>
+          </div>
+          <div class="collapsible-toggle">
+            <span class="toggle-icon">▼</span>
+          </div>
+        </div>
+        <div id="detail-content" class="collapsible-content" style="display: none; padding: 0 24px 24px 24px;">
+          <!-- Detail content will be loaded here -->
         </div>
       </div>
 
@@ -51,59 +120,28 @@
       <div class="table-box">
         <div class="table-header">
           <div>
-            <h2 class="table-title">Riwayat Peminjaman Semua User</h2>
-            <p style="color:var(--gray-400); margin: 8px 0 0 0; font-size: 14px;">Daftar semua peminjaman barang dari user</p>
+            <h2 class="table-title">📋 Riwayat Peminjaman Lengkap</h2>
+            <p style="color:var(--gray-400); margin: 8px 0 0 0; font-size: 14px;">Kelola dan pantau semua aktivitas peminjaman sistem</p>
+          </div>
+          <div class="table-actions">
+            <div class="search-container">
+              <input type="text" id="searchRiwayat" placeholder="Cari peminjaman..." class="search-input">
+              <span class="search-icon">🔍</span>
+            </div>
+            <select id="statusFilterRiwayat" class="filter-select">
+              <option value="">Semua Status</option>
+              <option value="rejected">Ditolak</option>
+              <option value="dipinjam">Dipinjam</option>
+              <option value="dikembalikan">Dikembalikan</option>
+            </select>
           </div>
         </div>
 
-        <!-- Container untuk menampilkan data peminjaman -->
-        <div id="riwayat-peminjaman-container" class="data-container">
+        <!-- Enhanced Container untuk menampilkan data peminjaman -->
+        <div id="riwayat-peminjaman-container" class="data-container enhanced">
           <!-- Data will be loaded here by JavaScript -->
         </div>
 
-        <!-- Modal Input Peminjaman Manual -->
-        <div class="modal-bg" id="modalPeminjamanAdmin">
-          <div class="modal">
-            <h3 id="modalPeminjamanTitle">Input Peminjaman Manual</h3>
-
-            <div class="input-group">
-              <label>Pilih User</label>
-              <select id="adminPeminjamanUser" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
-                <option value="">Pilih User</option>
-              </select>
-            </div>
-
-            <div class="input-group">
-              <label>Pilih Barang</label>
-              <select id="adminPeminjamanBarang" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
-                <option value="">Pilih Barang</option>
-              </select>
-            </div>
-
-            <div class="input-group">
-              <label>Jumlah</label>
-              <input type="number" id="adminPeminjamanJumlah" placeholder="Jumlah barang" min="1">
-            </div>
-
-            <div class="input-group">
-              <label>Status</label>
-              <select id="adminPeminjamanStatus" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;">
-                <option value="dipinjam">Dipinjam</option>
-                <option value="dikembalikan">Dikembalikan</option>
-              </select>
-            </div>
-
-            <div class="input-group">
-              <label>Catatan (opsional)</label>
-              <input type="text" id="adminPeminjamanCatatan" placeholder="Catatan peminjaman">
-            </div>
-
-            <div style="display:flex; gap:10px;">
-              <button class="primary" onclick="savePeminjamanAdmin()">Simpan</button>
-              <button class="btn-red" onclick="closePeminjamanAdminModal()">Batal</button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -157,7 +195,9 @@
 
       // Display sample data immediately for better UX
       console.log('📊 Displaying sample peminjaman data immediately');
-      displayRiwayatPeminjaman(window.samplePeminjaman || []);
+      filteredPeminjamanData = window.samplePeminjaman || [];
+      allPeminjamanData = [...filteredPeminjamanData];
+      displayRiwayatPeminjaman();
 
       // Try to load real data from backend
       try {
@@ -184,7 +224,9 @@
 
           if (Array.isArray(data) && data.length > 0) {
             console.log('Replacing sample data with real data:', data.length, 'records');
-            displayRiwayatPeminjaman(data);
+            allPeminjamanData = [...data];
+            filteredPeminjamanData = [...data];
+            displayRiwayatPeminjaman();
           } else {
             console.log('Backend returned empty data, keeping sample data');
           }
@@ -196,8 +238,8 @@
       }
     }
 
-    function displayRiwayatPeminjaman(peminjamanData) {
-      console.log('Displaying peminjaman data:', peminjamanData);
+    function displayRiwayatPeminjaman() {
+      console.log('Displaying peminjaman data:', filteredPeminjamanData);
 
       const container = document.getElementById('riwayat-peminjaman-container');
       if (!container) {
@@ -207,57 +249,233 @@
 
       container.innerHTML = '';
 
-      if (!Array.isArray(peminjamanData) || peminjamanData.length === 0) {
-        container.innerHTML = '<p class="no-data">Tidak ada data peminjaman</p>';
+      if (!Array.isArray(filteredPeminjamanData) || filteredPeminjamanData.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <div class="empty-title">Tidak ada data peminjaman</div>
+            <div class="empty-message">Belum ada aktivitas peminjaman yang tercatat</div>
+          </div>
+        `;
         return;
       }
 
-      const table = document.createElement('table');
-      table.className = 'peminjaman-table';
-
-      table.innerHTML = `
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Barang</th>
-            <th>Peminjam</th>
-            <th>Jumlah</th>
-            <th>Status</th>
-            <th>Tanggal Pinjam</th>
-            <th>Tanggal Kembali</th>
-            <th>Info</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      `;
-
-      const tbody = table.querySelector('tbody');
+      // Group data into sections of 10 items each
+      const itemsPerSection = 10;
+      const totalSections = Math.ceil(filteredPeminjamanData.length / itemsPerSection);
 
       let totalDipinjam = 0;
       let totalDikembalikan = 0;
 
-      peminjamanData.forEach((item) => {
-        if (item.status === 'dipinjam') totalDipinjam++;
-        else if (item.status === 'dikembalikan') totalDikembalikan++;
+      if (totalSections > 0) {
+        const sectionIndex = currentSection;
+        const startIndex = sectionIndex * itemsPerSection;
+        const endIndex = Math.min(startIndex + itemsPerSection, filteredPeminjamanData.length);
+        const sectionData = filteredPeminjamanData.slice(startIndex, endIndex);
 
-        const row = document.createElement('tr');
-        const statusClass = item.status === 'dipinjam' ? 'status-dipinjam' : 'status-dikembalikan';
-
-        row.innerHTML = `
-          <td>${item.id || '-'}</td>
-          <td>${item.barang_nama || item.barang || '-'}</td>
-          <td>${item.user_nama || item.user || '-'}</td>
-          <td>${item.jumlah || 0}</td>
-          <td><span class="status ${statusClass}">${item.status || '-'}</span></td>
-          <td>${item.tanggal_pinjam ? new Date(item.tanggal_pinjam).toLocaleDateString('id-ID') : '-'}</td>
-          <td>${item.tanggal_kembali ? new Date(item.tanggal_kembali).toLocaleDateString('id-ID') : '-'}</td>
-          <td>${item.catatan || '-'}</td>
+        // Create section container
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'peminjaman-section';
+        sectionDiv.style.cssText = `
+          background: var(--gray-800);
+          border-radius: 16px;
+          margin-bottom: 24px;
+          border: 1px solid var(--gray-600);
+          overflow: hidden;
         `;
 
-        tbody.appendChild(row);
-      });
+        // Section header
+        const sectionHeader = document.createElement('div');
+        sectionHeader.style.cssText = `
+          padding: 20px 24px;
+          background: var(--gray-700);
+          border-bottom: 1px solid var(--gray-600);
+          color: var(--gray-900);
+        `;
+        sectionHeader.innerHTML = `
+          <h3 style="color: var(--gray-900); margin: 0; font-size: 18px; font-weight: 600;">
+            📋 Section ${sectionIndex + 1} (${startIndex + 1}-${endIndex} dari ${filteredPeminjamanData.length})
+          </h3>
+          <p style="color: var(--gray-900); margin: 4px 0 0 0; font-size: 14px;">
+            Menampilkan ${sectionData.length} data peminjaman
+          </p>
+        `;
+        sectionDiv.appendChild(sectionHeader);
 
-      container.appendChild(table);
+        // Section content with table
+        const sectionContent = document.createElement('div');
+        sectionContent.style.cssText = 'padding: 24px;';
+
+        // Create table
+        const table = document.createElement('table');
+        table.style.cssText = `
+          width: 100%;
+          border-collapse: collapse;
+          color: var(--gray-900);
+        `;
+
+        // Table header
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+          <tr style="background: var(--gray-700);">
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-600); font-weight: 600; color: var(--gray-900);">ID</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-600); font-weight: 600; color: var(--gray-900);">Status</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-600); font-weight: 600; color: var(--gray-900);">Barang</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-600); font-weight: 600; color: var(--gray-900);">User</th>
+            <th style="padding: 12px; text-align: center; border-bottom: 1px solid var(--gray-600); font-weight: 600; color: var(--gray-900);">Jumlah</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-600); font-weight: 600; color: var(--gray-900);">Tanggal Pinjam</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-600); font-weight: 600; color: var(--gray-900);">Tanggal Kembali</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-600); font-weight: 600; color: var(--gray-900);">Catatan</th>
+            <th style="padding: 12px; text-align: center; border-bottom: 1px solid var(--gray-600); font-weight: 600; color: var(--gray-900);">Aksi</th>
+          </tr>
+        `;
+        table.appendChild(thead);
+
+        // Table body
+        const tbody = document.createElement('tbody');
+
+        let sectionDipinjam = 0;
+        let sectionDikembalikan = 0;
+
+        sectionData.forEach((item) => {
+          if (item.status === 'dipinjam') {
+            totalDipinjam++;
+            sectionDipinjam++;
+          } else if (item.status === 'dikembalikan') {
+            totalDikembalikan++;
+            sectionDikembalikan++;
+          }
+
+          let statusClass = 'status-gray';
+          let statusIcon = '❓';
+
+          switch (item.status) {
+             case 'pending':
+               statusClass = 'status-orange';
+               statusIcon = '⏳';
+               break;
+            case 'approved':
+              statusClass = 'status-blue';
+              statusIcon = '✅';
+              break;
+            case 'rejected':
+              statusClass = 'status-red';
+              statusIcon = '❌';
+              break;
+            case 'dipinjam':
+              statusClass = 'status-yellow';
+              statusIcon = '📦';
+              break;
+            case 'dikembalikan':
+              statusClass = 'status-green';
+              statusIcon = '↩️';
+              break;
+          }
+
+          const row = document.createElement('tr');
+          row.style.cssText = 'border-bottom: 1px solid var(--gray-600);';
+          row.innerHTML = `
+            <td style="padding: 12px; color: var(--gray-900);">#${item.id || '-'}</td>
+            <td style="padding: 12px; color: var(--gray-900);">
+              <span class="status ${statusClass}" style="font-size: 12px; padding: 4px 8px; border-radius: 6px;">
+                ${statusIcon} ${item.status || '-'}
+              </span>
+            </td>
+            <td style="padding: 12px; color: var(--gray-900);">
+              <div style="font-weight: 600;">${item.barang_nama || item.barang || '-'}</div>
+              <div style="font-size: 12px; color: var(--gray-900);">${item.barang_kategori || 'Umum'}</div>
+            </td>
+            <td style="padding: 12px; color: var(--gray-900);">
+              <div style="font-weight: 600;">${item.user_nama || item.user || '-'}</div>
+              <div style="font-size: 12px; color: var(--gray-900);">${item.user_email || ''}</div>
+            </td>
+            <td style="padding: 12px; text-align: center; color: var(--gray-900);">${item.jumlah || 0}</td>
+            <td style="padding: 12px; color: var(--gray-900);">
+              ${item.tanggal_pinjam ? new Date(item.tanggal_pinjam).toLocaleDateString('id-ID') : '-'}
+            </td>
+            <td style="padding: 12px; color: var(--gray-900);">
+              ${item.tanggal_kembali ? new Date(item.tanggal_kembali).toLocaleDateString('id-ID') : '-'}
+            </td>
+            <td style="padding: 12px; color: var(--gray-900);" title="${item.catatan || '-'}">
+              ${item.catatan ? (item.catatan.length > 30 ? item.catatan.substring(0, 30) + '...' : item.catatan) : '-'}
+            </td>
+            <td style="padding: 12px; text-align: center; color: var(--gray-900);">
+              <button class="btn-detail" onclick="showPeminjamanDetailInSection(${item.id})" title="Lihat Detail Lengkap" style="background: var(--primary); color: var(--gray-900); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                <span>🔍</span> Detail
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+
+        // Table footer with section summary
+        const tfoot = document.createElement('tfoot');
+        tfoot.innerHTML = `
+          <tr style="background: var(--gray-700); border-top: 2px solid var(--gray-600);">
+            <td colspan="4" style="padding: 12px; font-weight: 600; text-align: left; color: var(--gray-900);">Ringkasan Section ${sectionIndex + 1}</td>
+            <td style="padding: 12px; font-weight: 600; text-align: center; color: var(--gray-900);">${sectionData.length}</td>
+            <td colspan="2" style="padding: 12px; font-weight: 600; text-align: center; color: var(--gray-900);">Dipinjam: ${sectionDipinjam} | Dikembalikan: ${sectionDikembalikan}</td>
+            <td colspan="2" style="padding: 12px; font-weight: 600; text-align: center; color: var(--gray-900);">Total di Section: ${sectionData.length}</td>
+          </tr>
+        `;
+        table.appendChild(tfoot);
+
+        sectionContent.appendChild(table);
+        sectionDiv.appendChild(sectionContent);
+        container.appendChild(sectionDiv);
+
+        // Add navigation buttons if multiple sections
+        if (totalSections > 1) {
+          const navDiv = document.createElement('div');
+          navDiv.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; flex-wrap: wrap;';
+
+          // Section indicator
+          const sectionIndicator = document.createElement('span');
+          sectionIndicator.textContent = `Section ${sectionIndex + 1} of ${totalSections}`;
+          sectionIndicator.style.cssText = 'color: var(--gray-900); font-weight: 600; margin: 0 20px;';
+          navDiv.appendChild(sectionIndicator);
+
+          // First button
+          const firstBtn = document.createElement('button');
+          firstBtn.textContent = 'First';
+          firstBtn.onclick = () => changeSection(0);
+          firstBtn.disabled = currentSection === 0;
+          firstBtn.style.cssText = 'padding: 10px 15px; border: none; border-radius: 6px; background: var(--primary); color: var(--gray-900); cursor: pointer;';
+          if (firstBtn.disabled) firstBtn.style.opacity = '0.5';
+          navDiv.appendChild(firstBtn);
+
+          // Previous button
+          const prevBtn = document.createElement('button');
+          prevBtn.textContent = 'Previous';
+          prevBtn.onclick = () => changeSection(currentSection - 1);
+          prevBtn.disabled = currentSection === 0;
+          prevBtn.style.cssText = 'padding: 10px 15px; border: none; border-radius: 6px; background: var(--primary); color: var(--gray-900); cursor: pointer;';
+          if (prevBtn.disabled) prevBtn.style.opacity = '0.5';
+          navDiv.appendChild(prevBtn);
+
+          // Next button
+          const nextBtn = document.createElement('button');
+          nextBtn.textContent = 'Next';
+          nextBtn.onclick = () => changeSection(currentSection + 1);
+          nextBtn.disabled = currentSection === totalSections - 1;
+          nextBtn.style.cssText = 'padding: 10px 15px; border: none; border-radius: 6px; background: var(--primary); color: var(--gray-900); cursor: pointer;';
+          if (nextBtn.disabled) nextBtn.style.opacity = '0.5';
+          navDiv.appendChild(nextBtn);
+
+          // Last button
+          const lastBtn = document.createElement('button');
+          lastBtn.textContent = 'Last';
+          lastBtn.onclick = () => changeSection(totalSections - 1);
+          lastBtn.disabled = currentSection === totalSections - 1;
+          lastBtn.style.cssText = 'padding: 10px 15px; border: none; border-radius: 6px; background: var(--primary); color: var(--gray-900); cursor: pointer;';
+          if (lastBtn.disabled) lastBtn.style.opacity = '0.5';
+          navDiv.appendChild(lastBtn);
+
+          container.appendChild(navDiv);
+        }
+      }
 
       // Update counters
       const totalDipinjamEl = document.getElementById('totalDipinjamAdmin');
@@ -267,6 +485,32 @@
       if (totalDikembalikanEl) totalDikembalikanEl.textContent = totalDikembalikan;
 
       console.log(`Updated counters: ${totalDipinjam} dipinjam, ${totalDikembalikan} dikembalikan`);
+    }
+
+    function changePage(page) {
+      if (page < 1 || page > Math.ceil(filteredPeminjamanData.length / itemsPerPage)) return;
+      currentPage = page;
+      displayRiwayatPeminjaman();
+    }
+
+    function changeSection(sectionIndex) {
+      const totalSections = Math.ceil(filteredPeminjamanData.length / 10); // itemsPerSection is 10
+      if (sectionIndex < 0 || sectionIndex >= totalSections) return;
+      currentSection = sectionIndex;
+      displayRiwayatPeminjaman();
+    }
+
+    function toggleCollapsibleSection(sectionId) {
+      const content = document.getElementById(sectionId + '-content');
+      const toggleIcon = content.previousElementSibling.querySelector('.toggle-icon');
+
+      if (content.classList.contains('show')) {
+        content.classList.remove('show');
+        toggleIcon.textContent = '▶';
+      } else {
+        content.classList.add('show');
+        toggleIcon.textContent = '▼';
+      }
     }
 
     function initPeminjaman() {
@@ -279,6 +523,9 @@
         return;
       }
       console.log('✅ Peminjaman container found');
+
+      // Initialize search and filter functionality
+      initSearchAndFilter();
 
       // Load data - use the function from app.js if available, otherwise use fallback
       console.log('🔄 Calling loadRiwayatPeminjaman...');
@@ -371,9 +618,372 @@
         loadRiwayatPeminjaman();
       }
     }
+
+    async function showPeminjamanDetail(peminjamanId) {
+      const modal = document.getElementById('modalPeminjamanDetail');
+      const content = document.getElementById('peminjamanDetailContent');
+
+      content.innerHTML = '<div class="loading" style="color: white;">Memuat detail...</div>';
+      content.style.background = 'var(--gray-800)';
+      content.style.color = 'white';
+      modal.style.display = 'flex';
+
+      try {
+        const response = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/`);
+        if (!response.ok) throw new Error('Failed to fetch peminjaman details');
+
+        const peminjaman = await response.json();
+
+        // Determine status styling
+        let statusClass = 'status-gray';
+        let statusIcon = '❓';
+        switch (peminjaman.status) {
+          case 'pending_approval': statusClass = 'status-orange'; statusIcon = '⏳'; break;
+          case 'dipinjam': statusClass = 'status-yellow'; statusIcon = '📦'; break;
+          case 'dikembalikan': statusClass = 'status-green'; statusIcon = '↩️'; break;
+          case 'cancelled': statusClass = 'status-red'; statusIcon = '❌'; break;
+        }
+
+        content.innerHTML = `
+          <div class="detail-container" style="color: white !important;">
+            <!-- Header Info -->
+            <div class="detail-header">
+              <div class="detail-id">
+                <h4 style="color: white !important;">Peminjaman #${peminjaman.id}</h4>
+                <span class="status-large ${statusClass}">${statusIcon} ${peminjaman.status}</span>
+              </div>
+            </div>
+
+            <!-- Main Details Grid -->
+            <div class="detail-grid">
+              <div class="detail-section">
+                <h5 style="color: white !important;">📦 Informasi Barang</h5>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Nama Barang:</span>
+                  <span class="value" style="color: white !important;">${peminjaman.barang_nama || peminjaman.barang}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Kategori:</span>
+                  <span class="value" style="color: white !important;">${peminjaman.barang_kategori || 'Umum'}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Jumlah:</span>
+                  <span class="value quantity" style="color: white !important;">${peminjaman.jumlah} unit</span>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h5 style="color: white !important;">👤 Informasi Peminjam</h5>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Nama:</span>
+                  <span class="value" style="color: white !important;">${peminjaman.user_nama || peminjaman.user}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Email:</span>
+                  <span class="value" style="color: white !important;">${peminjaman.user_email || '-'}</span>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h5 style="color: white !important;">📅 Waktu & Tanggal</h5>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Tanggal Pinjam:</span>
+                  <span class="value" style="color: white !important;">${peminjaman.tanggal_pinjam ? new Date(peminjaman.tanggal_pinjam).toLocaleString('id-ID') : '-'}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Tanggal Kembali:</span>
+                  <span class="value" style="color: white !important;">${peminjaman.tanggal_kembali ? new Date(peminjaman.tanggal_kembali).toLocaleString('id-ID') : '-'}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Tanggal Verifikasi:</span>
+                  <span class="value" style="color: white !important;">${peminjaman.verified_at ? new Date(peminjaman.verified_at).toLocaleString('id-ID') : '-'}</span>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h5 style="color: white !important;">✅ Verifikasi Admin</h5>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Admin:</span>
+                  <span class="value" style="color: white !important;">${peminjaman.verified_by_name || peminjaman.verified_by || '-'}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label" style="color: white !important;">Alasan Reject:</span>
+                  <span class="value" style="color: white !important;">${peminjaman.alasan_reject || 'Tidak ada'}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="detail-section full-width">
+              <h5 style="color: white !important;">💬 Alasan Peminjaman</h5>
+              <div class="reason-box" style="color: white !important;">
+                ${peminjaman.alasan_peminjaman || 'Tidak ada alasan yang diberikan'}
+              </div>
+            </div>
+
+            <div class="detail-section full-width">
+              <h5 style="color: white !important;">📝 Catatan Tambahan</h5>
+              <div class="notes-box" style="color: white !important;">
+                ${peminjaman.catatan || 'Tidak ada catatan'}
+              </div>
+            </div>
+
+            <!-- Status History -->
+            <div class="detail-section full-width">
+              <h5 style="color: white !important;">📊 Riwayat Status</h5>
+              <div class="history-timeline" style="color: white !important;">
+                ${peminjaman.status_history ?
+                  peminjaman.status_history.map(h => `
+                    <div class="history-item" style="color: white !important;">
+                      <div class="history-status">${h.status}</div>
+                      <div class="history-time">${new Date(h.timestamp).toLocaleString('id-ID')}</div>
+                    </div>
+                  `).join('') :
+                  '<div class="history-item" style="color: white !important;">Tidak ada riwayat status</div>'
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading peminjaman detail:', error);
+        content.innerHTML = '<div class="error">Gagal memuat detail peminjaman</div>';
+      }
+    }
+
+    function closePeminjamanDetailModal() {
+      const modal = document.getElementById('modalPeminjamanDetail');
+      modal.style.display = 'none';
+    }
+
+    async function showPeminjamanDetailInSection(peminjamanId) {
+      const detailSection = document.getElementById('detail-section');
+      const content = document.getElementById('detail-content');
+      const toggleIcon = content.previousElementSibling.querySelector('.toggle-icon');
+
+      // Show the detail section
+      detailSection.style.display = 'block';
+      content.style.display = 'block';
+      content.classList.add('show');
+      toggleIcon.textContent = '▼';
+
+      content.innerHTML = '<div class="loading">Memuat detail...</div>';
+
+      try {
+        const response = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/`);
+        if (!response.ok) throw new Error('Failed to fetch peminjaman details');
+
+        const peminjaman = await response.json();
+
+        // Determine status styling
+        let statusClass = 'status-gray';
+        let statusIcon = '❓';
+        switch (peminjaman.status) {
+          case 'pending': statusClass = 'status-orange'; statusIcon = '⏳'; break;
+          case 'approved': statusClass = 'status-blue'; statusIcon = '✅'; break;
+          case 'rejected': statusClass = 'status-red'; statusIcon = '❌'; break;
+          case 'dipinjam': statusClass = 'status-yellow'; statusIcon = '📦'; break;
+          case 'dikembalikan': statusClass = 'status-green'; statusIcon = '↩️'; break;
+        }
+
+        content.innerHTML = `
+          <div class="detail-container">
+            <!-- Header Info -->
+            <div class="detail-header">
+              <div class="detail-id">
+                <h4>Peminjaman #${peminjaman.id}</h4>
+                <span class="status-large ${statusClass}">${statusIcon} ${peminjaman.status}</span>
+              </div>
+            </div>
+
+            <!-- Main Details Grid -->
+            <div class="detail-grid">
+              <div class="detail-section">
+                <h5>📦 Informasi Barang</h5>
+                <div class="detail-row">
+                  <span class="label">Nama Barang:</span>
+                  <span class="value">${peminjaman.barang_nama || peminjaman.barang}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Kategori:</span>
+                  <span class="value">${peminjaman.barang_kategori || 'Umum'}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Jumlah:</span>
+                  <span class="value quantity">${peminjaman.jumlah} unit</span>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h5>👤 Informasi Peminjam</h5>
+                <div class="detail-row">
+                  <span class="label">Nama:</span>
+                  <span class="value">${peminjaman.user_nama || peminjaman.user}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Email:</span>
+                  <span class="value">${peminjaman.user_email || '-'}</span>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h5>📅 Waktu & Tanggal</h5>
+                <div class="detail-row">
+                  <span class="label">Tanggal Pinjam:</span>
+                  <span class="value">${peminjaman.tanggal_pinjam ? new Date(peminjaman.tanggal_pinjam).toLocaleString('id-ID') : '-'}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Tanggal Kembali:</span>
+                  <span class="value">${peminjaman.tanggal_kembali ? new Date(peminjaman.tanggal_kembali).toLocaleString('id-ID') : '-'}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Tanggal Verifikasi:</span>
+                  <span class="value">${peminjaman.verified_at ? new Date(peminjaman.verified_at).toLocaleString('id-ID') : '-'}</span>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h5>✅ Verifikasi Admin</h5>
+                <div class="detail-row">
+                  <span class="label">Admin:</span>
+                  <span class="value">${peminjaman.verified_by_name || peminjaman.verified_by || '-'}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Alasan Reject:</span>
+                  <span class="value">${peminjaman.alasan_reject || 'Tidak ada'}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="detail-section full-width">
+              <h5>💬 Alasan Peminjaman</h5>
+              <div class="reason-box">
+                ${peminjaman.alasan_peminjaman || 'Tidak ada alasan yang diberikan'}
+              </div>
+            </div>
+
+            <div class="detail-section full-width">
+              <h5>📝 Catatan Tambahan</h5>
+              <div class="notes-box">
+                ${peminjaman.catatan || 'Tidak ada catatan'}
+              </div>
+            </div>
+
+            <!-- Status History -->
+            <div class="detail-section full-width">
+              <h5>📊 Riwayat Status</h5>
+              <div class="history-timeline">
+                ${peminjaman.status_history ?
+                  peminjaman.status_history.map(h => `
+                    <div class="history-item">
+                      <div class="history-status">${h.status}</div>
+                      <div class="history-time">${new Date(h.timestamp).toLocaleString('id-ID')}</div>
+                    </div>
+                  `).join('') :
+                  '<div class="history-item">Tidak ada riwayat status</div>'
+                }
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Scroll to the detail section
+        detailSection.scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        console.error('Error loading peminjaman detail:', error);
+        content.innerHTML = '<div class="error">Gagal memuat detail peminjaman</div>';
+      }
+    }
+
+    function printPeminjamanDetail() {
+      const content = document.getElementById('peminjamanDetailContent');
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Detail Peminjaman - InvManage</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .detail-header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+              .detail-section { margin-bottom: 20px; }
+              .detail-row { display: flex; margin-bottom: 8px; }
+              .label { font-weight: bold; min-width: 150px; }
+              .status { padding: 4px 8px; border-radius: 4px; color: white; }
+              .status-orange { background: #f59e0b; }
+              .status-blue { background: #3b82f6; }
+              .status-red { background: #ef4444; }
+              .status-yellow { background: #eab308; }
+              .status-green { background: #10b981; }
+              h5 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+            </style>
+          </head>
+          <body>
+            <h2>Detail Peminjaman - InvManage</h2>
+            ${content.innerHTML}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    // Enhanced search and filter functionality
+    let allPeminjamanData = [];
+    let filteredPeminjamanData = [];
+    let currentSection = 0;
+
+    function initSearchAndFilter() {
+      const searchInput = document.getElementById('searchRiwayat');
+      const statusFilter = document.getElementById('statusFilterRiwayat');
+
+      searchInput.addEventListener('input', debounce(() => {
+        currentSection = 0; // Reset to first section when searching
+        applyRiwayatFilters();
+      }, 300));
+
+      statusFilter.addEventListener('change', () => {
+        currentSection = 0; // Reset to first section when filtering
+        applyRiwayatFilters();
+      });
+    }
+
+    function applyRiwayatFilters() {
+      const searchTerm = document.getElementById('searchRiwayat').value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilterRiwayat').value;
+
+      let filteredData = allPeminjamanData;
+
+      // Apply status filter
+      if (statusFilter) {
+        // Map filter values to actual status values
+        const statusMap = {
+          'rejected': 'rejected',
+          'dipinjam': 'dipinjam',
+          'dikembalikan': 'dikembalikan'
+        };
+        const actualStatus = statusMap[statusFilter] || statusFilter;
+        filteredData = filteredData.filter(item => item.status === actualStatus);
+      }
+
+      // Apply search filter
+      if (searchTerm) {
+        filteredData = filteredData.filter(item =>
+          (item.barang_nama || item.barang || '').toLowerCase().includes(searchTerm) ||
+          (item.user_nama || item.user || '').toLowerCase().includes(searchTerm) ||
+          (item.user_email || '').toLowerCase().includes(searchTerm) ||
+          (item.catatan || '').toLowerCase().includes(searchTerm) ||
+          (item.alasan_peminjaman || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      filteredPeminjamanData = filteredData;
+      currentSection = 0; // Reset to first section when filters change
+      displayRiwayatPeminjaman();
+    }
   </script>
   <script src="data.js"></script>
-  <script src="app.js?v=20251226"></script>
+  <script src="app.js?v=20251227"></script>
   <script>
     // Initialize after all scripts are loaded
     window.addEventListener('load', function() {

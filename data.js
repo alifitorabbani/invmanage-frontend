@@ -59,10 +59,10 @@ const samplePeminjaman = [
     barang: 3,
     barang_nama: "Keyboard Dell KB216",
     jumlah: 1,
-    status: "dipinjam",
-    tanggal_pinjam: new Date(Date.now() - 86400000 * 1).toISOString(),
+    status: "pending",
+    tanggal_pinjam: new Date().toISOString(),
     catatan: "Dibutuhkan untuk meeting presentasi",
-    days_borrowed: 1
+    days_borrowed: 0
   },
   {
     id: 4,
@@ -71,11 +71,10 @@ const samplePeminjaman = [
     barang: 4,
     barang_nama: "Monitor Samsung 24 inch",
     jumlah: 1,
-    status: "dipinjam",
-    tanggal_pinjam: new Date(Date.now() - 86400000 * 3).toISOString(),
+    status: "approved",
+    tanggal_pinjam: new Date(Date.now() - 86400000 * 1).toISOString(),
     catatan: "Untuk design work",
-    days_borrowed: 3,
-    is_overdue: true
+    days_borrowed: 1
   },
   {
     id: 5,
@@ -97,10 +96,22 @@ const samplePeminjaman = [
     barang: 6,
     barang_nama: "Router TP-Link AC1200",
     jumlah: 1,
-    status: "dipinjam",
-    tanggal_pinjam: new Date(Date.now() - 86400000 * 4).toISOString(),
-    catatan: "Untuk setup jaringan kantor",
-    days_borrowed: 4
+    status: "rejected",
+    tanggal_pinjam: new Date(Date.now() - 86400000 * 1).toISOString(),
+    catatan: "Barang sedang dalam perbaikan",
+    days_borrowed: 1
+  },
+  {
+    id: 7,
+    user: 2,
+    user_nama: "Jane Smith",
+    barang: 7,
+    barang_nama: "Webcam Logitech C920",
+    jumlah: 1,
+    status: "pending",
+    tanggal_pinjam: new Date().toISOString(),
+    catatan: "Untuk video conference",
+    days_borrowed: 0
   }
 ];
 

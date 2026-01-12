@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvManage - Admin Verification</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+    <script src="app.js?v=20251227"></script>
+</head>
+<body>
+    <!-- Enterprise Background -->
+    <div class="enterprise-bg">
+        <div class="bg-gradient-primary"></div>
+        <div class="bg-gradient-secondary"></div>
+        <div class="enterprise-grid"></div>
+    </div>
+
+    <!-- Enterprise Navigation -->
+    <nav class="enterprise-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="nav-logo-icon">🏢</div>
+                <span class="nav-logo-text">InvManage Enterprise</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <button class="nav-cta-enterprise" onclick="window.location.href='admin-login.html'">
+                    <span>Admin Access</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <!-- Enterprise Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="image.png" alt="Logo" class="sidebar-logo">
+                <h1>InvManage</h1>
+                <div class="sidebar-subtitle">Enterprise Admin</div>
+            </div>
+
+            <div class="menu">
+                <a href="dashboard.html" class="menu-item">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Dashboard</span>
+                </a>
+                <a href="admin-verification.html" class="menu-item">
+                    <span class="menu-icon">✅</span>
+                    <span class="menu-text">Verification</span>
+                </a>
+                <a href="riwayat.html" class="menu-item">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">Riwayat Transaksi</span>
+                </a>
+                <a href="laporan.html" class="menu-item">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Laporan & Analitik</span>
+                </a>
+                <a href="profil.html" class="menu-item">
+                    <span class="menu-icon">👤</span>
+                    <span class="menu-text">Profil</span>
+                </a>
+                <a href="feedback.html" class="menu-item">
+                    <span class="menu-icon">💬</span>
+                    <span class="menu-text">Feedback</span>
+                </a>
+            </div>
+
+            <!-- User Info Section -->
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    <span id="sidebarUserInitial">A</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarUserName">Admin</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+                <button class="logout-btn" onclick="if(confirm('Apakah Anda yakin ingin keluar?')) { localStorage.clear(); sessionStorage.clear(); window.location.href = 'index.html'; }" title="Logout">
+                    <span>🚪</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="header-left">
+                    <h1 class="page-title">Admin Verification</h1>
+                    <p class="page-subtitle">Kelola dan verifikasi permintaan peminjaman barang</p>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="action-btn refresh-btn" onclick="refreshVerification()" title="Refresh Data">
+                            <span>🔄</span>
+                        </button>
+                        <div class="time-display" id="currentTime">--:--:--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Cards -->
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <div class="card-icon">⏳</div>
+                    <div class="card-content">
+                        <div class="card-value" id="pendingCount">0</div>
+                        <div class="card-label">Pending Approval</div>
+                        <div class="card-trend" id="pendingTrend">Menunggu verifikasi</div>
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="card-icon">✅</div>
+                    <div class="card-content">
+                        <div class="card-value" id="approvedToday">0</div>
+                        <div class="card-label">Approved Today</div>
+                        <div class="card-trend positive">↗️ Hari ini</div>
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="card-icon">❌</div>
+                    <div class="card-content">
+                        <div class="card-value" id="rejectedCount">0</div>
+                        <div class="card-label">Rejected</div>
+                        <div class="card-trend negative">↘️ Ditolak</div>
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-content">
+                        <div class="card-value" id="totalVerified">0</div>
+                        <div class="card-label">Total Verified</div>
+                        <div class="card-trend">Keseluruhan</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Requests Table -->
+            <div class="table-section">
+                <div class="table-header">
+                    <div class="table-info">
+                        <h3>Pending Loan Requests</h3>
+                        <p>Permintaan peminjaman yang menunggu verifikasi admin</p>
+                    </div>
+                    <div class="table-actions">
+                        <div class="search-container">
+                            <input type="text" id="searchRequests" placeholder="Cari permintaan..." class="search-input">
+                            <span class="search-icon">🔍</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="verificationTable">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Reason</th>
+                                <th>Request Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingRequestsContainer">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <div class="table-stats">
+                        <span id="tableStats">Menampilkan 0 dari 0 permintaan</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Verifications -->
+            <div class="recent-activity">
+                <div class="activity-header">
+                    <h3>Recent Verifications</h3>
+                    <button class="view-all-btn" onclick="loadRecentVerifications()">Refresh</button>
+                </div>
+                <div class="activity-list" id="recentVerificationsContainer">
+                    <!-- Recent verifications will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal-bg" id="rejectModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Tolak Permintaan Peminjaman</h3>
+                <button class="modal-close" onclick="closeRejectModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Alasan Penolakan</label>
+                    <textarea id="rejectReason" placeholder="Masukkan alasan penolakan..." rows="4" class="alasan-textarea"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeRejectModal()">Batal</button>
+                <button class="btn-danger" onclick="confirmReject()">Tolak Permintaan</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentRejectId = null;
+        let currentUser = null;
+        let allPendingRequests = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            if (!checkAuth('admin')) return;
+
+            // Show welcome message
+            showWelcomeMessage();
+
+            // Initialize verification
+            await initializeVerification();
+
+            // Update time display
+            updateTimeDisplay();
+            setInterval(updateTimeDisplay, 1000);
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Start real-time updates
+            startRealTimeUpdates();
+        });
+
+        function startRealTimeUpdates() {
+            // Poll for updates every 30 seconds
+            setInterval(async () => {
+                try {
+                    await Promise.all([
+                        loadVerificationStats(),
+                        loadPendingRequests()
+                    ]);
+                } catch (error) {
+                    console.error('Error in real-time update:', error);
+                }
+            }, 30000); // 30 seconds
+        }
+
+        function showWelcomeMessage() {
+            currentUser = getCurrentUser();
+            if (currentUser) {
+                document.getElementById('sidebarUserName').textContent = currentUser.nama || 'Admin';
+                document.getElementById('sidebarUserInitial').textContent = (currentUser.nama || 'A').charAt(0).toUpperCase();
+            }
+        }
+
+        async function initializeVerification() {
+            try {
+                showLoading("Memuat data verifikasi...");
+
+                await Promise.all([
+                    loadVerificationStats(),
+                    loadPendingRequests(),
+                    loadRecentVerifications()
+                ]);
+
+                hideLoading();
+            } catch (error) {
+                console.error('Error initializing verification:', error);
+                hideLoading();
+                showNotification("Gagal memuat data verifikasi", "error");
+            }
+        }
+
+        async function loadVerificationStats() {
+            try {
+                const response = await fetch(`${API_BASE}/peminjaman/stats/verification/`).catch(() => null);
+                let data = { total_pending: 0, total_verified_today: 0, total_rejected: 0, total_approved: 0 };
+
+                if (response?.ok) {
+                    data = await response.json();
+                }
+
+                document.getElementById('pendingCount').textContent = data.total_pending || 0;
+                document.getElementById('approvedToday').textContent = data.total_verified_today || 0;
+                document.getElementById('rejectedCount').textContent = data.total_rejected || 0;
+                document.getElementById('totalVerified').textContent = data.total_approved || 0;
+
+            } catch (error) {
+                console.error('Error loading verification stats:', error);
+            }
+        }
+
+        async function loadPendingRequests() {
+            try {
+                const response = await fetch(`${API_BASE}/notifications/pending_requests/`).catch(() => null);
+                let data = { count: 0, notifications: [] };
+
+                if (response?.ok) {
+                    data = await response.json();
+                }
+
+                const container = document.getElementById('pendingRequestsContainer');
+
+                if (data.count === 0) {
+                    container.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center" style="padding: 40px;">
+                                <div style="color: var(--gray-400);">
+                                    <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+                                    <h4 style="color: var(--gray-300); margin-bottom: 8px;">Tidak ada permintaan pending</h4>
+                                    <p>Semua permintaan peminjaman telah diproses</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    updateTableStats(0, 0);
+                    return;
+                }
+
+                // Store all requests for filtering
+                allPendingRequests = data.notifications;
+
+                // Apply current search filter
+                const searchTerm = document.getElementById('searchRequests')?.value?.toLowerCase() || '';
+                const filteredRequests = searchTerm ?
+                    data.notifications.filter(item =>
+                        item.user?.toLowerCase().includes(searchTerm) ||
+                        item.barang?.toLowerCase().includes(searchTerm) ||
+                        item.alasan?.toLowerCase().includes(searchTerm)
+                    ) : data.notifications;
+
+                const html = filteredRequests.map(item => `
+                    <tr>
+                        <td>${item.user || 'Unknown'}</td>
+                        <td>${item.barang || 'Unknown'}</td>
+                        <td>${item.jumlah || 0}</td>
+                        <td>${item.alasan || 'Tidak ada alasan'}</td>
+                        <td>${new Date(item.timestamp).toLocaleString('id-ID')}</td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="approval-btn approve" data-id="${item.id}" title="Approve">
+                                    <span>✓</span> Approve
+                                </button>
+                                <button class="approval-btn reject" data-id="${item.id}" title="Reject">
+                                    <span>✗</span> Reject
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+
+                container.innerHTML = html;
+                updateTableStats(filteredRequests.length, data.count);
+
+                // Add event listeners for buttons
+                container.querySelectorAll('.approval-btn.approve').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const loanId = this.getAttribute('data-id');
+                        approveRequest(loanId);
+                    });
+                });
+
+                container.querySelectorAll('.approval-btn.reject').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const loanId = this.getAttribute('data-id');
+                        showRejectModal(loanId);
+                    });
+                });
+
+            } catch (error) {
+                console.error('Error loading pending requests:', error);
+                document.getElementById('pendingRequestsContainer').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center" style="padding: 40px; color: var(--error);">
+                            <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                            <h4>Gagal memuat data permintaan</h4>
+                            <p>${error.message}</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        async function loadRecentVerifications() {
+            try {
+                const response = await fetch(`${API_BASE}/peminjaman/recent-verifications/`).catch(() => null);
+                let data = [];
+
+                if (response?.ok) {
+                    data = await response.json();
+                }
+
+                const container = document.getElementById('recentVerificationsContainer');
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div class="activity-item">
+                            <div class="activity-icon">📋</div>
+                            <div class="activity-content">
+                                <div class="activity-title">Belum ada verifikasi terbaru</div>
+                                <div class="activity-time">-</div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const html = data.slice(0, 10).map(item => `
+                    <div class="activity-item">
+                        <div class="activity-icon">${getActivityIcon(item.status)}</div>
+                        <div class="activity-content">
+                            <div class="activity-title">${item.title || getActivityTitle(item)}</div>
+                            <div class="activity-time">${new Date(item.timestamp).toLocaleString('id-ID')}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading recent verifications:', error);
+                document.getElementById('recentVerificationsContainer').innerHTML = `
+                    <div class="activity-item error">
+                        <div class="activity-icon">⚠️</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Gagal memuat verifikasi terbaru</div>
+                            <div class="activity-time">-</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function getActivityIcon(status) {
+            switch (status) {
+                case 'approved': return '✅';
+                case 'rejected': return '❌';
+                case 'dipinjam': return '📦';
+                case 'dikembalikan': return '↩️';
+                default: return '📋';
+            }
+        }
+
+        function getActivityTitle(item) {
+            if (item.message) return item.message;
+            return 'Verifikasi baru';
+        }
+
+        async function approveRequest(loanId) {
+            if (!confirm('Apakah Anda yakin ingin menyetujui permintaan peminjaman ini?')) return;
+
+            try {
+                showLoading('Memproses approval...');
+                const response = await apiCall(`${API_BASE}/peminjaman/${loanId}/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        status: 'approved'
+                    })
+                });
+
+                showNotification('Permintaan peminjaman berhasil disetujui!', 'success');
+                // Refresh data immediately
+                await Promise.all([
+                    loadVerificationStats(),
+                    loadPendingRequests(),
+                    loadRecentVerifications()
+                ]);
+
+            } catch (error) {
+                console.error('Approval error:', error);
+                showNotification('Kesalahan saat memproses approval: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showRejectModal(loanId) {
+            console.log('Showing reject modal for loanId:', loanId);
+            alert('Reject modal triggered for ID: ' + loanId); // Debug alert
+            currentRejectId = loanId;
+            document.getElementById('rejectReason').value = '';
+            const modal = document.getElementById('rejectModal');
+            modal.classList.add('modal-show', 'show');
+        }
+
+        function closeRejectModal() {
+            const modal = document.getElementById('rejectModal');
+            modal.classList.remove('modal-show', 'show');
+            currentRejectId = null;
+        }
+
+        async function confirmReject() {
+            const reason = document.getElementById('rejectReason').value.trim();
+            if (!reason) {
+                showNotification('Harap masukkan alasan penolakan', 'warning');
+                return;
+            }
+
+            try {
+                showLoading('Memproses penolakan...');
+                const response = await apiCall(`${API_BASE}/peminjaman/${currentRejectId}/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        status: 'rejected',
+                        alasan_reject: reason
+                    })
+                });
+
+                closeRejectModal();
+                showNotification('Permintaan peminjaman berhasil ditolak!', 'success');
+                // Refresh data immediately
+                await Promise.all([
+                    loadVerificationStats(),
+                    loadPendingRequests(),
+                    loadRecentVerifications()
+                ]);
+
+            } catch (error) {
+                console.error('Rejection error:', error);
+                showNotification('Kesalahan saat memproses penolakan: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchRequests').addEventListener('input', debounce(() => {
+                loadPendingRequests();
+            }, 300));
+        }
+
+        function updateTableStats(shown, total) {
+            document.getElementById('tableStats').textContent = `Menampilkan ${shown} dari ${total} permintaan`;
+        }
+
+        function updateTimeDisplay() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        function refreshVerification() {
+            showLoading("Menyegarkan data...");
+            setTimeout(async () => {
+                await initializeVerification();
+                hideLoading();
+                showNotification("Data verifikasi berhasil diperbarui", "success");
+            }, 1000);
+        }
+
+        // Debounce utility
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+
+    <script src="data.js"></script>
+</body>
+</html>

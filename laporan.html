@@ -294,11 +294,26 @@
             <h1>InvManage Admin</h1>
 
             <div class="menu">
-                <a href="dashboard.html" class="menu-item">Dashboard</a>
-                <a href="riwayat.html" class="menu-item">Riwayat Transaksi</a>
-                <a href="laporan.html" class="menu-item active">📊 Laporan & Analitik</a>
-                <a href="profil.html" class="menu-item">Profil</a>
-                <a href="feedback.html" class="menu-item">Feedback</a>
+              <a href="dashboard.html" class="menu-item">📊 Dashboard</a>
+              <a href="admin-verification.html" class="menu-item">✅ Verification</a>
+              <a href="riwayat.html" class="menu-item">📋 Riwayat Transaksi</a>
+              <a href="laporan.html" class="menu-item active">📈 Laporan & Analitik</a>
+              <a href="profil.html" class="menu-item">👤 Profil</a>
+              <a href="feedback.html" class="menu-item">💬 Feedback</a>
+            </div>
+
+            <!-- User Info Section -->
+            <div class="sidebar-user">
+              <div class="user-avatar">
+                <span id="sidebarUserInitial">A</span>
+              </div>
+              <div class="user-info">
+                <div class="user-name" id="sidebarUserName">Admin</div>
+                <div class="user-role">Administrator</div>
+              </div>
+              <button class="logout-btn" onclick="if(confirm('Apakah Anda yakin ingin keluar?')) { localStorage.clear(); sessionStorage.clear(); window.location.href = 'index.html'; }" title="Logout">
+                <span>🚪</span>
+              </button>
             </div>
         </div>
 
@@ -1172,6 +1187,6 @@
             }
         }
     </script>
-    <script src="app.js?v=20251226"></script>
+    <script src="app.js?v=20251227"></script>
 </body>
 </html>

@@ -51,7 +51,7 @@
           <div class="user-name" id="sidebarUserName">User</div>
           <div class="user-role">Standard User</div>
         </div>
-        <button class="logout-btn" onclick="logout()" title="Logout">
+        <button class="logout-btn" onclick="if(confirm('Apakah Anda yakin ingin keluar?')) logout();" title="Logout">
           <span>🚪</span>
         </button>
       </div>
@@ -77,7 +77,7 @@
 
       <!-- User Stats Cards -->
       <div class="analytics-grid">
-        <div class="analytics-card">
+        <div class="analytics-card stagger-1">
           <div class="card-icon">📦</div>
           <div class="card-content">
             <div class="card-value" id="totalAvailableItems">0</div>
@@ -86,7 +86,7 @@
           </div>
         </div>
 
-        <div class="analytics-card">
+        <div class="analytics-card stagger-2">
           <div class="card-icon">🔄</div>
           <div class="card-content">
             <div class="card-value" id="myActiveLoans">0</div>
@@ -95,7 +95,7 @@
           </div>
         </div>
 
-        <div class="analytics-card">
+        <div class="analytics-card stagger-3">
           <div class="card-icon">✅</div>
           <div class="card-content">
             <div class="card-value" id="myCompletedLoans">0</div>
@@ -104,7 +104,7 @@
           </div>
         </div>
 
-        <div class="analytics-card">
+        <div class="analytics-card stagger-4">
           <div class="card-icon">⭐</div>
           <div class="card-content">
             <div class="card-value" id="feedbackCount">0</div>
@@ -118,19 +118,19 @@
       <div class="quick-actions">
         <h3>Aksi Cepat</h3>
         <div class="actions-grid">
-          <button class="quick-action-btn" onclick="showAvailableItems()">
+          <button class="quick-action-btn stagger-1" onclick="showAvailableItems()">
             <div class="action-icon">📦</div>
             <div class="action-text">Lihat Barang</div>
           </button>
-          <button class="quick-action-btn" onclick="showMyLoans()">
+          <button class="quick-action-btn stagger-2" onclick="showMyLoans()">
             <div class="action-icon">📋</div>
             <div class="action-text">Peminjaman Saya</div>
           </button>
-          <button class="quick-action-btn" onclick="giveFeedback()">
+          <button class="quick-action-btn stagger-3" onclick="giveFeedback()">
             <div class="action-icon">💬</div>
             <div class="action-text">Beri Feedback</div>
           </button>
-          <button class="quick-action-btn" onclick="viewProfile()">
+          <button class="quick-action-btn stagger-4" onclick="viewProfile()">
             <div class="action-icon">👤</div>
             <div class="action-text">Lihat Profil</div>
           </button>
@@ -151,6 +151,36 @@
               <div class="activity-time">-</div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- User Current Loans Section -->
+      <div class="table-section">
+        <div class="table-header">
+          <div class="table-info">
+            <h3>Peminjaman Aktif Saya</h3>
+            <p>Kelola peminjaman yang sedang berlangsung</p>
+          </div>
+          <div class="table-actions">
+            <button class="btn-warning" id="bulkEditLoansBtn" onclick="openEditLoanModal()">Edit</button>
+            <button class="btn-danger" id="bulkDeleteLoansBtn" onclick="openDeleteLoanModal()">Hapus</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="tabelUserLoans">
+            <thead>
+              <tr>
+                <th>Barang</th>
+                <th>Jumlah</th>
+                <th>Status</th>
+                <th>Tanggal Pinjam</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- User loans will be loaded here -->
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -216,10 +246,10 @@
         <button class="modal-close" onclick="closePinjamModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="item-preview" style="text-align: center; margin-bottom: 24px;">
-          <div style="font-size: 48px; margin-bottom: 12px;">📦</div>
-          <h4 id="pinjamNamaBarang" style="color: var(--gray-100); margin: 0;"></h4>
-          <p style="color: var(--gray-400); margin: 4px 0 0 0;">Barang tersedia untuk dipinjam</p>
+        <div class="item-preview">
+          <div class="item-preview-icon">📦</div>
+          <h4 id="pinjamNamaBarang" class="item-preview-title"></h4>
+          <p class="item-preview-subtitle">Barang tersedia untuk dipinjam</p>
         </div>
 
         <div class="input-group">
@@ -229,13 +259,13 @@
         </div>
 
         <div class="input-group">
-          <label>Keperluan Peminjaman</label>
-          <textarea id="pinjamCatatan" placeholder="Jelaskan keperluan peminjaman barang ini..." rows="3" style="resize: vertical; min-height: 80px;"></textarea>
+          <label>Alasan Peminjaman *</label>
+          <textarea id="pinjamAlasan" placeholder="Jelaskan alasan peminjaman barang ini..." rows="3" required style="resize: vertical; min-height: 80px;"></textarea>
         </div>
 
-        <div class="loan-info" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 16px; margin-top: 16px;">
-          <h5 style="color: var(--gray-100); margin: 0 0 8px 0; font-size: 14px;">📋 Informasi Peminjaman</h5>
-          <ul style="color: var(--gray-300); font-size: 13px; margin: 0; padding-left: 16px;">
+        <div class="loan-info">
+          <h5>📋 Informasi Peminjaman</h5>
+          <ul>
             <li>Batas waktu pengembalian: 30 hari</li>
             <li>Denda keterlambatan: Rp 1.000 per hari</li>
             <li>Pastikan barang dalam kondisi baik saat dikembalikan</li>
@@ -252,13 +282,13 @@
   <!-- Success Modal -->
   <div class="modal-bg" id="modalSuccess">
     <div class="modal modal-small">
-      <div class="modal-header" style="background: rgba(16, 185, 129, 0.1);">
-        <h3 style="color: #10b981;">✅ Berhasil!</h3>
+      <div class="modal-header success-modal-header">
+        <h3 class="text-success">✅ Berhasil!</h3>
         <button class="modal-close" onclick="closeSuccessModal()">✕</button>
       </div>
-      <div class="modal-body" style="text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
-        <p id="successMessage" style="color: var(--gray-200); margin: 0;"></p>
+      <div class="modal-body success-modal-body">
+        <div class="success-modal-icon">🎉</div>
+        <p id="successMessage" class="success-modal-message"></p>
       </div>
       <div class="modal-footer">
         <button class="btn-primary" onclick="closeSuccessModal()">Tutup</button>
@@ -297,9 +327,23 @@
     </div>
   </footer>
 
-  <script src="app.js?v=20251226"></script>
+  <script src="app.js?v=20251227"></script>
   <script src="data.js"></script>
   <script>
+    // Status badge function
+    function getStatusBadge(status) {
+      const badges = {
+        'pending': '<span class="badge badge-warning">Menunggu Approval</span>',
+        'approved': '<span class="badge badge-info">Disetujui - Siap Diambil</span>',
+        'rejected': '<span class="badge badge-danger">Ditolak</span>',
+        'dipinjam': '<span class="badge badge-primary">Dipinjam</span>',
+        'dikembalikan': '<span class="badge badge-success">Dikembalikan</span>',
+        'pending_approval': '<span class="badge badge-warning">Menunggu Approval</span>',
+        'cancelled': '<span class="badge badge-danger">Dibatalkan</span>'
+      };
+      return badges[status] || '<span class="badge badge-secondary">Unknown</span>';
+    }
+
     // User Dashboard Enhanced Functionality
     let currentPage = 1;
     let itemsPerPage = 10;
@@ -321,6 +365,9 @@
 
       // Setup event listeners
       setupUserEventListeners();
+
+      // Start user notification polling
+      startUserNotificationPolling();
     });
 
     function showUserWelcomeMessage() {
@@ -371,7 +418,8 @@
         await Promise.all([
           loadBarangUser(),
           loadUserStats(),
-          loadUserRecentActivity()
+          loadUserRecentActivity(),
+          loadUserLoans()
         ]);
 
         hideLoading();
@@ -464,6 +512,117 @@
         `;
         activityList.appendChild(activityItem);
       });
+    }
+
+    async function loadUserLoans() {
+      const tableBody = document.querySelector("#tabelUserLoans tbody");
+      if (!tableBody) return;
+
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/peminjaman/?user=${currentUser.id}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+
+        const data = await res.json();
+
+        tableBody.innerHTML = "";
+
+        // Filter to show only active loans (not completed)
+        const activeLoans = data.filter(p => p.status !== 'dikembalikan' && p.status !== 'cancelled');
+
+        if (activeLoans.length === 0) {
+          const emptyRow = document.createElement("tr");
+          emptyRow.innerHTML = `<td colspan="5" style="text-align: center; color: #6b7280; padding: 40px;">Belum ada peminjaman aktif</td>`;
+          tableBody.appendChild(emptyRow);
+          return;
+        }
+
+        activeLoans.forEach((p) => {
+          const statusBadge = getStatusBadge(p.status);
+          const actionButton = renderLoanActions(p);
+          const tanggal = p.tanggal_pinjam ? new Date(p.tanggal_pinjam).toLocaleString("id-ID") : "-";
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${p.barang_nama || p.barang || '-'}</td>
+            <td>${p.jumlah}</td>
+            <td>${statusBadge}</td>
+            <td>${tanggal}</td>
+            <td>${actionButton}</td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+      } catch (err) {
+        console.error("Error loading user loans:", err);
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444; padding: 40px;">Gagal memuat data peminjaman</td></tr>`;
+      }
+    }
+
+    function renderLoanActions(loan) {
+      if (loan.status === 'approved') {
+        return `<button class="btn btn-success btn-sm" onclick="pickupLoan(${loan.id})">Ambil Barang</button>`;
+      } else if (loan.status === 'dipinjam') {
+        return `<button class="btn btn-warning btn-sm" onclick="returnLoan(${loan.id})">Kembalikan</button>`;
+      }
+      return '';
+    }
+
+    async function pickupLoan(loanId) {
+      if (!confirm('Apakah Anda yakin ingin mengambil barang ini? Stok akan dikurangi.')) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/peminjaman/${loanId}/`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            status: 'dipinjam'
+          })
+        });
+
+        if (response.ok) {
+          alert('Barang berhasil diambil!');
+          loadUserLoans(); // Refresh list
+          loadUserStats(); // Update stats
+        } else {
+          const data = await response.json();
+          alert(`Error: ${data.error || 'Gagal mengambil barang'}`);
+        }
+
+      } catch (error) {
+        console.error('Pickup error:', error);
+        alert('Network error');
+      }
+    }
+
+    async function returnLoan(loanId) {
+      if (!confirm('Apakah Anda yakin ingin mengembalikan barang ini?')) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/peminjaman/${loanId}/kembalikan/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (response.ok) {
+          alert('Barang berhasil dikembalikan!');
+          loadUserLoans(); // Refresh list
+          loadUserStats(); // Update stats
+        } else {
+          const data = await response.json();
+          alert(`Error: ${data.error || 'Gagal mengembalikan barang'}`);
+        }
+
+      } catch (error) {
+        console.error('Return error:', error);
+        alert('Network error');
+      }
     }
 
     function setupUserEventListeners() {
@@ -652,7 +811,7 @@
       document.getElementById('pinjamNamaBarang').textContent = nama;
       document.getElementById('pinjamJumlah').max = stok;
       document.getElementById('pinjamJumlah').value = "1";
-      document.getElementById('pinjamCatatan').value = "";
+      document.getElementById('pinjamAlasan').value = "";
 
       const modal = document.getElementById('modalPinjam');
       modal.style.display = "flex";
@@ -687,18 +846,55 @@
     }
 
     function viewAllMyActivity() {
-      window.location.href = 'user-peminjaman.html';
+        window.location.href = 'user-peminjaman.html';
+    }
+
+    function startUserNotificationPolling() {
+        // Poll for user status updates every 15 seconds
+        setInterval(async () => {
+            const userId = getCurrentUser()?.id;
+            if (!userId) return;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/notifications/user_updates/?user_id=${userId}`);
+                const data = await response.json();
+
+                if (data.count > 0) {
+                    // Show notification
+                    showStatusNotifications(data.notifications);
+                    // Refresh loan history
+                    loadUserLoans();
+                    loadUserStats();
+                }
+            } catch (error) {
+                console.error('Error fetching user updates:', error);
+            }
+        }, 15000); // Check every 15 seconds
+    }
+
+    function showStatusNotifications(notifications) {
+        notifications.forEach(notification => {
+            // Show browser notification or in-app notification
+            showNotification(notification.title, 'info');
+            showNotification(notification.message, 'success');
+        });
     }
 
     // Temporary fix for konfirmasiPinjam function
     async function konfirmasiPinjam() {
       console.log("🔄 konfirmasiPinjam called from HTML");
       const jumlah = Number($("#pinjamJumlah")?.value || 0);
-      const catatan = $("#pinjamCatatan")?.value || "";
+      const alasan = $("#pinjamAlasan")?.value || "";
       const currentUser = getCurrentUser();
 
       if (!jumlah || jumlah < 1) {
         showNotification("Jumlah harus minimal 1", "warning");
+        return;
+      }
+
+      if (!alasan.trim()) {
+        showNotification("Alasan peminjaman wajib diisi", "warning");
+        document.getElementById('pinjamAlasan').focus();
         return;
       }
 
@@ -716,7 +912,7 @@
           barang: currentPinjamBarangId,
           user: currentUser.id,
           jumlah,
-          catatan
+          alasan
         });
 
         const res = await fetch(`${API_BASE}/peminjaman/`, {
@@ -729,7 +925,8 @@
             barang: currentPinjamBarangId,
             user: currentUser.id,
             jumlah: jumlah,
-            catatan: catatan || ""
+            alasan_peminjaman: alasan,
+            status: "pending"
           }),
         });
 
@@ -768,7 +965,7 @@
           await loadPeminjamanUser();
         }
 
-        showNotification("Peminjaman berhasil! Cek riwayat peminjaman Anda.", "success");
+        showNotification("Request peminjaman berhasil dikirim! Menunggu approval dari admin.", "success");
       } catch (err) {
         console.error("Error in konfirmasiPinjam:", err);
         hideLoading();

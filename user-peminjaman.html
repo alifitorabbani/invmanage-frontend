@@ -24,13 +24,13 @@
     <!-- Main content -->
     <div class="main-content">
       <!-- Manual Input Section at Top -->
-      <div class="manual-input-section" style="background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--gray-600);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div class="manual-input-section">
+        <div class="manual-input-header">
           <div>
-            <h3 style="color: var(--gray-100); margin: 0; font-size: 18px;">Input Peminjaman Manual</h3>
-            <p style="color: var(--gray-400); margin: 4px 0 0 0; font-size: 14px;">Tambahkan peminjaman secara manual tanpa harus memilih dari daftar barang</p>
+            <h3 class="manual-input-title">Input Peminjaman Manual</h3>
+            <p class="manual-input-subtitle">Tambahkan peminjaman secara manual tanpa harus memilih dari daftar barang</p>
           </div>
-          <button class="add-btn" onclick="openManualPeminjamanModal()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid #10b981; padding: 12px 20px;">
+          <button class="add-btn" onclick="openManualPeminjamanModal()">
             <i class="fas fa-plus"></i> Input Manual
           </button>
         </div>
@@ -49,9 +49,27 @@
 
       <div class="table-box">
         <div class="table-header">
-          <div>
+          <div class="table-header-flex-left">
             <h2 class="table-title">Riwayat Peminjaman Saya</h2>
-            <p style="color:var(--gray-400); margin: 8px 0 0 0; font-size: 14px;">Daftar barang yang pernah/sedang dipinjam</p>
+            <p class="table-subtitle">Daftar barang yang pernah/sedang dipinjam</p>
+          </div>
+          <div class="table-header-flex-right">
+            <div class="table-header-flex-filters">
+              <button id="bulkEditBtn" class="btn-blue hidden">Edit Selected</button>
+              <button id="bulkDeleteBtn" class="btn-red hidden">Delete Selected</button>
+            </div>
+            <div class="table-header-flex-filters">
+              <input type="text" id="searchPeminjaman" placeholder="Cari berdasarkan barang..." class="table-search-input">
+              <label for="statusFilter" class="table-filter-label">Filter Status:</label>
+              <select id="statusFilter" class="table-filter-select">
+                  <option value="">Semua Status</option>
+                  <option value="pending">Menunggu Persetujuan</option>
+                  <option value="approved">Disetujui</option>
+                  <option value="rejected">Ditolak</option>
+                  <option value="dipinjam">Sedang Dipinjam</option>
+                  <option value="dikembalikan">Sudah Dikembalikan</option>
+                </select>
+            </div>
           </div>
         </div>
 
@@ -64,7 +82,6 @@
               <th>Jumlah</th>
               <th>Status</th>
               <th>Catatan</th>
-              <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -83,7 +100,7 @@
 
       <div class="input-group">
         <label>Pilih Barang</label>
-        <select id="barang-select" style="width: 100%; padding: 12px; border: 1px solid var(--gray-600); border-radius: 8px; background: var(--gray-800); color: var(--gray-100);">
+        <select id="barang-select" class="modal-select">
           <option value="">Loading barang...</option>
         </select>
       </div>
@@ -91,6 +108,12 @@
       <div class="input-group">
         <label>Jumlah</label>
         <input type="number" id="manualJumlah" placeholder="Masukkan jumlah" min="1">
+        <div class="input-underline"></div>
+      </div>
+
+      <div class="input-group">
+        <label>Alasan Peminjaman *</label>
+        <textarea id="manualAlasan" placeholder="Jelaskan alasan peminjaman barang ini" rows="3" required></textarea>
         <div class="input-underline"></div>
       </div>
 
@@ -103,6 +126,32 @@
       <div class="modal-buttons">
         <button class="btn-red" onclick="closeManualPeminjamanModal()">Batal</button>
         <button class="btn-green" onclick="submitManualPeminjaman()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Bulk Edit -->
+  <div id="modalBulkEdit" class="modal-bg" style="display: none;">
+    <div class="modal">
+      <h3>Edit Peminjaman Terpilih</h3>
+      <p>Edit jumlah untuk peminjaman yang dipilih</p>
+      <div id="bulkEditItems"></div>
+      <div class="modal-buttons">
+        <button class="btn-red" onclick="closeBulkEditModal()">Batal</button>
+        <button class="btn-green" onclick="submitBulkEdit()">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Bulk Delete -->
+  <div id="modalBulkDelete" class="modal-bg" style="display: none;">
+    <div class="modal">
+      <h3>Hapus Peminjaman Terpilih</h3>
+      <p>Pilih opsi penghapusan untuk peminjaman yang dipilih</p>
+      <div id="bulkDeleteItems"></div>
+      <div class="modal-buttons">
+        <button class="btn-red" onclick="closeBulkDeleteModal()">Batal</button>
+        <button class="btn-green" onclick="submitBulkDelete()">Hapus</button>
       </div>
     </div>
   </div>
@@ -138,11 +187,40 @@
     </div>
   </footer>
 
-  <script src="app.js?v=20251226"></script>
+  <script src="app.js?v=20251227"></script>
   <script>
     let barangList = []; // Global variable to store barang data
     let barangRetryCount = 0; // Track retry attempts
     let peminjamanRetryCount = 0; // Track retry attempts
+    let peminjamanData = []; // Global variable to store peminjaman data
+    let filteredPeminjamanData = []; // Global variable to store filtered peminjaman data
+
+    // Status badge function
+    function getStatusBadge(status) {
+      const badges = {
+        'pending': '<span class="badge badge-warning">Menunggu Approval</span>',
+        'approved': '<span class="badge badge-info">Disetujui - Siap Diambil</span>',
+        'rejected': '<span class="badge badge-danger">Ditolak</span>',
+        'dipinjam': '<span class="badge badge-primary">Dipinjam</span>',
+        'dikembalikan': '<span class="badge badge-success">Dikembalikan</span>',
+        'pending_approval': '<span class="badge badge-warning">Menunggu Approval</span>',
+        'cancelled': '<span class="badge badge-danger">Dibatalkan</span>'
+      };
+      return badges[status] || '<span class="badge badge-secondary">Unknown</span>';
+    }
+
+    // Debounce utility function
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
 
     document.addEventListener("DOMContentLoaded", async () => {
       // Temporarily bypass auth for testing - REMOVE THIS IN PRODUCTION
@@ -151,7 +229,114 @@
       // Load barang data first, then peminjaman with delay to avoid rate limiting
       await loadBarangData();
       setTimeout(() => loadPeminjamanUser(), 500); // 500ms delay
+
+      // Start real-time status updates
+      startStatusPolling();
+
+      // Setup status filter and search
+      document.getElementById('statusFilter').addEventListener('change', () => {
+        loadPeminjamanUser();
+      });
+
+      document.getElementById('searchPeminjaman').addEventListener('input', debounce(() => {
+        loadPeminjamanUser();
+      }, 300));
+
+      // Setup bulk operations
+      setupBulkOperations();
     });
+
+    // Status polling for real-time updates
+    let lastKnownStatuses = {};
+
+    function startStatusPolling() {
+        // Poll for status updates every 20 seconds
+        setInterval(async () => {
+            try {
+                await checkStatusUpdates();
+            } catch (error) {
+                console.error('Error checking status updates:', error);
+            }
+        }, 20000); // 20 seconds
+
+        // Additional notification polling for user updates
+        setInterval(async () => {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/notifications/user_updates/?user_id=${currentUser.id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.count > 0) {
+                        // Show status update notifications
+                        data.notifications.forEach(notification => {
+                            showNotification(notification.message, notification.type || 'info');
+                        });
+                        // Refresh loan list
+                        await loadPeminjamanUser();
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user notifications:', error);
+            }
+        }, 15000); // 15 seconds
+    }
+
+    async function checkStatusUpdates() {
+        try {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+
+            const res = await fetch(`${API_BASE}/peminjaman/?user=${currentUser.id}`);
+            if (!res.ok) return;
+
+            const data = await res.json();
+
+            // Check for status changes
+            data.forEach(item => {
+                const lastStatus = lastKnownStatuses[item.id];
+                if (lastStatus && lastStatus !== item.status) {
+                    // Status changed, show notification
+                    showStatusChangeNotification(item, lastStatus, item.status);
+                }
+                lastKnownStatuses[item.id] = item.status;
+            });
+
+        } catch (error) {
+            console.error('Error checking status updates:', error);
+        }
+    }
+
+    function showStatusChangeNotification(item, oldStatus, newStatus) {
+        let message = '';
+        let type = 'info';
+
+        switch (newStatus) {
+            case 'approved':
+                message = `Permintaan peminjaman ${item.barang_nama || item.barang} telah disetujui! Silakan ambil barang.`;
+                type = 'success';
+                break;
+            case 'rejected':
+                message = `Permintaan peminjaman ${item.barang_nama || item.barang} telah ditolak.`;
+                type = 'error';
+                break;
+            case 'dipinjam':
+                message = `You have successfully picked up ${item.barang_nama || item.barang}.`;
+                type = 'success';
+                break;
+            case 'dikembalikan':
+                message = `Your return of ${item.barang_nama || item.barang} has been processed.`;
+                type = 'success';
+                break;
+        }
+
+        if (message) {
+            showNotification(message, type);
+            // Refresh the list to show updated status
+            loadPeminjamanUser();
+        }
+    }
 
     // Load barang data for dropdown
     async function loadBarangData() {
@@ -225,20 +410,22 @@
     }
 
     function closeManualPeminjamanModal() {
-      const modal = document.getElementById('modalManualPeminjaman');
-      if (modal) {
-        modal.style.display = 'none';
-        // Clear form
-        document.getElementById('barang-select').value = '';
-        document.getElementById('manualJumlah').value = '';
-        document.getElementById('manualCatatan').value = '';
-      }
-    }
+       const modal = document.getElementById('modalManualPeminjaman');
+       if (modal) {
+         modal.style.display = 'none';
+         // Clear form
+         document.getElementById('barang-select').value = '';
+         document.getElementById('manualJumlah').value = '';
+         document.getElementById('manualAlasan').value = '';
+         document.getElementById('manualCatatan').value = '';
+       }
+     }
 
     async function submitManualPeminjaman() {
-      const selectedBarangId = document.getElementById('barang-select').value;
-      const jumlah = parseInt(document.getElementById('manualJumlah').value);
-      const catatan = document.getElementById('manualCatatan').value.trim();
+       const selectedBarangId = document.getElementById('barang-select').value;
+       const jumlah = parseInt(document.getElementById('manualJumlah').value);
+       const alasan = document.getElementById('manualAlasan').value.trim();
+       const catatan = document.getElementById('manualCatatan').value.trim();
 
       // Enhanced validation
       if (!selectedBarangId) {
@@ -263,6 +450,18 @@
       if (jumlah > 1000) {
         showNotification('Jumlah maksimal 1000 unit', 'warning');
         document.getElementById('manualJumlah').focus();
+        return;
+      }
+
+      if (!alasan) {
+        showNotification('Alasan peminjaman wajib diisi', 'warning');
+        document.getElementById('manualAlasan').focus();
+        return;
+      }
+
+      if (alasan.length > 500) {
+        showNotification('Alasan peminjaman maksimal 500 karakter', 'warning');
+        document.getElementById('manualAlasan').focus();
         return;
       }
 
@@ -295,8 +494,9 @@
           barang: selectedBarang.id, // Send barang ID
           barang_nama: selectedBarang.nama, // Also send nama for reference
           jumlah: jumlah,
+          alasan_peminjaman: alasan,
           catatan: catatan || '',
-          status: 'dipinjam',
+          status: 'pending',
           tanggal_pinjam: new Date().toISOString(),
           is_manual: true
         };
@@ -321,8 +521,9 @@
             barang: selectedBarang.id, // Send barang ID
             barang_nama: selectedBarang.nama,
             jumlah: jumlah,
+            alasan_peminjaman: alasan,
             catatan: catatan || '',
-            status: 'dipinjam'
+            status: 'pending_approval'
           };
 
           res = await fetch(endpoint, {
@@ -366,7 +567,7 @@
         // Refresh the peminjaman list immediately
         await loadPeminjamanUser();
 
-        showNotification('Peminjaman manual berhasil disimpan!', 'success');
+        showNotification('Request peminjaman berhasil dikirim! Menunggu approval dari admin.', 'success');
 
       } catch (err) {
         console.error('Error submitting manual peminjaman:', err);
@@ -424,6 +625,24 @@
       }
     });
 
+    // Function to get action button based on status
+    function getActionButton(peminjaman) {
+      switch (peminjaman.status) {
+        case 'pending':
+          return '<span class="text-muted">Menunggu Persetujuan Admin</span>';
+        case 'approved':
+          return `<button class="btn-blue" onclick="ambilBarang(${peminjaman.id})">Ambil Barang</button>`;
+        case 'rejected':
+          return '<span class="text-muted">Permintaan Ditolak</span>';
+        case 'dipinjam':
+          return `<button class="btn-green" onclick="kembalikanBarang(${peminjaman.id})">Kembalikan</button>`;
+        case 'dikembalikan':
+          return '<span class="text-muted">Sudah Dikembalikan</span>';
+        default:
+          return '<span class="text-muted">-</span>';
+      }
+    }
+
     // Temporary fix for loadPeminjamanUser function
     async function loadPeminjamanUser() {
       console.log("🔄 loadPeminjamanUser called from HTML");
@@ -448,7 +667,7 @@
             if (peminjamanRetryCount >= 5) { // Max 5 retries
               console.error('Max retries reached for peminjaman data, giving up');
               showNotification('Server rate limiting aktif. Coba refresh halaman nanti.', 'warning');
-              tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #f59e0b; padding: 40px;">Server rate limiting aktif<br><small>Coba refresh halaman dalam beberapa menit</small></td></tr>`;
+              tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f59e0b; padding: 40px;">Server rate limiting aktif<br><small>Coba refresh halaman dalam beberapa menit</small></td></tr>`;
               return;
             }
             const delay = Math.min(1000 * Math.pow(2, peminjamanRetryCount), 15000); // Exponential backoff, max 15s
@@ -462,11 +681,16 @@
         const data = await res.json();
         console.log(`Loaded ${data.length} peminjaman records for user ${currentUser.id}`, data);
         peminjamanRetryCount = 0; // Reset retry count on success
+        peminjamanData = data; // Store for bulk operations
 
         tableBody.innerHTML = "";
 
         let totalDipinjam = 0;
         let totalDikembalikan = 0;
+
+        // Get filter values
+        const statusFilter = document.getElementById('statusFilter').value;
+        const searchTerm = document.getElementById('searchPeminjaman').value.toLowerCase().trim();
 
         // Sort by date (newest first)
         data.sort((a, b) => {
@@ -475,13 +699,27 @@
           return dateB - dateA;
         });
 
-        data.forEach((p) => {
-          const statusText = p.status === 'dipinjam' ? 'Dipinjam' : 'Dikembalikan';
-          const statusClass = p.status === 'dipinjam' ? 'yellow' : 'green';
-          const tanggal = p.tanggal_pinjam ? new Date(p.tanggal_pinjam).toLocaleString("id-ID") : "-";
+        // Filter by status and search term
+        const filteredData = data.filter(p => {
+          const matchesStatus = !statusFilter || p.status === statusFilter;
+          const matchesSearch = !searchTerm ||
+            (p.barang_nama || p.barang || '').toLowerCase().includes(searchTerm) ||
+            (p.catatan || '').toLowerCase().includes(searchTerm);
+          return matchesStatus && matchesSearch;
+        });
 
-          if (p.status === 'dipinjam') totalDipinjam++;
-          else totalDikembalikan++;
+        filteredPeminjamanData = filteredData; // Store filtered data for bulk operations
+
+        filteredData.forEach((p) => {
+           // Use the new badge function
+           const statusBadge = getStatusBadge(p.status);
+           const tanggal = p.tanggal_pinjam ? new Date(p.tanggal_pinjam).toLocaleString("id-ID") : "-";
+
+           // Update last known statuses for polling
+           lastKnownStatuses[p.id] = p.status;
+
+           if (p.status === 'dipinjam') totalDipinjam++;
+           else if (p.status === 'dikembalikan') totalDikembalikan++;
 
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -489,11 +727,8 @@
             <td>${tanggal}</td>
             <td>${p.barang_nama || p.barang || '-'}</td>
             <td>${p.jumlah}</td>
-            <td><span class="status ${statusClass}">${statusText}</span></td>
+            <td>${statusBadge}</td>
             <td>${p.catatan || '-'}</td>
-            <td>
-              ${p.status === 'dipinjam' ? `<button class="btn-green" onclick="kembalikanBarang(${p.id})">Kembalikan</button>` : '<span class="text-muted">Sudah dikembalikan</span>'}
-            </td>
           `;
           tableBody.appendChild(tr);
         });
@@ -507,10 +742,27 @@
 
         console.log(`Updated peminjaman display: ${totalDipinjam} dipinjam, ${totalDikembalikan} dikembalikan`);
 
+        // Update bulk buttons visibility
+        updateBulkButtonsVisibility();
+
         // Show message if no records
-        if (data.length === 0) {
+        if (filteredData.length === 0) {
           const emptyRow = document.createElement("tr");
-          emptyRow.innerHTML = `<td colspan="7" style="text-align: center; color: #6b7280; padding: 40px;">Belum ada riwayat peminjaman</td>`;
+          let filterText = '';
+          if (statusFilter) {
+            const statusLabels = {
+              'pending': 'Menunggu Persetujuan',
+              'approved': 'Disetujui',
+              'rejected': 'Ditolak',
+              'dipinjam': 'Sedang Dipinjam',
+              'dikembalikan': 'Sudah Dikembalikan'
+            };
+            filterText += ` dengan status ${statusLabels[statusFilter] || statusFilter}`;
+          }
+          if (searchTerm) {
+            filterText += `${filterText ? ' dan' : ''} pencarian "${searchTerm}"`;
+          }
+          emptyRow.innerHTML = `<td colspan="6" style="text-align: center; color: #6b7280; padding: 40px;">${filterText ? `Tidak ada peminjaman${filterText}` : 'Belum ada riwayat peminjaman'}</td>`;
           tableBody.appendChild(emptyRow);
         }
 
@@ -522,7 +774,7 @@
           const backendAvailable = await checkBackendHealth();
           if (!backendAvailable) {
             showNotification("Backend server tidak tersedia. Pastikan server Django berjalan di http://127.0.0.1:8001", "error");
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 40px;">Server backend tidak tersedia<br><small>Periksa apakah Django server berjalan</small></td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 40px;">Server backend tidak tersedia<br><small>Periksa apakah Django server berjalan</small></td></tr>`;
             return;
           }
         } catch (healthErr) {
@@ -531,7 +783,89 @@
         }
 
         showNotification("Gagal memuat riwayat peminjaman", "error");
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 40px;">Gagal memuat data peminjaman</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 40px;">Gagal memuat data peminjaman</td></tr>`;
+      }
+    }
+
+    // Function to pickup approved item
+    async function ambilBarang(peminjamanId) {
+      console.log("🔄 ambilBarang called with ID:", peminjamanId);
+
+      if (!confirm("Yakin ingin mengambil barang ini? Stok akan berkurang setelah pickup.")) return;
+
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        showNotification("Silakan login terlebih dahulu", "error");
+        return;
+      }
+
+      try {
+        showLoading("Memproses pengambilan barang...");
+
+        // First check if the peminjaman is approved
+        const checkRes = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/`);
+        if (!checkRes.ok) {
+          throw new Error("Gagal memeriksa status peminjaman");
+        }
+
+        const peminjamanData = await checkRes.json();
+        if (peminjamanData.status !== 'approved') {
+          throw new Error("Peminjaman belum disetujui admin. Silakan tunggu approval terlebih dahulu.");
+        }
+
+        // Get barang details to check stock
+        const barangRes = await fetch(`${API_BASE}/barang/${peminjamanData.barang}/`);
+        if (!barangRes.ok) throw new Error("Gagal mendapatkan detail barang");
+
+        const barang = await barangRes.json();
+
+        // Check if stock is sufficient
+        if (barang.stok < peminjamanData.jumlah) {
+          throw new Error(`Stok tidak cukup. Tersedia: ${barang.stok}, Dibutuhkan: ${peminjamanData.jumlah}`);
+        }
+
+        // Proceed with pickup
+        const res = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/ambil/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: currentUser.id })
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Gagal mengambil barang");
+        }
+
+        const result = await res.json();
+        console.log("Pengambilan berhasil:", result);
+
+        hideLoading();
+
+        // Refresh peminjaman history
+        await loadPeminjamanUser();
+
+        // Also refresh barang list to show updated stock
+        if (typeof loadBarangUser === 'function') {
+          await loadBarangUser();
+        }
+
+        showNotification("Barang berhasil diambil!", "success");
+      } catch (err) {
+        console.error("Error in ambilBarang:", err);
+        hideLoading();
+
+        // Provide specific error messages
+        if (err.message.includes('belum disetujui')) {
+          showNotification(err.message, "warning");
+        } else if (err.message.includes('Stok tidak cukup')) {
+          showNotification(err.message, "warning");
+        } else if (err.message.includes('404')) {
+          showNotification("Peminjaman atau barang tidak ditemukan", "error");
+        } else if (err.message.includes('401')) {
+          showNotification("Sesi login telah berakhir. Silakan login kembali.", "error");
+        } else {
+          showNotification(err.message || "Gagal mengambil barang", "error");
+        }
       }
     }
 
@@ -580,6 +914,186 @@
         showNotification(err.message || "Gagal mengembalikan barang", "error");
       }
     }
+
+    // Bulk Operations Functions
+    function setupBulkOperations() {
+      const bulkEditBtn = document.getElementById('bulkEditBtn');
+      const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+
+      // Bulk buttons
+      bulkEditBtn.addEventListener('click', openBulkEditModal);
+      bulkDeleteBtn.addEventListener('click', openBulkDeleteModal);
+    }
+
+    function updateBulkButtonsVisibility() {
+      const bulkEditBtn = document.getElementById('bulkEditBtn');
+      const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+
+      if (filteredPeminjamanData.length > 0) {
+        bulkEditBtn.classList.remove('hidden');
+        bulkDeleteBtn.classList.remove('hidden');
+      } else {
+        bulkEditBtn.classList.add('hidden');
+        bulkDeleteBtn.classList.add('hidden');
+      }
+    }
+
+    function openBulkEditModal() {
+      if (filteredPeminjamanData.length === 0) return;
+
+      const modal = document.getElementById('modalBulkEdit');
+      const itemsContainer = document.getElementById('bulkEditItems');
+
+      itemsContainer.innerHTML = filteredPeminjamanData.map(item => `
+        <div class="input-group" style="border: 1px solid var(--gray-600); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+          <label>${item.barang_nama || item.barang} (Max: ${item.jumlah})</label>
+          <input type="number" class="edit-quantity" data-id="${item.id}" value="${item.jumlah}" min="1" max="${item.jumlah}" style="width: 100px;">
+        </div>
+      `).join('');
+
+      modal.style.display = 'flex';
+      modal.style.alignItems = 'center';
+      modal.style.justifyContent = 'center';
+    }
+
+    function closeBulkEditModal() {
+      document.getElementById('modalBulkEdit').style.display = 'none';
+    }
+
+    async function submitBulkEdit() {
+      const updates = [];
+
+      filteredPeminjamanData.forEach(item => {
+        const input = document.querySelector(`.edit-quantity[data-id="${item.id}"]`);
+        const newQty = parseInt(input.value);
+        if (newQty !== item.jumlah && newQty > 0 && newQty <= item.jumlah) {
+          updates.push({ id: item.id, jumlah: newQty });
+        }
+      });
+
+      if (updates.length === 0) {
+        showNotification('Tidak ada perubahan yang dilakukan', 'info');
+        closeBulkEditModal();
+        return;
+      }
+
+      try {
+        showLoading('Menyimpan perubahan...');
+        for (const update of updates) {
+          const res = await fetch(`${API_BASE}/peminjaman/${update.id}/`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jumlah: update.jumlah })
+          });
+          if (!res.ok) throw new Error(`Gagal update peminjaman ${update.id}`);
+        }
+        hideLoading();
+        closeBulkEditModal();
+        await loadPeminjamanUser();
+        showNotification('Perubahan berhasil disimpan', 'success');
+      } catch (err) {
+        hideLoading();
+        showNotification(err.message || 'Gagal menyimpan perubahan', 'error');
+      }
+    }
+
+    function openBulkDeleteModal() {
+      if (filteredPeminjamanData.length === 0) return;
+
+      const modal = document.getElementById('modalBulkDelete');
+      const itemsContainer = document.getElementById('bulkDeleteItems');
+
+      itemsContainer.innerHTML = filteredPeminjamanData.map(item => `
+        <div class="input-group" style="border: 1px solid var(--gray-600); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+          <label>${item.barang_nama || item.barang} (Jumlah: ${item.jumlah})</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="radio" name="delete-option-${item.id}" value="full" checked> Hapus Semua
+            <input type="radio" name="delete-option-${item.id}" value="partial"> Hapus Sebagian
+            <input type="number" class="delete-quantity" data-id="${item.id}" min="1" max="${item.jumlah}" value="${item.jumlah}" style="width: 80px;" disabled>
+          </div>
+        </div>
+      `).join('');
+
+      // Add event listeners for radio buttons
+      itemsContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+          const itemId = this.name.split('-')[2];
+          const qtyInput = document.querySelector(`.delete-quantity[data-id="${itemId}"]`);
+          qtyInput.disabled = this.value === 'full';
+        });
+      });
+
+      modal.style.display = 'flex';
+      modal.style.alignItems = 'center';
+      modal.style.justifyContent = 'center';
+    }
+
+    function closeBulkDeleteModal() {
+      document.getElementById('modalBulkDelete').style.display = 'none';
+    }
+
+    async function submitBulkDelete() {
+      const deletes = [];
+
+      filteredPeminjamanData.forEach(item => {
+        const fullRadio = document.querySelector(`input[name="delete-option-${item.id}"][value="full"]`);
+        const partialRadio = document.querySelector(`input[name="delete-option-${item.id}"][value="partial"]`);
+        const qtyInput = document.querySelector(`.delete-quantity[data-id="${item.id}"]`);
+
+        if (fullRadio.checked) {
+          deletes.push({ id: item.id, action: 'full' });
+        } else if (partialRadio.checked) {
+          const qty = parseInt(qtyInput.value);
+          if (qty > 0 && qty < item.jumlah) {
+            deletes.push({ id: item.id, action: 'partial', jumlah: qty });
+          } else if (qty === item.jumlah) {
+            deletes.push({ id: item.id, action: 'full' });
+          }
+        }
+      });
+
+      if (deletes.length === 0) {
+        showNotification('Tidak ada penghapusan yang dilakukan', 'info');
+        closeBulkDeleteModal();
+        return;
+      }
+
+      if (!confirm(`Yakin ingin menghapus ${deletes.length} peminjaman terpilih?`)) return;
+
+      try {
+        showLoading('Menghapus peminjaman...');
+        for (const del of deletes) {
+          if (del.action === 'full') {
+            const res = await fetch(`${API_BASE}/peminjaman/${del.id}/`, { method: 'DELETE' });
+            if (!res.ok) throw new Error(`Gagal hapus peminjaman ${del.id}`);
+          } else {
+            // For partial delete, update quantity
+            const res = await fetch(`${API_BASE}/peminjaman/${del.id}/`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ jumlah: del.jumlah })
+            });
+            if (!res.ok) throw new Error(`Gagal update peminjaman ${del.id}`);
+          }
+        }
+        hideLoading();
+        closeBulkDeleteModal();
+        await loadPeminjamanUser();
+        showNotification('Penghapusan berhasil', 'success');
+      } catch (err) {
+        hideLoading();
+        showNotification(err.message || 'Gagal menghapus peminjaman', 'error');
+      }
+    }
+
+
+    // Close modals when clicking outside
+    document.addEventListener('click', function(e) {
+      const bulkEditModal = document.getElementById('modalBulkEdit');
+      const bulkDeleteModal = document.getElementById('modalBulkDelete');
+      if (e.target === bulkEditModal) closeBulkEditModal();
+      if (e.target === bulkDeleteModal) closeBulkDeleteModal();
+    });
   </script>
 </body>
 </html>

@@ -1,12 +1,23 @@
 // ============================
 // KONFIGURASI API BACKEND - INVMANAGE
 // ============================
+
 console.log('🚀 InvManage Frontend v2.0 - Loaded at:', new Date().toISOString());
-const BACKEND_URL = 'http://127.0.0.1:8001';
-const API_BASE = `${BACKEND_URL}/api`;
+const BACKEND_URL = 'http://localhost:8001';
+var API_BASE = `${BACKEND_URL}/api`;
+
+// Removed: updateSelectedBarangButtons function - no longer needed
+
+console.log('🔍 Checking sample data availability...');
+console.log('window.sampleFeedback:', !!window.sampleFeedback);
+console.log('window.sampleFeedback type:', typeof window.sampleFeedback);
+if (window.sampleFeedback) {
+  console.log('window.sampleFeedback length:', window.sampleFeedback.length);
+  console.log('First sample feedback:', window.sampleFeedback[0]);
+}
 
 // Configuration for better error handling
-const API_CONFIG = {
+var API_CONFIG = {
   timeout: 10000, // 10 seconds
   retries: 3,
   retryDelay: 1000, // 1 second
@@ -14,7 +25,7 @@ const API_CONFIG = {
 };
 
 // CSRF Token Management
-let csrfToken = null;
+var csrfToken = null;
 
 async function getCsrfToken() {
   if (csrfToken) return csrfToken;
@@ -169,46 +180,44 @@ async function checkBackendHealth() {
   }
 }
 
-const $ = (sel) => document.querySelector(sel);
+var $ = (sel) => document.querySelector(sel);
 
 // ============================
 // ENTERPRISE UI ENHANCEMENTS
 // ============================
 
 // API Response Caching System
-class ApiCache {
-  constructor(ttl = 300000) { // 5 minutes default
-    this.cache = new Map();
-    this.ttl = ttl;
-  }
-
-  set(key, data) {
-    this.cache.set(key, {
-      data: JSON.parse(JSON.stringify(data)), // Deep clone
-      timestamp: Date.now()
-    });
-  }
-
-  get(key) {
-    const item = this.cache.get(key);
-    if (item && (Date.now() - item.timestamp) < this.ttl) {
-      return JSON.parse(JSON.stringify(item.data)); // Return clone
-    }
-    this.cache.delete(key);
-    return null;
-  }
-
-  clear() {
-    this.cache.clear();
-  }
-
-  size() {
-    return this.cache.size;
-  }
+function ApiCache(ttl = 300000) { // 5 minutes default
+  this.cache = new Map();
+  this.ttl = ttl;
 }
 
+ApiCache.prototype.set = function(key, data) {
+  this.cache.set(key, {
+    data: JSON.parse(JSON.stringify(data)), // Deep clone
+    timestamp: Date.now()
+  });
+};
+
+ApiCache.prototype.get = function(key) {
+  const item = this.cache.get(key);
+  if (item && (Date.now() - item.timestamp) < this.ttl) {
+    return JSON.parse(JSON.stringify(item.data)); // Return clone
+  }
+  this.cache.delete(key);
+  return null;
+};
+
+ApiCache.prototype.clear = function() {
+  this.cache.clear();
+};
+
+ApiCache.prototype.size = function() {
+  return this.cache.size;
+};
+
 // Global cache instance
-const apiCache = new ApiCache();
+var apiCache = new ApiCache();
 
 // Input Sanitization & Validation
 function sanitizeInput(input) {
@@ -253,12 +262,12 @@ function showLoading(message = "Memproses...", showSkeleton = false) {
     overlay.innerHTML = `
       <div class="loading-content">
         <div class="loading-spinner"></div>
-        <p style="margin: 0; color: #64748b; font-weight: 500;">${message}</p>
+        <p class="margin-0 color-var-gray-600 font-weight-500">${message}</p>
       </div>
     `;
     document.body.appendChild(overlay);
   }
-  overlay.style.display = "flex";
+  overlay.classList.add("modal-show");
 
   // Show skeleton if requested
   if (showSkeleton) {
@@ -285,7 +294,7 @@ function showLoading(message = "Memproses...", showSkeleton = false) {
 function hideLoading() {
   const overlay = $("#loading-overlay");
   if (overlay) {
-    overlay.style.display = "none";
+    overlay.classList.remove("modal-show");
   }
 
   // Remove skeleton loaders
@@ -426,6 +435,12 @@ function clearCurrentUser() {
 // Role-based login is now handled in index.html
 // This function is kept for backward compatibility but role validation is done in the HTML version
 
+// Get authentication token
+function getToken() {
+  const user = getCurrentUser();
+  return user ? (user.token || user.access_token || localStorage.getItem('auth_token')) : null;
+}
+
 // Check if user is logged in and has correct access level
 function checkAuth(requiredRole = null) {
   const user = getCurrentUser();
@@ -561,14 +576,30 @@ async function doRegister() {
 // DASHBOARD / BARANG - OPTIMIZED CRUD
 // ============================
 
-let barangCache = [];
-let barangFormMode = "add";
-let barangFormId = null;
-let deleteBarangId = null;
-let isOperationInProgress = false; // Prevent multiple simultaneous operations
+var barangCache = [];
+var barangFormMode = "add";
+var barangFormId = null;
+var deleteBarangId = null;
+var isOperationInProgress = false; // Prevent multiple simultaneous operations
+
+// Barang pagination
+var barangCurrentPage = 1;
+var barangItemsPerPage = 10;
+var barangFilteredData = [];
+
+// Feedback pagination
+var feedbackCache = [];
+var feedbackCurrentPage = 1;
+var feedbackItemsPerPage = 10;
+
+// Transaksi pagination
+var transaksiCache = [];
+var transaksiCurrentPage = 1;
+var transaksiItemsPerPage = 10;
+var transaksiFilteredData = [];
 
 // Offline queue for operations when backend is unavailable
-let offlineQueue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
+var offlineQueue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
 
 // Save offline queue to localStorage
 function saveOfflineQueue() {
@@ -705,7 +736,7 @@ async function processOfflineBarangUpdate(operation) {
 // Process offline delete operation
 async function processOfflineBarangDelete(operation) {
   try {
-    const res = await fetch(`${API_BASE}/barang/${operation.itemId}/`, {
+    const res = await apiCall(`${API_BASE}/barang/${operation.itemId}/`, {
       method: "DELETE",
     });
 
@@ -872,7 +903,7 @@ async function loadBarang(forceRefresh = false) {
       if (usingOfflineMode || !backendAvailable) {
         const offlineRow = document.createElement('tr');
         offlineRow.innerHTML = `
-          <td colspan="5" style="text-align: center; color: #f59e0b; padding: 20px; background: rgba(245, 158, 11, 0.1); border-top: 2px solid #f59e0b;">
+          <td colspan="6" style="text-align: center; color: #f59e0b; padding: 20px; background: rgba(245, 158, 11, 0.1); border-top: 2px solid #f59e0b;">
             <div style="font-size: 24px; margin-bottom: 5px;">🔄</div>
             <small><strong>Mode Offline</strong> - Perubahan akan disimpan secara lokal<br>
             ${backendAvailable ? 'Server tersedia, coba sinkronkan:' : 'Server tidak tersedia di http://127.0.0.1:8001'}</small>
@@ -894,8 +925,12 @@ async function loadBarang(forceRefresh = false) {
       }
     }
 
-    // Always render the final data
-    renderBarangData(finalData);
+    // Set filtered data and render with pagination
+    barangFilteredData = finalData;
+    renderBarangDataWithPagination();
+
+    // No button states to initialize
+
     hideLoading();
 
   } catch (err) {
@@ -914,7 +949,7 @@ async function loadBarang(forceRefresh = false) {
     // Render error state as last resort
     table.innerHTML = `
       <tr>
-        <td colspan="5" style="text-align: center; color: #ef4444; padding: 40px;">
+        <td colspan="6" style="text-align: center; color: #ef4444; padding: 40px;">
           <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
           Gagal memuat data barang<br>
           <small>${err.message}</small>
@@ -938,8 +973,394 @@ function clearOfflineData() {
   loadBarang(true);
 }
 
+// Enhanced search and filter function with multiple criteria
+function applyBarangFilter() {
+    const searchTerm = document.getElementById('searchBarang')?.value?.toLowerCase().trim() || '';
+    const statusFilter = document.getElementById('statusFilter')?.value || '';
+    const kategoriFilter = document.getElementById('kategoriFilter')?.value || '';
+
+    // Filter the cached data with multiple criteria
+    barangFilteredData = barangCache.filter(item => {
+        // Search term filter
+        const nama = (item.nama || '').toLowerCase();
+        const searchMatch = !searchTerm || nama.includes(searchTerm);
+
+        // Status filter
+        let statusMatch = true;
+        if (statusFilter) {
+            const stok = Number(item.stok ?? 0);
+            const minimum = Number(item.minimum ?? 5);
+            if (statusFilter === 'Tersedia') {
+                statusMatch = stok > minimum;
+            } else if (statusFilter === 'Stok Rendah') {
+                statusMatch = stok > 0 && stok <= minimum;
+            } else if (statusFilter === 'Habis') {
+                statusMatch = stok <= 0;
+            }
+        }
+
+        // Kategori filter
+        const kategoriMatch = !kategoriFilter || (item.kategori || '') === kategoriFilter;
+
+        return searchMatch && statusMatch && kategoriMatch;
+    });
+
+    // Reset to first page when filtering
+    barangCurrentPage = 1;
+
+    // Update filter indicators
+    updateFilterIndicators();
+
+    // Re-render with pagination
+    renderBarangDataWithPagination();
+}
+
+// Debounced search function for better performance
+var debouncedBarangFilter = debounce(applyBarangFilter, 300);
+
+// Update filter indicators to show active filters
+function updateFilterIndicators() {
+    const searchInput = document.getElementById('searchBarang');
+    const statusFilter = document.getElementById('statusFilter');
+    const kategoriFilter = document.getElementById('kategoriFilter');
+    const clearSearchBtn = document.getElementById('clearSearch');
+
+    // Show/hide clear search button
+    if (clearSearchBtn) {
+        clearSearchBtn.style.display = (searchInput?.value?.trim()) ? 'block' : 'none';
+    }
+
+    // Add visual indicators for active filters
+    [statusFilter, kategoriFilter].forEach(filter => {
+        if (filter && filter.value) {
+            filter.classList.add('filter-active');
+        } else {
+            filter.classList.remove('filter-active');
+        }
+    });
+}
+
+// Clear search function
+function clearBarangSearch() {
+    const searchInput = document.getElementById('searchBarang');
+    const statusFilter = document.getElementById('statusFilter');
+    const kategoriFilter = document.getElementById('kategoriFilter');
+
+    if (searchInput) searchInput.value = '';
+    if (statusFilter) statusFilter.value = '';
+    if (kategoriFilter) kategoriFilter.value = '';
+
+    applyBarangFilter();
+}
+
+// Export table data functionality
+function exportTableData() {
+    try {
+        // Get current filtered data
+        const dataToExport = barangFilteredData.length > 0 ? barangFilteredData : barangCache;
+
+        if (dataToExport.length === 0) {
+            showNotification("Tidak ada data untuk diekspor", "warning");
+            return;
+        }
+
+        // Create CSV content
+        const headers = ["Nama Barang", "Stok", "Minimum", "Status", "Kategori", "Terakhir Update"];
+        const csvContent = [
+            headers.join(","),
+            ...dataToExport.map(item => {
+                const stok = Number(item.stok ?? 0);
+                const minimum = Number(item.minimum ?? 5);
+                let status = "Habis";
+                if (stok > minimum) status = "Tersedia";
+                else if (stok > 0) status = "Stok Rendah";
+
+                return [
+                    `"${(item.nama || '').replace(/"/g, '""')}"`,
+                    stok,
+                    minimum,
+                    `"${status}"`,
+                    `"${item.kategori || ''}"`,
+                    `"${item.updated_at ? new Date(item.updated_at).toLocaleString('id-ID') : ''}"`
+                ].join(",");
+            })
+        ].join("\n");
+
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `inventaris-barang-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showNotification(`Berhasil mengekspor ${dataToExport.length} data barang`, "success");
+    } catch (error) {
+        console.error('Export error:', error);
+        showNotification("Gagal mengekspor data", "error");
+    }
+}
+
+// Removed: editSelectedBarang function - replaced with openSelectItemModal
+
+// Open bulk edit modal for multiple items
+function openBulkEditModal() {
+  const checkboxes = document.querySelectorAll('#tabelBarang .barang-checkbox:checked');
+  const selectedItems = Array.from(checkboxes).map(cb => {
+    const itemId = parseInt(cb.dataset.id);
+    const item = barangCache.find(b => b.id === itemId);
+    return item;
+  });
+
+  // Create bulk edit modal
+  let modal = document.getElementById('modalBulkEditBarang');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modalBulkEditBarang';
+    modal.className = 'modal-bg';
+    modal.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Edit Massal Barang</h3>
+          <button class="modal-close" onclick="closeBulkEditModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="bulk-edit-info">
+            <p><strong>${selectedItems.length} barang dipilih untuk diedit:</strong></p>
+            <div class="selected-items-list">
+              ${selectedItems.map(item => `<span class="item-tag">${item.nama}</span>`).join('')}
+            </div>
+          </div>
+
+          <div class="bulk-edit-options">
+            <div class="edit-option">
+              <label>
+                <input type="checkbox" id="bulkEditCategory" onchange="toggleBulkField('category')">
+                Update Kategori
+              </label>
+              <select id="bulkCategorySelect" disabled style="margin-top: 5px;">
+                <option value="">Pilih Kategori Baru</option>
+                <option value="elektronik">Elektronik</option>
+                <option value="peralatan">Peralatan</option>
+                <option value="aksesoris">Aksesoris</option>
+                <option value="lainnya">Lainnya</option>
+              </select>
+            </div>
+
+            <div class="edit-option">
+              <label>
+                <input type="checkbox" id="bulkEditMinimum" onchange="toggleBulkField('minimum')">
+                Update Stok Minimum
+              </label>
+              <input type="number" id="bulkMinimumInput" disabled placeholder="Stok minimum baru" min="0" style="margin-top: 5px;">
+            </div>
+
+            <div class="edit-option">
+              <label>
+                <input type="checkbox" id="bulkEditStock" onchange="toggleBulkField('stock')">
+                Update Stok (Tambah/Kurangi)
+              </label>
+              <div style="margin-top: 5px;">
+                <input type="number" id="bulkStockInput" disabled placeholder="Jumlah perubahan" style="width: 120px;">
+                <select id="bulkStockOperation" disabled style="width: 100px; margin-left: 5px;">
+                  <option value="add">Tambah (+)</option>
+                  <option value="subtract">Kurangi (-)</option>
+                  <option value="set">Set ke (=)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeBulkEditModal()">Batal</button>
+          <button class="btn-primary" onclick="applyBulkEdit()" id="applyBulkEditBtn">Terapkan Perubahan</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  // Update selected items list
+  const itemsList = modal.querySelector('.selected-items-list');
+  if (itemsList) {
+    itemsList.innerHTML = selectedItems.map(item => `<span class="item-tag">${item.nama}</span>`).join('');
+  }
+
+  // Reset form
+  modal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  modal.querySelectorAll('input[type="number"], select').forEach(el => {
+    el.disabled = true;
+    el.value = '';
+  });
+
+  modal.classList.add("modal-show");
+}
+
+function closeBulkEditModal() {
+  const modal = document.getElementById('modalBulkEditBarang');
+  if (modal) modal.classList.remove('modal-show');
+}
+
+function toggleBulkField(field) {
+  const checkbox = document.getElementById(`bulkEdit${field.charAt(0).toUpperCase() + field.slice(1)}`);
+  const input = document.getElementById(`bulk${field.charAt(0).toUpperCase() + field.slice(1)}${field === 'stock' ? 'Input' : field === 'minimum' ? 'Input' : 'Select'}`);
+
+  if (field === 'stock') {
+    const operation = document.getElementById('bulkStockOperation');
+    input.disabled = !checkbox.checked;
+    operation.disabled = !checkbox.checked;
+  } else {
+    input.disabled = !checkbox.checked;
+  }
+}
+
+async function applyBulkEdit() {
+  const checkboxes = document.querySelectorAll('#tabelBarang .barang-checkbox:checked');
+  const selectedItems = Array.from(checkboxes).map(cb => {
+    const itemId = parseInt(cb.dataset.id);
+    return barangCache.find(b => b.id === itemId);
+  });
+
+  if (selectedItems.length === 0) {
+    showNotification("Tidak ada barang yang dipilih", "warning");
+    return;
+  }
+
+  // Collect changes
+  const changes = {};
+
+  if (document.getElementById('bulkEditCategory').checked) {
+    const category = document.getElementById('bulkCategorySelect').value;
+    if (category) changes.kategori = category;
+  }
+
+  if (document.getElementById('bulkEditMinimum').checked) {
+    const minimum = parseInt(document.getElementById('bulkMinimumInput').value);
+    if (!isNaN(minimum) && minimum >= 0) changes.minimum = minimum;
+  }
+
+  if (document.getElementById('bulkEditStock').checked) {
+    const amount = parseInt(document.getElementById('bulkStockInput').value);
+    const operation = document.getElementById('bulkStockOperation').value;
+    if (!isNaN(amount)) {
+      changes.stockChange = { amount, operation };
+    }
+  }
+
+  if (Object.keys(changes).length === 0) {
+    showNotification("Pilih setidaknya satu perubahan untuk diterapkan", "warning");
+    return;
+  }
+
+  // Confirm changes
+  let confirmMessage = `Apakah Anda yakin ingin menerapkan perubahan berikut ke ${selectedItems.length} barang?\n\n`;
+  if (changes.kategori) confirmMessage += `• Kategori: ${changes.kategori}\n`;
+  if (changes.minimum !== undefined) confirmMessage += `• Stok Minimum: ${changes.minimum}\n`;
+  if (changes.stockChange) {
+    const { amount, operation } = changes.stockChange;
+    const opText = operation === 'add' ? 'Tambah' : operation === 'subtract' ? 'Kurangi' : 'Set ke';
+    confirmMessage += `• Stok: ${opText} ${amount}\n`;
+  }
+
+  if (!confirm(confirmMessage)) return;
+
+  showLoading(`Menerapkan perubahan ke ${selectedItems.length} barang...`);
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const item of selectedItems) {
+    try {
+      // Prepare update data
+      const updateData = { ...item };
+
+      if (changes.kategori) updateData.kategori = changes.kategori;
+      if (changes.minimum !== undefined) updateData.minimum = changes.minimum;
+
+      if (changes.stockChange) {
+        const { amount, operation } = changes.stockChange;
+        const currentStock = Number(item.stok ?? 0);
+
+        if (operation === 'add') {
+          updateData.stok = currentStock + amount;
+        } else if (operation === 'subtract') {
+          updateData.stok = Math.max(0, currentStock - amount);
+        } else if (operation === 'set') {
+          updateData.stok = Math.max(0, amount);
+        }
+      }
+
+      // Update local cache immediately
+      const existingIndex = barangCache.findIndex(b => b.id === item.id);
+      if (existingIndex >= 0) {
+        barangCache[existingIndex] = { ...barangCache[existingIndex], ...updateData, _optimistic: true };
+      }
+
+      // Try to sync with backend
+      const backendAvailable = await checkBackendHealth();
+
+      if (backendAvailable) {
+        const payload = {
+          nama: updateData.nama,
+          stok: updateData.stok,
+          minimum: updateData.minimum,
+          kategori: updateData.kategori,
+          harga: 0
+        };
+
+        const res = await fetch(`${API_BASE}/barang/${item.id}/`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          // Update with real server data
+          if (existingIndex >= 0) {
+            barangCache[existingIndex] = { ...result, _synced: true };
+          }
+          successCount++;
+        } else {
+          throw new Error(`HTTP ${res.status}`);
+        }
+      } else {
+        // Add to offline queue
+        addToOfflineQueue({
+          type: 'update_barang',
+          itemId: item.id,
+          data: updateData
+        });
+        successCount++;
+      }
+
+    } catch (error) {
+      console.error(`Failed to update item ${item.id}:`, error);
+      failCount++;
+    }
+  }
+
+  hideLoading();
+  closeBulkEditModal();
+
+  // Update UI
+  renderBarangData(barangCache);
+  updateSelectedBarangButtons();
+
+  if (successCount > 0) {
+    showNotification(`${successCount} barang berhasil diupdate${failCount > 0 ? `, ${failCount} gagal` : ''}`, failCount > 0 ? "warning" : "success");
+  } else {
+    showNotification("Gagal mengupdate semua barang yang dipilih", "error");
+  }
+}
+
+// Removed: deleteSelectedBarang function - replaced with performDeleteWithQuantity
+
 // Separate rendering function for better code organization
-function renderBarangData(data) {
+function renderBarangData(data, startNumber = 1) {
   const table = document.querySelector("#tabelBarang tbody");
   if (!table) return;
 
@@ -954,7 +1375,7 @@ function renderBarangData(data) {
   // Use DocumentFragment for better performance with large datasets
   const fragment = document.createDocumentFragment();
 
-  data.forEach((item) => {
+  data.forEach((item, index) => {
     const stok = Number(item.stok ?? 0);
     totalItem++;
 
@@ -990,6 +1411,8 @@ function renderBarangData(data) {
       statusIndicator = '<span class="sync-indicator synced" title="Tersinkronkan">✅</span>';
     }
 
+    const rowNumber = startNumber + index;
+
     const tr = document.createElement("tr");
     tr.setAttribute("data-nama", (item.nama || "").toLowerCase());
     tr.setAttribute("data-id", item.id);
@@ -997,6 +1420,7 @@ function renderBarangData(data) {
 
     // Use innerHTML for better performance
     tr.innerHTML = `
+      <td>${rowNumber}</td>
       <td>
         ${statusIndicator}
         ${sanitizeInput(item.nama || '-')}
@@ -1004,24 +1428,15 @@ function renderBarangData(data) {
       <td>${stok}</td>
       <td>${item.minimum || 5}</td>
       <td><span class="status ${statusClass}">${statusText}</span></td>
-      <td>
-        <button class="icon-btn" style="border:none; background:none; cursor:pointer; margin-right:6px;"
-                onclick="openBarangModal('edit', ${item.id})"
-                aria-label="Edit ${sanitizeInput(item.nama || 'barang')}">
-          ✏️
-        </button>
-        <button class="icon-btn" style="border:none; background:none; cursor:pointer;"
-                onclick="openDeleteBarang(${item.id})"
-                aria-label="Hapus ${sanitizeInput(item.nama || 'barang')}">
-          🗑️
-        </button>
-      </td>
+      <td>${item.updated_at ? new Date(item.updated_at).toLocaleString('id-ID') : '-'}</td>
     `;
     fragment.appendChild(tr);
   });
 
   // Append all rows at once
   table.appendChild(fragment);
+
+  // No checkboxes to handle
 
   // Update dashboard cards asynchronously to prevent blocking
   requestAnimationFrame(() => {
@@ -1040,6 +1455,140 @@ function renderBarangData(data) {
   });
 }
 
+// Render barang data with pagination
+function renderBarangDataWithPagination() {
+  const table = document.querySelector("#tabelBarang tbody");
+  if (!table) return;
+
+  // Calculate pagination
+  const totalItems = barangFilteredData.length;
+  const totalPages = Math.ceil(totalItems / barangItemsPerPage);
+  const startIndex = (barangCurrentPage - 1) * barangItemsPerPage;
+  const endIndex = startIndex + barangItemsPerPage;
+  const pageData = barangFilteredData.slice(startIndex, endIndex);
+
+  // Calculate start number for row numbering
+  const startNumber = (barangCurrentPage - 1) * barangItemsPerPage + 1;
+
+  // Render current page data
+  renderBarangData(pageData, startNumber);
+
+  // Update pagination controls
+  updateBarangPagination(totalPages, totalItems);
+
+  // No button states to update
+}
+
+// Update barang pagination controls with event delegation
+function updateBarangPagination(totalPages, totalItems) {
+  const prevBtn = document.getElementById("prevPage");
+  const nextBtn = document.getElementById("nextPage");
+  const firstBtn = document.getElementById("firstPage");
+  const lastBtn = document.getElementById("lastPage");
+  const pageNumbers = document.getElementById("pageNumbers");
+  const tableStats = document.getElementById("tableStats");
+  const itemsPerPageSelect = document.getElementById("itemsPerPage");
+
+  // Update items per page selector
+  if (itemsPerPageSelect) {
+    itemsPerPageSelect.value = barangItemsPerPage;
+    itemsPerPageSelect.onchange = (e) => {
+      barangItemsPerPage = parseInt(e.target.value);
+      barangCurrentPage = 1; // Reset to first page
+      renderBarangDataWithPagination();
+    };
+  }
+
+  // Update button states
+  if (firstBtn) firstBtn.disabled = barangCurrentPage <= 1;
+  if (prevBtn) prevBtn.disabled = barangCurrentPage <= 1;
+  if (nextBtn) nextBtn.disabled = barangCurrentPage >= totalPages;
+  if (lastBtn) lastBtn.disabled = barangCurrentPage >= totalPages;
+
+  // Generate page number buttons
+  if (pageNumbers) {
+    pageNumbers.innerHTML = '';
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, barangCurrentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    // Add page number buttons
+    for (let i = startPage; i <= endPage; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = `page-number ${i === barangCurrentPage ? 'active' : ''}`;
+      pageBtn.textContent = i;
+      pageBtn.dataset.page = i; // Store page number
+      pageBtn.onclick = () => {
+        barangCurrentPage = i;
+        renderBarangDataWithPagination();
+        scrollToTop();
+      };
+      pageNumbers.appendChild(pageBtn);
+    }
+  }
+
+  // Update table stats
+  if (tableStats) {
+    const startItem = (barangCurrentPage - 1) * barangItemsPerPage + 1;
+    const endItem = Math.min(barangCurrentPage * barangItemsPerPage, totalItems);
+    tableStats.textContent = `Menampilkan ${startItem}-${endItem} dari ${totalItems} barang`;
+  }
+}
+
+// Event delegation for pagination buttons
+function setupBarangPaginationEvents() {
+  const tableFooter = document.querySelector('.table-footer');
+  if (!tableFooter) return;
+
+  tableFooter.addEventListener('click', (e) => {
+    const target = e.target;
+
+    if (target.id === 'firstPage' && !target.disabled) {
+      barangCurrentPage = 1;
+      renderBarangDataWithPagination();
+      scrollToTop();
+    } else if (target.id === 'prevPage' && !target.disabled) {
+      if (barangCurrentPage > 1) {
+        barangCurrentPage--;
+        renderBarangDataWithPagination();
+        scrollToTop();
+      }
+    } else if (target.id === 'nextPage' && !target.disabled) {
+      const totalPages = Math.ceil(barangFilteredData.length / barangItemsPerPage);
+      if (barangCurrentPage < totalPages) {
+        barangCurrentPage++;
+        renderBarangDataWithPagination();
+        scrollToTop();
+      }
+    } else if (target.id === 'lastPage' && !target.disabled) {
+      const totalPages = Math.ceil(barangFilteredData.length / barangItemsPerPage);
+      barangCurrentPage = totalPages;
+      renderBarangDataWithPagination();
+      scrollToTop();
+    } else if (target.classList.contains('page-number')) {
+      const page = parseInt(target.dataset.page);
+      if (page && !isNaN(page)) {
+        barangCurrentPage = page;
+        renderBarangDataWithPagination();
+        scrollToTop();
+      }
+    }
+  });
+}
+
+// Helper function to scroll to top of table
+function scrollToTop() {
+  const tableSection = document.querySelector('.table-section');
+  if (tableSection) {
+    tableSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 // Enhanced modal opening with instant response
 function openBarangModal(mode, id = null) {
   // Immediate modal display for instant user feedback
@@ -1054,7 +1603,7 @@ function openBarangModal(mode, id = null) {
   barangFormId = id;
 
   // Show modal instantly
-  modal.style.display = "flex";
+  modal.classList.add("modal-show");
 
   // Prepare form data asynchronously for better perceived performance
   requestAnimationFrame(() => {
@@ -1099,7 +1648,7 @@ function openBarangModal(mode, id = null) {
 
 function closeBarangModal() {
   const modal = $("#modalBarang");
-  if (modal) modal.style.display = "none";
+  if (modal) modal.classList.remove("modal-show");
 }
 
 async function saveBarang() {
@@ -1296,47 +1845,287 @@ function openDeleteBarang(id) {
     $("#deleteNamaBarang").textContent = item ? item.nama : "";
   }
   const modal = $("#modalDeleteBarang");
-  if (modal) modal.style.display = "flex";
+  if (modal) modal.classList.add("modal-show");
 }
 
 function closeDeleteBarang() {
   const modal = $("#modalDeleteBarang");
-  if (modal) modal.style.display = "none";
+  if (modal) modal.classList.remove("modal-show");
   deleteBarangId = null;
 }
 
-async function confirmDeleteBarang() {
-  if (deleteBarangId == null) return;
+// Select Item Modal functions
+let selectItemMode = 'edit'; // 'edit' or 'delete'
 
+function openSelectItemModal(mode) {
+  selectItemMode = mode;
+  const modal = $("#modalSelectItem");
+  const title = $("#selectItemTitle");
+  const quantityGroup = $("#quantityGroup");
+  const quantityLabel = $("#quantityLabel");
+  const confirmBtn = $("#confirmItemBtn");
+
+  if (title) {
+    title.textContent = mode === 'edit' ? 'Pilih Barang untuk Edit' : 'Pilih Barang untuk Hapus';
+  }
+
+  if (quantityGroup) {
+    if (mode === 'delete') {
+      quantityGroup.classList.remove("display-none");
+    } else {
+      quantityGroup.classList.add("display-none");
+    }
+  }
+
+  if (quantityLabel) {
+    quantityLabel.textContent = mode === 'delete' ? 'Jumlah yang akan dihapus' : 'Jumlah';
+  }
+
+  if (confirmBtn) {
+    confirmBtn.textContent = mode === 'edit' ? 'Edit Barang' : 'Hapus Barang';
+  }
+
+  // Load barang options
+  loadBarangOptionsForSelection();
+
+  if (modal) modal.classList.add("modal-show");
+}
+
+function closeSelectItemModal() {
+  const modal = $("#modalSelectItem");
+  if (modal) modal.classList.remove("modal-show");
+  const select = $("#selectItemBarang");
+  const quantity = $("#selectItemQuantity");
+  if (select) select.value = "";
+  if (quantity) quantity.value = "";
+  const quantityGroup = $("#quantityGroup");
+  if (quantityGroup) quantityGroup.classList.add("display-none");
+}
+
+function loadBarangOptionsForSelection() {
+  const select = $("#selectItemBarang");
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Pilih Barang</option>';
+
+  // Use current filtered data or all data
+  const dataToUse = barangFilteredData.length > 0 ? barangFilteredData : barangCache;
+
+  dataToUse.forEach(item => {
+    const option = document.createElement("option");
+    option.value = item.id;
+    option.textContent = `${item.nama} (Stok: ${item.stok})`;
+    select.appendChild(option);
+  });
+}
+
+function onItemSelected() {
+  const select = $("#selectItemBarang");
+  const quantityGroup = $("#quantityGroup");
+
+  if (select && select.value && selectItemMode === 'delete' && quantityGroup) {
+    quantityGroup.classList.remove("display-none");
+  }
+}
+
+function confirmItemSelection() {
+  const select = $("#selectItemBarang");
+  const quantity = $("#selectItemQuantity");
+
+  if (!select || !select.value) {
+    showNotification("Pilih barang terlebih dahulu", "warning");
+    return;
+  }
+
+  const itemId = parseInt(select.value);
+  const item = barangCache.find(b => b.id === itemId);
+
+  if (!item) {
+    showNotification("Barang tidak ditemukan", "error");
+    return;
+  }
+
+  if (selectItemMode === 'edit') {
+    // Open edit modal for selected item
+    openBarangModal('edit', itemId);
+    closeSelectItemModal();
+  } else if (selectItemMode === 'delete') {
+    // Handle delete with quantity
+    const qty = quantity && quantity.value ? parseInt(quantity.value) : null;
+
+    if (qty !== null && qty <= 0) {
+      showNotification("Jumlah harus lebih dari 0", "warning");
+      return;
+    }
+
+    if (qty !== null && qty > item.stok) {
+      showNotification("Jumlah yang akan dihapus melebihi stok tersedia", "warning");
+      return;
+    }
+
+    // Confirm delete
+    const message = qty === null
+      ? `Apakah Anda yakin ingin menghapus semua ${item.nama} (${item.stok} unit)?`
+      : `Apakah Anda yakin ingin menghapus ${qty} unit dari ${item.nama}?`;
+
+    if (confirm(message)) {
+      performDeleteWithQuantity(itemId, qty);
+    }
+}
+}
+
+async function performDeleteWithQuantity(itemId, quantity) {
+  const item = barangCache.find(b => b.id === itemId);
+  if (!item) return;
+
+  showLoading(`Menghapus ${quantity === null ? 'semua' : quantity + ' unit'} ${item.nama}...`);
+
+  try {
+    const backendAvailable = await checkBackendHealth();
+
+    if (backendAvailable) {
+      // If quantity is specified and not all stock, we need to update stock instead of delete
+      if (quantity !== null && quantity < item.stok) {
+        const newStock = item.stok - quantity;
+        const res = await fetch(`${API_BASE}/barang/${itemId}/`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nama: item.nama,
+            stok: newStock,
+            minimum: item.minimum,
+            kategori: item.kategori,
+            harga: 0
+          }),
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          // Update cache
+          const existingIndex = barangCache.findIndex(b => b.id === itemId);
+          if (existingIndex >= 0) {
+            barangCache[existingIndex] = { ...result, _synced: true };
+          }
+          apiCache.set('barang', barangCache);
+          renderBarangData(barangCache);
+          showNotification(`${quantity} unit ${item.nama} berhasil dihapus`, "success");
+        } else {
+          throw new Error("Gagal mengupdate stok");
+        }
+      } else {
+        // Delete entire item
+        const res = await fetch(`${API_BASE}/barang/${itemId}/`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          // Remove from cache
+          const originalIndex = barangCache.findIndex(b => b.id === itemId);
+          barangCache.splice(originalIndex, 1);
+          apiCache.set('barang', barangCache);
+          renderBarangData(barangCache);
+          showNotification(`${item.nama} berhasil dihapus seluruhnya`, "success");
+        } else {
+          throw new Error("Gagal menghapus barang");
+        }
+      }
+    } else {
+      // Offline mode - add to queue
+      if (quantity !== null && quantity < item.stok) {
+        // Partial delete - update stock
+        const newStock = item.stok - quantity;
+        addToOfflineQueue({
+          type: 'update_barang',
+          itemId: itemId,
+          data: { ...item, stok: newStock }
+        });
+      } else {
+        // Full delete
+        addToOfflineQueue({
+          type: 'delete_barang',
+          itemId: itemId,
+          data: item
+        });
+      }
+
+      // Update local cache immediately
+      if (quantity !== null && quantity < item.stok) {
+        const existingIndex = barangCache.findIndex(b => b.id === itemId);
+        if (existingIndex >= 0) {
+          barangCache[existingIndex] = { ...barangCache[existingIndex], stok: item.stok - quantity, _optimistic: true };
+        }
+        removeBarangFromLocal(itemId);
+        saveBarangToLocal(barangCache[existingIndex]);
+      } else {
+        const originalIndex = barangCache.findIndex(b => b.id === itemId);
+        barangCache.splice(originalIndex, 1);
+        removeBarangFromLocal(itemId);
+      }
+
+      renderBarangData(barangCache);
+      showNotification("Perubahan disimpan secara lokal dan akan disinkronkan nanti", "warning");
+    }
+
+    closeSelectItemModal();
+  } catch (error) {
+    console.error("Error deleting item:", error);
+    showNotification(error.message || "Gagal menghapus barang", "error");
+  } finally {
+    hideLoading();
+  }
+}
+
+// Function to confirm delete with detailed notification
+function confirmDeleteBarang(itemId) {
+  // Find the item to delete
+  const item = barangCache.find(b => b.id === itemId);
+  if (!item) {
+    showNotification("Data barang tidak ditemukan", "error");
+    return;
+  }
+
+  // Show confirmation dialog with item details
+  const message = `Apakah Anda yakin ingin menghapus barang berikut?\n\n` +
+                  `Nama Barang: ${item.nama}\n` +
+                  `Jumlah Stok: ${item.stok} unit\n` +
+                  `Status: ${item.stok > (item.minimum || 5) ? 'Tersedia' : item.stok > 0 ? 'Stok Rendah' : 'Habis'}\n\n` +
+                  `Tindakan ini tidak dapat dibatalkan.`;
+
+  if (confirm(message)) {
+    // Proceed with deletion
+    performDeleteBarang(itemId);
+  }
+}
+
+async function performDeleteBarang(itemId) {
   // Find the item to delete for optimistic update
-  const itemToDelete = barangCache.find(b => b.id === deleteBarangId);
+  const itemToDelete = barangCache.find(b => b.id === itemId);
   if (!itemToDelete) {
     showNotification("Data barang tidak ditemukan", "error");
     return;
   }
 
   // Immediate UI feedback for instant perceived response
-  const originalIndex = barangCache.findIndex(b => b.id === deleteBarangId);
+  const originalIndex = barangCache.findIndex(b => b.id === itemId);
   const deletedItem = barangCache.splice(originalIndex, 1)[0];
 
   // Update local storage
-  removeBarangFromLocal(deleteBarangId);
+  removeBarangFromLocal(itemId);
 
   // Update UI immediately - no delay for better UX
   renderBarangData(barangCache);
-  closeDeleteBarang();
 
   // Show immediate success feedback
-  showNotification("Barang berhasil dihapus (menyimpan...)", "success");
+  showNotification(`Barang "${deletedItem.nama}" berhasil dihapus (menyimpan...)`, "success");
 
   // Now try to sync with backend
   const backendAvailable = await checkBackendHealth();
 
   if (backendAvailable) {
     try {
-      console.log("Syncing delete with backend for ID:", deleteBarangId);
+      console.log("Syncing delete with backend for ID:", itemId);
 
-      const res = await fetch(`${API_BASE}/barang/${deleteBarangId}/`, {
+      const res = await apiCall(`${API_BASE}/barang/${itemId}/`, {
         method: "DELETE",
       });
 
@@ -1348,7 +2137,7 @@ async function confirmDeleteBarang() {
         // Update cache
         apiCache.set('barang', barangCache);
 
-        showNotification("Barang berhasil dihapus dan disinkronkan", "success");
+        showNotification(`Barang "${deletedItem.nama}" berhasil dihapus dan disinkronkan`, "success");
 
       } else {
         throw new Error(`HTTP ${res.status}: Gagal menghapus di server`);
@@ -1367,12 +2156,12 @@ async function confirmDeleteBarang() {
       // Add to offline queue for later sync
       addToOfflineQueue({
         type: 'delete_barang',
-        itemId: deleteBarangId,
+        itemId: itemId,
         data: deletedItem // Store the item data in case we need to restore it
       });
 
       showNotification(
-        "Gagal menghapus di server. Item dikembalikan dan akan dicoba lagi nanti.",
+        `Gagal menghapus "${deletedItem.nama}" di server. Item dikembalikan dan akan dicoba lagi nanti.`,
         "error"
       );
     }
@@ -1380,75 +2169,103 @@ async function confirmDeleteBarang() {
     // Backend not available - add to offline queue
     addToOfflineQueue({
       type: 'delete_barang',
-      itemId: deleteBarangId,
+      itemId: itemId,
       data: deletedItem
     });
 
     showNotification(
-      "Server tidak tersedia. Penghapusan disimpan secara lokal dan akan disinkronkan nanti.",
+      `Server tidak tersedia. Penghapusan "${deletedItem.nama}" disimpan secara lokal dan akan disinkronkan nanti.`,
       "warning"
     );
   }
 }
 
-// Optimized search function with better performance
-const debouncedBarangFilter = debounce(() => {
-  const input = document.getElementById("searchBarang");
-  const tbody = document.querySelector("#tabelBarang tbody");
-  if (!input || !tbody) return;
+async function confirmDeleteBarang() {
+  if (deleteBarangId == null) return;
 
-  const query = input.value.toLowerCase().trim();
-  const rows = tbody.rows;
-
-  // Use requestAnimationFrame for smoother filtering
-  requestAnimationFrame(() => {
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      const nama = (row.getAttribute("data-nama") || "").toLowerCase();
-      row.style.display = nama.includes(query) ? "" : "none";
-    }
-  });
-}, 150); // Reduced debounce time for better responsiveness
-
-function applyBarangFilter() {
-  debouncedBarangFilter();
+  // Use the new function
+  confirmDeleteBarang(deleteBarangId);
+  closeDeleteBarang();
 }
+
 
 
 // ============================
 // FEEDBACK
 // ============================
 
-async function loadFeedback() {
+// Helper function to wait for sample data
+function waitForSampleData(maxWait = 5000) {
+  return new Promise((resolve) => {
+    const checkData = () => {
+      if (window.sampleFeedback && Array.isArray(window.sampleFeedback)) {
+        resolve(true);
+      } else if (maxWait <= 0) {
+        console.warn('Timeout waiting for sample data');
+        resolve(false);
+      } else {
+        maxWait -= 100;
+        setTimeout(checkData, 100);
+      }
+    };
+    checkData();
+  });
+}
+
+// Make loadFeedback globally available
+window.loadFeedback = async function() {
+  console.log('🔄 loadFeedback function called');
+
   const tableBody = document.querySelector("#tabelFeedback tbody");
   console.log('🔄 Loading feedback, table body found:', !!tableBody);
   if (!tableBody) {
     console.error('❌ Feedback table body #tabelFeedback tbody not found');
+    console.log('Available elements:', document.querySelectorAll('[id*="Feedback"]'));
     return;
   }
 
   console.log('✅ Loading feedback...');
 
-  // Display sample feedback immediately for better UX
-  tableBody.innerHTML = "";
-  window.sampleFeedback.forEach((f) => {
-    const namaUser = f.user_nama || "Unknown";
-    const tanggal = f.tanggal ? new Date(f.tanggal).toLocaleString("id-ID") : "-";
+  // Wait for sample data to be available
+  console.log('⏳ Waiting for sample feedback data...');
+  const sampleDataAvailable = await waitForSampleData();
+  console.log('Sample data available:', sampleDataAvailable);
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${namaUser}</td>
-      <td>${f.pesan}</td>
-      <td>${tanggal}</td>
-    `;
-    tableBody.appendChild(tr);
-  });
-  console.log('✅ Sample feedback displayed immediately');
+  // Display feedback data
+  tableBody.innerHTML = "";
+  console.log('Sample feedback data available:', !!window.sampleFeedback);
+  console.log('Sample feedback is array:', Array.isArray(window.sampleFeedback));
+  console.log('Sample feedback length:', window.sampleFeedback?.length);
+
+  // Always try to display sample data first, even if empty
+  const feedbackData = window.sampleFeedback && Array.isArray(window.sampleFeedback) ? window.sampleFeedback : [];
+  console.log('Using feedback data:', feedbackData.length, 'items');
+
+  if (feedbackData.length > 0) {
+    feedbackData.forEach((f, index) => {
+      console.log(`Processing feedback ${index}:`, f);
+      const namaUser = f.user_nama || "Unknown";
+      const tanggal = f.tanggal ? new Date(f.tanggal).toLocaleString("id-ID") : "-";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${namaUser}</td>
+        <td>${f.pesan}</td>
+        <td>${tanggal}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+    console.log('✅ Sample feedback displayed immediately');
+  } else {
+    console.warn('⚠️ No sample feedback data available, showing empty state');
+    tableBody.innerHTML = '<tr><td colspan="3" style="color: #6b7280; text-align: center; padding: 40px;">Belum ada feedback dari pengguna</td></tr>';
+  }
 
   // Try to load real feedback from backend in background
   try {
+    console.log('🔄 Attempting to load real feedback from API...');
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // Increased timeout
 
     const res = await fetch(`${API_BASE}/feedback/`, {
       method: 'GET',
@@ -1461,37 +2278,46 @@ async function loadFeedback() {
     });
 
     clearTimeout(timeoutId);
+    console.log('API response status:', res.status);
 
     if (res.ok) {
       const data = await res.json();
-      console.log('Feedback API response:', data);
+      console.log('Feedback API response data:', data);
 
-      if (Array.isArray(data) && data.length > 0) {
-        console.log('Real feedback loaded, replacing sample data:', data.length, 'records');
-        tableBody.innerHTML = "";
-        data.forEach((f) => {
-          const namaUser = f.user_nama || f.user || "Unknown";
-          const tanggal = f.tanggal ? new Date(f.tanggal).toLocaleString("id-ID") : "-";
+      if (Array.isArray(data)) {
+        if (data.length > 0) {
+          console.log('Real feedback loaded, replacing sample data:', data.length, 'records');
+          tableBody.innerHTML = "";
+          data.forEach((f) => {
+            const namaUser = f.user_nama || f.user || "Unknown";
+            const tanggal = f.tanggal ? new Date(f.tanggal).toLocaleString("id-ID") : "-";
 
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${namaUser}</td>
-            <td>${f.pesan || '-'}</td>
-            <td>${tanggal}</td>
-          `;
-          tableBody.appendChild(tr);
-        });
-        showNotification(`Berhasil memuat ${data.length} feedback dari database`, "success");
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${namaUser}</td>
+              <td>${f.pesan || '-'}</td>
+              <td>${tanggal}</td>
+            `;
+            tableBody.appendChild(tr);
+          });
+          showNotification(`Berhasil memuat ${data.length} feedback dari database`, "success");
+        } else {
+          console.log('API returned empty array, keeping sample data');
+          showNotification("Database kosong, menampilkan data sample", "info");
+        }
       } else {
-        console.log('API returned empty data, keeping sample data');
-        showNotification("Database kosong, menampilkan data sample", "info");
+        console.warn('API returned non-array data:', typeof data, data);
+        showNotification("Format data feedback tidak valid", "warning");
       }
     } else {
       console.warn('Feedback API request failed:', res.status, res.statusText);
       showNotification("Backend tidak tersedia, menampilkan data sample", "warning");
     }
   } catch (err) {
-    console.error('Error loading real feedback, keeping sample data:', err.message);
+    console.error('Error loading real feedback:', err.message);
+    if (err.name === 'AbortError') {
+      console.log('API request timed out');
+    }
     showNotification("Menggunakan data sample - backend tidak dapat diakses", "info");
   }
 }
@@ -1649,8 +2475,8 @@ async function loadTransaksi(searchTerm = '', filterTipe = '') {
       data = window.sampleTransaksi;
     }
 
-    // Apply filters
-    let filteredData = data;
+    // Apply filters - exclude pending items from history (they belong in verification page)
+    let filteredData = data.filter(t => t.status !== 'pending');
     if (searchTerm) {
       filteredData = filteredData.filter(t =>
         (t.barang_nama || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1764,60 +2590,12 @@ async function loadTransaksi(searchTerm = '', filterTipe = '') {
     if ($("#totalMasuk")) $("#totalMasuk").textContent = totalMasuk;
     if ($("#totalKeluar")) $("#totalKeluar").textContent = totalKeluar;
 
-    // Create table
-    if (filteredData.length === 0) {
-      container.innerHTML = '<div class="no-data">Tidak ada data transaksi ditemukan</div>';
-      hideLoading();
-      return;
-    }
+    // Store filtered data for pagination
+    transaksiFilteredData = filteredData;
+    transaksiCache = filteredData;
 
-    const table = document.createElement('table');
-    table.className = 'data-table';
-
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Tanggal</th>
-          <th>Barang</th>
-          <th>Tipe</th>
-          <th>Jumlah</th>
-          <th>User</th>
-          <th>Catatan</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    `;
-
-    const tbody = table.querySelector('tbody');
-
-    filteredData.forEach((t) => {
-      const id = t.id || "-";
-      const tanggal = t.tanggal ? formatDate(t.tanggal) : "-";
-      const item = t.barang_nama || "-";
-      const tipe = t.tipe || "-";
-      const jumlah = Number(t.jumlah ?? 0);
-      const user = t.user_nama || "System";
-      const catatan = t.catatan || "-";
-
-      const statusClass = tipe === 'masuk' ? 'status-masuk' : 'status-keluar';
-      const statusText = tipe.charAt(0).toUpperCase() + tipe.slice(1);
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${id}</td>
-        <td>${tanggal}</td>
-        <td>${item}</td>
-        <td><span class="status ${statusClass}">${statusText}</span></td>
-        <td>${jumlah}</td>
-        <td>${user}</td>
-        <td>${catatan}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    container.innerHTML = '';
-    container.appendChild(table);
+    // Create table with pagination
+    renderTransaksiDataWithPagination();
 
     hideLoading();
   }
@@ -1891,11 +2669,11 @@ async function saveTransaksi() {
     const res = await fetch(`${API_BASE}/barang/${barangId}/update_stok/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        jumlah: Number(jumlah), 
-        tipe, 
-        catatan, 
-        user_id: currentUser?.id 
+      body: JSON.stringify({
+        jumlah: Number(jumlah),
+        tipe,
+        catatan,
+        user_id: currentUser?.id
       }),
     });
 
@@ -1910,11 +2688,138 @@ async function saveTransaksi() {
   }
 }
 
+// Render transaksi data with pagination
+function renderTransaksiDataWithPagination() {
+  const container = document.getElementById('riwayat-transaksi-container');
+  if (!container) return;
+
+  const filteredData = transaksiFilteredData;
+
+  // Calculate pagination
+  const totalItems = filteredData.length;
+  const totalPages = Math.ceil(totalItems / transaksiItemsPerPage);
+  const startIndex = (transaksiCurrentPage - 1) * transaksiItemsPerPage;
+  const endIndex = startIndex + transaksiItemsPerPage;
+  const pageData = filteredData.slice(startIndex, endIndex);
+
+  // Calculate totals for current page
+  let totalMasuk = 0;
+  let totalKeluar = 0;
+
+  pageData.forEach((t) => {
+    const jumlah = Number(t.jumlah ?? 0);
+    if (t.tipe === "masuk") totalMasuk += jumlah;
+    else if (t.tipe === "keluar") totalKeluar += jumlah;
+  });
+
+  // Update counters
+  if ($("#totalMasuk")) $("#totalMasuk").textContent = totalMasuk;
+  if ($("#totalKeluar")) $("#totalKeluar").textContent = totalKeluar;
+
+  // Create table
+  if (pageData.length === 0) {
+    container.innerHTML = '<div class="no-data">Tidak ada data transaksi ditemukan</div>';
+    return;
+  }
+
+  const table = document.createElement('table');
+  table.className = 'data-table';
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tanggal</th>
+        <th>Barang</th>
+        <th>Tipe</th>
+        <th>Jumlah</th>
+        <th>User</th>
+        <th>Catatan</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector('tbody');
+
+  pageData.forEach((t) => {
+    const id = t.id || "-";
+    const tanggal = t.tanggal ? formatDate(t.tanggal) : "-";
+    const item = t.barang_nama || "-";
+    const tipe = t.tipe || "-";
+    const jumlah = Number(t.jumlah ?? 0);
+    const user = t.user_nama || "System";
+    const catatan = t.catatan || "-";
+
+    const statusClass = tipe === 'masuk' ? 'status-masuk' : 'status-keluar';
+    const statusText = tipe.charAt(0).toUpperCase() + tipe.slice(1);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${id}</td>
+      <td>${tanggal}</td>
+      <td>${item}</td>
+      <td><span class="status ${statusClass}">${statusText}</span></td>
+      <td>${jumlah}</td>
+      <td>${user}</td>
+      <td>${catatan}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  container.innerHTML = '';
+  container.appendChild(table);
+
+  // Add pagination controls
+  if (totalPages > 1) {
+    const paginationDiv = document.createElement('div');
+    paginationDiv.className = 'pagination-controls';
+    paginationDiv.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; padding: 10px;';
+
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '‹ Previous';
+    prevBtn.disabled = transaksiCurrentPage === 1;
+    prevBtn.onclick = () => {
+      if (transaksiCurrentPage > 1) {
+        transaksiCurrentPage--;
+        renderTransaksiDataWithPagination();
+      }
+    };
+    prevBtn.style.cssText = 'padding: 8px 16px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 4px;';
+    if (prevBtn.disabled) prevBtn.style.opacity = '0.5';
+
+    // Page info
+    const pageInfo = document.createElement('span');
+    pageInfo.textContent = `Halaman ${transaksiCurrentPage} dari ${totalPages}`;
+    pageInfo.style.cssText = 'margin: 0 10px;';
+
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next ›';
+    nextBtn.disabled = transaksiCurrentPage === totalPages;
+    nextBtn.onclick = () => {
+      if (transaksiCurrentPage < totalPages) {
+        transaksiCurrentPage++;
+        renderTransaksiDataWithPagination();
+      }
+    };
+    nextBtn.style.cssText = 'padding: 8px 16px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 4px;';
+    if (nextBtn.disabled) nextBtn.style.opacity = '0.5';
+
+    paginationDiv.appendChild(prevBtn);
+    paginationDiv.appendChild(pageInfo);
+    paginationDiv.appendChild(nextBtn);
+
+    container.appendChild(paginationDiv);
+  }
+}
+
 // ============================
 // PROFIL
 // ============================
 
-let isEditMode = false;
+var isEditMode = false;
 
 function loadProfil() {
   if (!$("#profileNama")) return;
@@ -1933,8 +2838,8 @@ function loadProfil() {
   }
 }
 
-// Load profil lengkap dengan semua field
-function loadProfilFull() {
+// Make functions globally available
+window.loadProfilFull = function() {
   const currentUser = getCurrentUser();
   if (!currentUser) return;
 
@@ -1975,37 +2880,40 @@ function getInitials(name) {
   return name.substring(0, 2).toUpperCase();
 }
 
-function toggleEditMode() {
+// Make profile functions globally available
+window.toggleEditMode = function() {
   isEditMode = !isEditMode;
   const inputs = document.querySelectorAll('.profile-form input');
   const saveButtons = $("#saveButtons");
-  
+
   inputs.forEach(input => {
     input.disabled = !isEditMode;
   });
-  
+
   if (saveButtons) {
     saveButtons.style.display = isEditMode ? 'block' : 'none';
   }
 }
 
-function cancelEdit() {
+// Make cancelEdit globally available
+window.cancelEdit = function() {
   isEditMode = false;
   const inputs = document.querySelectorAll('.profile-form input');
   const saveButtons = $("#saveButtons");
-  
+
   inputs.forEach(input => {
     input.disabled = true;
   });
-  
+
   if (saveButtons) {
     saveButtons.style.display = 'none';
   }
-  
+
   loadProfilFull(); // Reset values
 }
 
-async function saveProfil() {
+// Make saveProfil globally available
+window.saveProfil = async function() {
   const currentUser = getCurrentUser();
   if (!currentUser) return;
 
@@ -2039,19 +2947,19 @@ async function saveProfil() {
   }
 }
 
-// Preview and upload photo
-function previewPhoto(input) {
+// Make previewPhoto globally available
+window.previewPhoto = function(input) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
     reader.onload = async function(e) {
       const base64 = e.target.result;
-      
+
       // Update preview
       const photoEl = $("#profilePhoto");
       if (photoEl) {
         photoEl.src = base64;
       }
-      
+
       // Save to server
       await uploadPhoto(base64);
     };
@@ -2083,7 +2991,8 @@ async function uploadPhoto(base64) {
   }
 }
 
-async function changePassword() {
+// Make changePassword globally available
+window.changePassword = async function() {
   const currentUser = getCurrentUser();
   if (!currentUser) return;
 
@@ -2110,9 +3019,9 @@ async function changePassword() {
     const res = await fetch(`${API_BASE}/users/${currentUser.id}/change_password/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        old_password: oldPassword, 
-        new_password: newPassword 
+      body: JSON.stringify({
+        old_password: oldPassword,
+        new_password: newPassword
       }),
     });
 
@@ -2133,7 +3042,46 @@ async function changePassword() {
   }
 }
 
-function logout() {
+// Make adminLogout function globally available
+window.adminLogout = async function() {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/admin/logout/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Clear admin session
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('admin_data');
+      sessionStorage.clear();
+
+      // Clear welcome notification flags
+      const currentUser = getCurrentUser();
+      if (currentUser) {
+        localStorage.removeItem(`welcome_shown_${currentUser.id}`);
+        localStorage.removeItem(`welcome_shown_admin_${currentUser.id}`);
+      }
+
+      clearCurrentUser();
+
+      // Redirect to login
+      window.location.href = 'admin-login.html';
+    } else {
+      alert('Logout failed: ' + data.message);
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+    alert('Network error during logout');
+  }
+}
+
+// Make logout function globally available
+window.logout = function() {
   const currentUser = getCurrentUser();
 
   // Clear welcome notification flags
@@ -2146,12 +3094,8 @@ function logout() {
   localStorage.removeItem("profileNama");
   localStorage.removeItem("profileEmail");
 
-  // Redirect based on user role
-  if (currentUser && currentUser.role === 'admin') {
-    window.location.href = "admin-login.html";
-  } else {
-    window.location.href = "index.html";
-  }
+  // Redirect to index.html for all users
+  window.location.replace("index.html");
 }
 
 // ============================
@@ -2229,8 +3173,8 @@ function applyBarangUserFilter() {
   });
 }
 
-let pinjamBarangId = null;
-let pinjamBarangStok = 0;
+var pinjamBarangId = null;
+var pinjamBarangStok = 0;
 
 function openPinjamModal(id, nama, stok) {
   pinjamBarangId = id;
@@ -2289,7 +3233,9 @@ window.konfirmasiPinjam = async function() {
         barang: pinjamBarangId,
         user: currentUser.id,
         jumlah: jumlah,
-        catatan: catatan || ""
+        catatan: catatan || "",
+        alasan_peminjaman: catatan || "",
+        status: "pending" // Request admin approval
       }),
     });
 
@@ -2328,7 +3274,7 @@ window.konfirmasiPinjam = async function() {
       await loadPeminjamanUser();
     }
 
-    showNotification("Peminjaman berhasil! Cek riwayat peminjaman Anda.", "success");
+    showNotification("Permintaan peminjaman telah diajukan. Menunggu persetujuan admin.", "success");
   } catch (err) {
     console.error("Error in konfirmasiPinjam:", err);
     hideLoading();
@@ -2368,11 +3314,6 @@ window.loadPeminjamanUser = async function() {
     const data = await res.json();
     console.log(`Loaded ${data.length} peminjaman records for user ${currentUser.id}`, data);
 
-    tableBody.innerHTML = "";
-
-    let totalDipinjam = 0;
-    let totalDikembalikan = 0;
-
     // Sort by date (newest first)
     data.sort((a, b) => {
       const dateA = new Date(a.tanggal_pinjam || 0);
@@ -2380,44 +3321,11 @@ window.loadPeminjamanUser = async function() {
       return dateB - dateA;
     });
 
-    data.forEach((p) => {
-      const statusText = p.status === 'dipinjam' ? 'Dipinjam' : 'Dikembalikan';
-      const statusClass = p.status === 'dipinjam' ? 'yellow' : 'green';
-      const tanggal = p.tanggal_pinjam ? new Date(p.tanggal_pinjam).toLocaleString("id-ID") : "-";
+    // Store filtered data for pagination
+    peminjamanUserFilteredData = data;
 
-      if (p.status === 'dipinjam') totalDipinjam++;
-      else totalDikembalikan++;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${p.id}</td>
-        <td>${tanggal}</td>
-        <td>${p.barang_nama || p.barang || '-'}</td>
-        <td>${p.jumlah}</td>
-        <td><span class="status ${statusClass}">${statusText}</span></td>
-        <td>${p.catatan || '-'}</td>
-        <td>
-          ${p.status === 'dipinjam' ? `<button class="btn-green" onclick="kembalikanBarang(${p.id})">Kembalikan</button>` : '<span class="text-muted">Sudah dikembalikan</span>'}
-        </td>
-      `;
-      tableBody.appendChild(tr);
-    });
-
-    // Update counters
-    const totalDipinjamEl = $("#totalDipinjam");
-    const totalDikembalikanEl = $("#totalDikembalikan");
-
-    if (totalDipinjamEl) totalDipinjamEl.textContent = totalDipinjam;
-    if (totalDikembalikanEl) totalDikembalikanEl.textContent = totalDikembalikan;
-
-    console.log(`Updated peminjaman display: ${totalDipinjam} dipinjam, ${totalDikembalikan} dikembalikan`);
-
-    // Show message if no records
-    if (data.length === 0) {
-      const emptyRow = document.createElement("tr");
-      emptyRow.innerHTML = `<td colspan="7" style="text-align: center; color: #6b7280; padding: 40px;">Belum ada riwayat peminjaman</td>`;
-      tableBody.appendChild(emptyRow);
-    }
+    // Render with pagination
+    renderPeminjamanUserWithPagination();
 
   } catch (err) {
     console.error("Error loading peminjaman user:", err);
@@ -2434,6 +3342,196 @@ window.loadPeminjamanUser = async function() {
     tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 40px;">Gagal memuat data peminjaman</td></tr>`;
   }
 };
+
+// Render peminjaman user data with pagination
+function renderPeminjamanUserWithPagination() {
+  const tableBody = document.querySelector("#tabelPeminjamanUser tbody");
+  if (!tableBody) return;
+
+  // Calculate pagination
+  const totalItems = peminjamanUserFilteredData.length;
+  const totalPages = Math.ceil(totalItems / peminjamanUserItemsPerPage);
+  const startIndex = (peminjamanUserCurrentPage - 1) * peminjamanUserItemsPerPage;
+  const endIndex = startIndex + peminjamanUserItemsPerPage;
+  const pageData = peminjamanUserFilteredData.slice(startIndex, endIndex);
+
+  tableBody.innerHTML = "";
+
+  let totalPending = 0;
+  let totalApproved = 0;
+  let totalDipinjam = 0;
+  let totalDikembalikan = 0;
+  let totalRejected = 0;
+
+  pageData.forEach((p) => {
+    let statusText = '';
+    let statusClass = '';
+    let actionButton = '';
+
+    if (p.status === 'pending_approval') {
+      statusText = 'Menunggu Persetujuan';
+      statusClass = 'blue';
+      actionButton = '<span class="text-muted">Menunggu approval admin</span>';
+      totalPending++;
+    } else if (p.status === 'dipinjam') {
+      statusText = 'Dipinjam';
+      statusClass = 'yellow';
+      actionButton = `<button class="btn-green" onclick="kembalikanBarang(${p.id})">Kembalikan</button>`;
+      totalDipinjam++;
+    } else if (p.status === 'dikembalikan') {
+      statusText = 'Dikembalikan';
+      statusClass = 'green';
+      actionButton = '<span class="text-muted">Sudah dikembalikan</span>';
+      totalDikembalikan++;
+    } else if (p.status === 'cancelled') {
+      statusText = 'Dibatalkan';
+      statusClass = 'red';
+      actionButton = '<span class="text-muted">Permintaan ditolak</span>';
+      totalRejected++;
+    }
+
+    const tanggal = p.tanggal_pinjam ? new Date(p.tanggal_pinjam).toLocaleString("id-ID") : "-";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.id}</td>
+      <td>${tanggal}</td>
+      <td>${p.barang_nama || p.barang || '-'}</td>
+      <td>${p.jumlah}</td>
+      <td><span class="status ${statusClass}">${statusText}</span></td>
+      <td>${p.catatan || '-'}</td>
+      <td>${actionButton}</td>
+    `;
+    tableBody.appendChild(tr);
+  });
+
+  // Update counters
+  const totalDipinjamEl = $("#totalDipinjam");
+  const totalDikembalikanEl = $("#totalDikembalikan");
+
+  if (totalDipinjamEl) totalDipinjamEl.textContent = totalDipinjam;
+  if (totalDikembalikanEl) totalDikembalikanEl.textContent = totalDikembalikan;
+
+  console.log(`Updated peminjaman display: ${totalDipinjam} dipinjam, ${totalDikembalikan} dikembalikan`);
+
+  // Show message if no records
+  if (peminjamanUserFilteredData.length === 0) {
+    const emptyRow = document.createElement("tr");
+    emptyRow.innerHTML = `<td colspan="7" style="text-align: center; color: #6b7280; padding: 40px;">Belum ada riwayat peminjaman</td>`;
+    tableBody.appendChild(emptyRow);
+  }
+
+  // Add pagination controls if needed
+  updatePeminjamanUserPagination(totalPages, totalItems);
+}
+
+// Update peminjaman user pagination controls
+function updatePeminjamanUserPagination(totalPages, totalItems) {
+  // Remove existing pagination
+  const existingPagination = document.querySelector('.peminjaman-user-pagination');
+  if (existingPagination) existingPagination.remove();
+
+  if (totalPages <= 1) return;
+
+  const tableContainer = document.querySelector("#tabelPeminjamanUser").parentElement;
+  if (!tableContainer) return;
+
+  const paginationDiv = document.createElement('div');
+  paginationDiv.className = 'peminjaman-user-pagination';
+  paginationDiv.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; padding: 10px;';
+
+  // Previous button
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = '‹ Previous';
+  prevBtn.disabled = peminjamanUserCurrentPage === 1;
+  prevBtn.onclick = () => {
+    if (peminjamanUserCurrentPage > 1) {
+      peminjamanUserCurrentPage--;
+      renderPeminjamanUserWithPagination();
+    }
+  };
+  prevBtn.style.cssText = 'padding: 8px 16px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 4px;';
+  if (prevBtn.disabled) prevBtn.style.opacity = '0.5';
+
+  // Page info
+  const pageInfo = document.createElement('span');
+  pageInfo.textContent = `Halaman ${peminjamanUserCurrentPage} dari ${totalPages}`;
+  pageInfo.style.cssText = 'margin: 0 10px;';
+
+  // Next button
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next ›';
+  nextBtn.disabled = peminjamanUserCurrentPage === totalPages;
+  nextBtn.onclick = () => {
+    if (peminjamanUserCurrentPage < totalPages) {
+      peminjamanUserCurrentPage++;
+      renderPeminjamanUserWithPagination();
+    }
+  };
+  nextBtn.style.cssText = 'padding: 8px 16px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 4px;';
+  if (nextBtn.disabled) nextBtn.style.opacity = '0.5';
+
+  paginationDiv.appendChild(prevBtn);
+  paginationDiv.appendChild(pageInfo);
+  paginationDiv.appendChild(nextBtn);
+
+  tableContainer.appendChild(paginationDiv);
+}
+
+async function ambilBarang(peminjamanId) {
+  if (!confirm("Konfirmasi pengambilan barang? Status akan berubah menjadi 'Dipinjam'.")) return;
+
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    showNotification("Silakan login terlebih dahulu", "error");
+    return;
+  }
+
+  try {
+    showLoading("Memproses pengambilan barang...");
+
+    // First check if the peminjaman is approved
+    const checkRes = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/`);
+    if (!checkRes.ok) {
+      throw new Error("Gagal memeriksa status peminjaman");
+    }
+
+    const peminjamanData = await checkRes.json();
+    if (peminjamanData.status !== 'approved') {
+      throw new Error("Peminjaman belum disetujui admin. Silakan tunggu approval terlebih dahulu.");
+    }
+
+    const res = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/ambil/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: currentUser.id })
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Gagal mengambil barang");
+    }
+
+    const result = await res.json();
+    console.log("Pengambilan berhasil:", result);
+
+    hideLoading();
+
+    // Refresh peminjaman history
+    await loadPeminjamanUser();
+
+    // Also refresh barang list to show updated stock
+    if (typeof loadBarangUser === 'function') {
+      await loadBarangUser();
+    }
+
+    showNotification("Barang berhasil diambil!", "success");
+  } catch (err) {
+    console.error("Error in ambilBarang:", err);
+    hideLoading();
+    showNotification(err.message || "Gagal mengambil barang", "error");
+  }
+}
 
 async function kembalikanBarang(peminjamanId) {
   if (!confirm("Yakin ingin mengembalikan barang ini?")) return;
@@ -2483,6 +3581,16 @@ async function kembalikanBarang(peminjamanId) {
 // ============================
 
 let peminjamanCache = [];
+
+// Peminjaman admin pagination
+var peminjamanAdminCurrentPage = 1;
+var peminjamanAdminItemsPerPage = 10;
+var peminjamanAdminFilteredData = [];
+
+// Peminjaman user pagination
+var peminjamanUserCurrentPage = 1;
+var peminjamanUserItemsPerPage = 10;
+var peminjamanUserFilteredData = [];
 
 async function loadPeminjamanAdmin() {
   const tableBody = document.querySelector("#tabelPeminjamanAdmin tbody");
@@ -2567,49 +3675,8 @@ async function loadPeminjamanAdmin() {
         console.log('Real data loaded, replacing sample data:', data.length, 'records');
 
         peminjamanCache = data;
-        tableBody.innerHTML = "";
-
-        let totalDipinjam = 0;
-        let totalDikembalikan = 0;
-
-        data.forEach((p) => {
-          const statusText = p.status === 'dipinjam' ? 'Dipinjam' : 'Dikembalikan';
-          const statusClass = p.status === 'dipinjam' ? 'yellow' : 'green';
-          const tanggalPinjam = p.tanggal_pinjam ? new Date(p.tanggal_pinjam).toLocaleString("id-ID") : "-";
-          const tanggalKembali = p.tanggal_kembali ? new Date(p.tanggal_kembali).toLocaleString("id-ID") : "-";
-
-          if (p.status === 'dipinjam') totalDipinjam++;
-          else totalDikembalikan++;
-
-          const userName = p.user_nama || p.user_name || p.user || '-';
-          const barangName = p.barang_nama || p.barang_name || p.barang || '-';
-
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${p.id || '-'}</td>
-            <td>${tanggalPinjam}</td>
-            <td>${userName}</td>
-            <td>${barangName}</td>
-            <td>${p.jumlah || 0}</td>
-            <td><span class="status ${statusClass}">${statusText}</span></td>
-            <td>${tanggalKembali}</td>
-            <td>${p.catatan || '-'}</td>
-            <td>
-              <button class="icon-btn" style="border:none; background:none; cursor:pointer;" onclick="openEditPeminjamanModal(${p.id})" title="Edit peminjaman">✏️</button>
-              <button class="icon-btn" style="border:none; background:none; cursor:pointer; color: #ef4444;" onclick="deletePeminjamanAdmin(${p.id})" title="Hapus peminjaman">🗑️</button>
-            </td>
-          `;
-          tableBody.appendChild(tr);
-        });
-
-        // Update counters
-        const totalDipinjamEl = $("#totalDipinjamAdmin");
-        const totalDikembalikanEl = $("#totalDikembalikanAdmin");
-
-        if (totalDipinjamEl) totalDipinjamEl.textContent = totalDipinjam;
-        if (totalDikembalikanEl) totalDikembalikanEl.textContent = totalDikembalikan;
-
-        console.log(`Real peminjaman data loaded: ${totalDipinjam} dipinjam, ${totalDikembalikan} dikembalikan`);
+        peminjamanAdminFilteredData = data;
+        renderPeminjamanAdminWithPagination();
       } else {
         console.log('API returned empty data, keeping sample data');
       }
@@ -2620,6 +3687,144 @@ async function loadPeminjamanAdmin() {
     console.error("Error loading peminjaman admin:", err);
     // Keep sample data on error
   }
+}
+
+// Render peminjaman admin data with pagination
+function renderPeminjamanAdminWithPagination() {
+  const tableBody = document.querySelector("#tabelPeminjamanAdmin tbody");
+  if (!tableBody) return;
+
+  // Calculate pagination
+  const totalItems = peminjamanAdminFilteredData.length;
+  const totalPages = Math.ceil(totalItems / peminjamanAdminItemsPerPage);
+  const startIndex = (peminjamanAdminCurrentPage - 1) * peminjamanAdminItemsPerPage;
+  const endIndex = startIndex + peminjamanAdminItemsPerPage;
+  const pageData = peminjamanAdminFilteredData.slice(startIndex, endIndex);
+
+  tableBody.innerHTML = "";
+
+  let totalDipinjam = 0;
+  let totalDikembalikan = 0;
+
+  pageData.forEach((p) => {
+    let statusText = '';
+    let statusClass = '';
+    let actionButtons = '';
+
+    if (p.status === 'pending_approval') {
+      statusText = 'Menunggu Persetujuan';
+      statusClass = 'blue';
+      actionButtons = `
+        <button class="btn-green" onclick="approvePeminjaman(${p.id})" title="Setujui peminjaman">✅ Setujui</button>
+        <button class="btn-red" onclick="rejectPeminjaman(${p.id})" title="Tolak peminjaman">❌ Tolak</button>
+      `;
+    } else if (p.status === 'dipinjam') {
+      statusText = 'Dipinjam';
+      statusClass = 'yellow';
+      actionButtons = `
+        <button class="icon-btn" style="border:none; background:none; cursor:pointer;" onclick="openEditPeminjamanModal(${p.id})" title="Edit peminjaman">✏️</button>
+        <button class="icon-btn" style="border:none; background:none; cursor:pointer; color: #ef4444;" onclick="deletePeminjamanAdmin(${p.id})" title="Hapus peminjaman">🗑️</button>
+      `;
+      totalDipinjam++;
+    } else if (p.status === 'dikembalikan') {
+      statusText = 'Dikembalikan';
+      statusClass = 'green';
+      actionButtons = `
+        <button class="icon-btn" style="border:none; background:none; cursor:pointer;" onclick="openEditPeminjamanModal(${p.id})" title="Edit peminjaman">✏️</button>
+        <button class="icon-btn" style="border:none; background:none; cursor:pointer; color: #ef4444;" onclick="deletePeminjamanAdmin(${p.id})" title="Hapus peminjaman">🗑️</button>
+      `;
+      totalDikembalikan++;
+    } else if (p.status === 'cancelled') {
+      statusText = 'Dibatalkan';
+      statusClass = 'red';
+      actionButtons = `
+        <button class="icon-btn" style="border:none; background:none; cursor:pointer; color: #ef4444;" onclick="deletePeminjamanAdmin(${p.id})" title="Hapus peminjaman">🗑️</button>
+      `;
+    }
+
+    const tanggalPinjam = p.tanggal_pinjam ? new Date(p.tanggal_pinjam).toLocaleString("id-ID") : "-";
+    const tanggalKembali = p.tanggal_kembali ? new Date(p.tanggal_kembali).toLocaleString("id-ID") : "-";
+
+    const userName = p.user_nama || p.user_name || p.user || '-';
+    const barangName = p.barang_nama || p.barang_name || p.barang || '-';
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.id || '-'}</td>
+      <td>${tanggalPinjam}</td>
+      <td>${userName}</td>
+      <td>${barangName}</td>
+      <td>${p.jumlah || 0}</td>
+      <td><span class="status ${statusClass}">${statusText}</span></td>
+      <td>${tanggalKembali}</td>
+      <td>${p.catatan || '-'}</td>
+      <td>${actionButtons}</td>
+    `;
+    tableBody.appendChild(tr);
+  });
+
+  // Update counters
+  const totalDipinjamEl = $("#totalDipinjamAdmin");
+  const totalDikembalikanEl = $("#totalDikembalikanAdmin");
+
+  if (totalDipinjamEl) totalDipinjamEl.textContent = totalDipinjam;
+  if (totalDikembalikanEl) totalDikembalikanEl.textContent = totalDikembalikan;
+
+  // Add pagination controls if needed
+  updatePeminjamanAdminPagination(totalPages, totalItems);
+}
+
+// Update peminjaman admin pagination controls
+function updatePeminjamanAdminPagination(totalPages, totalItems) {
+  // Remove existing pagination
+  const existingPagination = document.querySelector('.peminjaman-admin-pagination');
+  if (existingPagination) existingPagination.remove();
+
+  if (totalPages <= 1) return;
+
+  const tableContainer = document.querySelector("#tabelPeminjamanAdmin").parentElement;
+  if (!tableContainer) return;
+
+  const paginationDiv = document.createElement('div');
+  paginationDiv.className = 'peminjaman-admin-pagination';
+  paginationDiv.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; padding: 10px;';
+
+  // Previous button
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = '‹ Previous';
+  prevBtn.disabled = peminjamanAdminCurrentPage === 1;
+  prevBtn.onclick = () => {
+    if (peminjamanAdminCurrentPage > 1) {
+      peminjamanAdminCurrentPage--;
+      renderPeminjamanAdminWithPagination();
+    }
+  };
+  prevBtn.style.cssText = 'padding: 8px 16px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 4px;';
+  if (prevBtn.disabled) prevBtn.style.opacity = '0.5';
+
+  // Page info
+  const pageInfo = document.createElement('span');
+  pageInfo.textContent = `Halaman ${peminjamanAdminCurrentPage} dari ${totalPages}`;
+  pageInfo.style.cssText = 'margin: 0 10px;';
+
+  // Next button
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next ›';
+  nextBtn.disabled = peminjamanAdminCurrentPage === totalPages;
+  nextBtn.onclick = () => {
+    if (peminjamanAdminCurrentPage < totalPages) {
+      peminjamanAdminCurrentPage++;
+      renderPeminjamanAdminWithPagination();
+    }
+  };
+  nextBtn.style.cssText = 'padding: 8px 16px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 4px;';
+  if (nextBtn.disabled) nextBtn.style.opacity = '0.5';
+
+  paginationDiv.appendChild(prevBtn);
+  paginationDiv.appendChild(pageInfo);
+  paginationDiv.appendChild(nextBtn);
+
+  tableContainer.appendChild(paginationDiv);
 }
 
 // Modal input peminjaman manual oleh admin
@@ -2872,9 +4077,9 @@ async function loadRiwayatPeminjaman() {
     }
 }
 
-// Fungsi untuk menampilkan data peminjaman
+// Fungsi untuk menampilkan data peminjaman dalam section (10 data per section)
 function displayRiwayatPeminjaman(peminjamanData) {
-    console.log('Displaying peminjaman data:', peminjamanData);
+    console.log('Displaying peminjaman data in sections:', peminjamanData);
 
     const container = document.getElementById('riwayat-peminjaman-container');
     if (!container) {
@@ -2898,66 +4103,86 @@ function displayRiwayatPeminjaman(peminjamanData) {
         return;
     }
 
-    console.log('Creating table with', peminjamanData.length, 'records');
-
-    const table = document.createElement('table');
-    table.className = 'peminjaman-table';
-
-    // Table header
-    table.innerHTML = `
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Barang</th>
-                <th>Peminjam</th>
-                <th>Jumlah</th>
-                <th>Status</th>
-                <th>Tanggal Pinjam</th>
-                <th>Tanggal Kembali</th>
-                <th>Info</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    `;
-
-    const tbody = table.querySelector('tbody');
-    console.log('Table created, processing', peminjamanData.length, 'items');
+    console.log('Creating sections with', peminjamanData.length, 'records');
 
     // Calculate counters
     let totalDipinjam = 0;
     let totalDikembalikan = 0;
 
-    peminjamanData.forEach((item, index) => {
-        console.log(`Processing item ${index}:`, item);
+    // Group data into sections of 10 items each
+    const itemsPerSection = 10;
+    const totalSections = Math.ceil(peminjamanData.length / itemsPerSection);
 
-        // Count status
-        if (item.status === 'dipinjam') totalDipinjam++;
-        else if (item.status === 'dikembalikan') totalDikembalikan++;
+    for (let sectionIndex = 0; sectionIndex < totalSections; sectionIndex++) {
+        const startIndex = sectionIndex * itemsPerSection;
+        const endIndex = Math.min(startIndex + itemsPerSection, peminjamanData.length);
+        const sectionData = peminjamanData.slice(startIndex, endIndex);
 
-        const row = document.createElement('tr');
-
-        const statusClass = item.status === 'dipinjam' ? 'status-dipinjam' : 'status-dikembalikan';
-        const overdueClass = item.is_overdue ? 'overdue' : '';
-
-        row.innerHTML = `
-            <td>${item.id || '-'}</td>
-            <td>${item.barang_nama || item.barang || '-'}</td>
-            <td>${item.user_nama || item.user || '-'}</td>
-            <td>${item.jumlah || 0}</td>
-            <td><span class="status ${statusClass}">${item.status || '-'}</span></td>
-            <td>${formatDate(item.tanggal_pinjam)}</td>
-            <td>${item.tanggal_kembali ? formatDate(item.tanggal_kembali) : '-'}</td>
-            <td>
-                ${item.is_overdue ? '<span class="overdue-badge">OVERDUE</span>' : ''}
-                ${item.days_borrowed ? `(${item.days_borrowed} hari)` : ''}
-            </td>
+        // Create section container
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'peminjaman-section';
+        sectionDiv.innerHTML = `
+            <div class="section-header">
+                <h3>Section ${sectionIndex + 1} (${startIndex + 1}-${endIndex} dari ${peminjamanData.length})</h3>
+            </div>
         `;
 
-        tbody.appendChild(row);
-    });
+        // Create table for this section
+        const table = document.createElement('table');
+        table.className = 'peminjaman-table';
 
-    console.log('Appending table to container');
-    container.appendChild(table);
+        // Table header
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Barang</th>
+                    <th>Peminjam</th>
+                    <th>Jumlah</th>
+                    <th>Status</th>
+                    <th>Tanggal Pinjam</th>
+                    <th>Tanggal Kembali</th>
+                    <th>Info</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+
+        const tbody = table.querySelector('tbody');
+
+        // Process items in this section
+        sectionData.forEach((item, index) => {
+            console.log(`Processing item ${startIndex + index}:`, item);
+
+            // Count status
+            if (item.status === 'dipinjam') totalDipinjam++;
+            else if (item.status === 'dikembalikan') totalDikembalikan++;
+
+            const row = document.createElement('tr');
+
+            const statusClass = item.status === 'dipinjam' ? 'status-dipinjam' : 'status-dikembalikan';
+            const overdueClass = item.is_overdue ? 'overdue' : '';
+
+            row.innerHTML = `
+                <td>${item.id || '-'}</td>
+                <td>${item.barang_nama || item.barang || '-'}</td>
+                <td>${item.user_nama || item.user || '-'}</td>
+                <td>${item.jumlah || 0}</td>
+                <td><span class="status ${statusClass}">${item.status || '-'}</span></td>
+                <td>${formatDate(item.tanggal_pinjam)}</td>
+                <td>${item.tanggal_kembali ? formatDate(item.tanggal_kembali) : '-'}</td>
+                <td>
+                    ${item.is_overdue ? '<span class="overdue-badge">OVERDUE</span>' : ''}
+                    ${item.days_borrowed ? `(${item.days_borrowed} hari)` : ''}
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+
+        sectionDiv.appendChild(table);
+        container.appendChild(sectionDiv);
+    }
 
     // Update counters in the HTML
     const totalDipinjamEl = document.getElementById('totalDipinjamAdmin');
@@ -2967,7 +4192,7 @@ function displayRiwayatPeminjaman(peminjamanData) {
     if (totalDikembalikanEl) totalDikembalikanEl.textContent = totalDikembalikan;
 
     console.log(`Updated counters: ${totalDipinjam} dipinjam, ${totalDikembalikan} dikembalikan`);
-    console.log('Riwayat peminjaman displayed successfully');
+    console.log('Riwayat peminjaman displayed in sections successfully');
 }
 
 // Fungsi helper untuk format tanggal
@@ -3060,6 +4285,84 @@ async function savePeminjamanAdmin() {
   }
 }
 
+async function approvePeminjaman(peminjamanId) {
+  if (!confirm("Setujui permintaan peminjaman ini? Barang akan langsung masuk ke daftar peminjaman.")) {
+    return;
+  }
+
+  try {
+    showLoading("Menyetujui peminjaman...");
+
+    console.log(`Approving peminjaman ID: ${peminjamanId}`);
+
+    const res = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/`, {
+      method: "PATCH",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      mode: 'cors',
+      body: JSON.stringify({ status: 'dipinjam' }) // Set directly to dipinjam (borrowed)
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error || `HTTP ${res.status}: Gagal menyetujui peminjaman`);
+    }
+
+    console.log("Peminjaman approved and marked as borrowed successfully");
+    hideLoading();
+    await loadPeminjamanAdmin();
+    showNotification("Peminjaman berhasil disetujui. User dapat mengambil barang.", "success");
+  } catch (err) {
+    console.error("Error approving peminjaman:", err);
+    hideLoading();
+    showNotification(err.message || "Gagal menyetujui peminjaman", "error");
+  }
+}
+
+async function rejectPeminjaman(peminjamanId) {
+  const reason = prompt('Masukkan alasan penolakan:');
+  if (reason === null) return; // Cancelled
+  if (!reason.trim()) {
+    showNotification('Alasan penolakan harus diisi', 'warning');
+    return;
+  }
+
+  try {
+    showLoading("Menolak peminjaman...");
+
+    console.log(`Rejecting peminjaman ID: ${peminjamanId}`);
+
+    const res = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/`, {
+      method: "PATCH",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      mode: 'cors',
+      body: JSON.stringify({
+        status: 'cancelled', // Set to cancelled status
+        alasan_reject: reason
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error || `HTTP ${res.status}: Gagal menolak peminjaman`);
+    }
+
+    console.log("Peminjaman cancelled successfully");
+    hideLoading();
+    await loadPeminjamanAdmin();
+    showNotification("Peminjaman berhasil ditolak", "success");
+  } catch (err) {
+    console.error("Error rejecting peminjaman:", err);
+    hideLoading();
+    showNotification(err.message || "Gagal membatalkan peminjaman", "error");
+  }
+}
+
 async function deletePeminjamanAdmin(peminjamanId) {
   if (!confirm("Yakin ingin menghapus peminjaman ini? Tindakan ini tidak dapat dibatalkan.")) {
     return;
@@ -3070,13 +4373,8 @@ async function deletePeminjamanAdmin(peminjamanId) {
 
     console.log(`Deleting peminjaman ID: ${peminjamanId}`);
 
-    const res = await fetch(`${API_BASE}/peminjaman/${peminjamanId}/`, {
+    const res = await apiCall(`${API_BASE}/peminjaman/${peminjamanId}/`, {
       method: "DELETE",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-      },
-      mode: 'cors'
     });
 
     if (!res.ok) {
@@ -3145,6 +4443,159 @@ async function loadDashboardStats() {
 }
 
 // ============================
+// REAL-TIME NOTIFICATIONS
+// ============================
+
+// Admin real-time updates
+function startAdminRealTimeUpdates() {
+  // Polling setiap 30 detik untuk pending requests
+  setInterval(async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/notifications/pending_requests/`);
+      const data = await response.json();
+
+      updatePendingRequests(data.notifications);
+      updatePendingCount(data.count);
+    } catch (error) {
+      console.error('Error fetching pending requests:', error);
+    }
+  }, 30000); // 30 seconds
+}
+
+function updatePendingRequests(notifications) {
+  const container = document.getElementById('pendingRequestsContainer');
+  if (!container) return;
+
+  container.innerHTML = notifications.map(item => `
+    <div class="pending-item">
+      <h5>${item.title}</h5>
+      <p>${item.message}</p>
+      <p><strong>Alasan:</strong> ${item.alasan}</p>
+      <button onclick="approveRequest(${item.id})" class="btn btn-success">Approve</button>
+      <button onclick="rejectRequest(${item.id})" class="btn btn-danger">Reject</button>
+    </div>
+  `).join('');
+}
+
+// User real-time updates
+function startUserRealTimeUpdates() {
+  // Polling setiap 15 detik untuk status updates
+  setInterval(async () => {
+    const userId = getCurrentUser()?.id;
+    if (!userId) return;
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/notifications/user_updates/?user_id=${userId}`);
+      const data = await response.json();
+
+      if (data.count > 0) {
+        showNotifications(data.notifications);
+        refreshLoanHistory(); // Refresh daftar peminjaman
+      }
+    } catch (error) {
+      console.error('Error fetching user updates:', error);
+    }
+  }, 15000); // 15 seconds
+}
+
+function showNotifications(notifications) {
+  notifications.forEach(notification => {
+    showNotification(notification.message, notification.type || 'info');
+  });
+}
+
+function refreshLoanHistory() {
+  // Refresh peminjaman history if functions exist
+  if (typeof loadPeminjamanUser === 'function') {
+    loadPeminjamanUser();
+  }
+  if (typeof loadBarangUser === 'function') {
+    loadBarangUser();
+  }
+}
+
+// ============================
+// ADMIN VERIFICATION ACTIONS
+// ============================
+
+async function approveRequest(loanId) {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/peminjaman/${loanId}/`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: 'approved'
+      })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      alert('Peminjaman disetujui!');
+      // Refresh pending list
+      if (typeof loadPendingRequests === 'function') {
+        loadPendingRequests();
+      }
+    } else {
+      alert('Error: ' + data.error);
+    }
+  } catch (error) {
+    console.error('Approval error:', error);
+    alert('Network error');
+  }
+}
+
+async function rejectRequest(loanId) {
+  const reason = prompt('Alasan penolakan:');
+  if (!reason) return;
+
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/peminjaman/${loanId}/`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: 'cancelled',
+        alasan_reject: reason
+      })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      alert('Peminjaman ditolak!');
+      // Refresh pending list
+      if (typeof loadPendingRequests === 'function') {
+        loadPendingRequests();
+      }
+    } else {
+      alert('Error: ' + data.error);
+    }
+  } catch (error) {
+    console.error('Rejection error:', error);
+    alert('Network error');
+  }
+}
+
+// ============================
+// STATUS BADGES
+// ============================
+
+function getStatusBadge(status) {
+  const badges = {
+    'pending': '<span class="badge badge-warning">Menunggu Approval</span>',
+    'approved': '<span class="badge badge-info">Disetujui - Siap Diambil</span>',
+    'rejected': '<span class="badge badge-danger">Ditolak</span>',
+    'dipinjam': '<span class="badge badge-primary">Dipinjam</span>',
+    'dikembalikan': '<span class="badge badge-success">Dikembalikan</span>',
+    'pending_approval': '<span class="badge badge-warning">Menunggu Approval</span>',
+    'cancelled': '<span class="badge badge-danger">Dibatalkan</span>'
+  };
+  return badges[status] || '<span class="badge badge-secondary">Unknown</span>';
+}
+
+// ============================
 // INIT SAAT PAGE DILOAD
 // ============================
 
@@ -3172,13 +4623,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Load data immediately without delay for instant response
     loadBarang();
     loadDashboardStats(); // Load dashboard statistics
+    setupBarangPaginationEvents(); // Setup pagination event delegation
     const searchInput = $("#searchBarang");
     if (searchInput) {
       searchInput.addEventListener("input", () => applyBarangFilter());
     }
   }
 
-  // Feedback
+  // Feedback - handled by feedback.html initialization
   if ($("#tabelFeedback")) {
     loadFeedback();
   }
@@ -3220,8 +4672,20 @@ document.addEventListener("DOMContentLoaded", () => {
     $("#sidebarUserName").textContent = currentUser.nama;
   }
 
+  // Set active menu item based on current page
+  const currentPath = window.location.pathname;
+  const currentPage = currentPath.split('/').pop() || 'index.html';
+  const menuItems = document.querySelectorAll('.menu-item');
+
+  menuItems.forEach(item => {
+    item.classList.remove('active');
+    const href = item.getAttribute('href');
+    if (href === currentPage) {
+      item.classList.add('active');
+    }
+  });
+
   // Add smooth transitions to navigation
-  const menuItems = document.querySelectorAll(".menu-item");
   menuItems.forEach(item => {
     item.addEventListener("click", () => {
       // Add loading state for navigation
@@ -3237,6 +4701,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === $("#modalDeleteBarang")) closeDeleteBarang();
     if (e.target === $("#modalTransaksi")) closeTransaksiModal();
     if (e.target === $("#modalPeminjamanAdmin")) closePeminjamanAdminModal();
+    if (e.target === $("#modalBulkEditBarang")) closeBulkEditModal();
+    if (e.target === $("#modalSelectItem")) closeSelectItemModal();
   });
   
   // Immediate button feedback for better UX
@@ -3277,5 +4743,15 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+
+  // Initialize real-time notifications for admin dashboard
+  if (window.location.pathname.includes('admin-verification') || window.location.pathname.includes('dashboard')) {
+    startAdminRealTimeUpdates();
+  }
+
+  // Initialize real-time notifications for user dashboard
+  if (window.location.pathname.includes('user-dashboard') || window.location.pathname.includes('user-peminjaman')) {
+    startUserRealTimeUpdates();
+  }
 });
 }

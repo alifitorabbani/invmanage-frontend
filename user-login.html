@@ -1,581 +1,890 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <title>InvManage - User Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvManage - User Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <meta name="description" content="InvManage User Portal - Professional Inventory Management System for Standard Users">
+    <meta name="keywords" content="inventory, management, user, login, professional, system">
+    <style>
+        .password-strength {
+            margin-top: 5px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .password-strength.weak {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+        .password-strength.normal {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fcd34d;
+        }
+        .password-strength.strong {
+            background-color: #d1fae5;
+            color: #059669;
+            border: 1px solid #6ee7b7;
+        }
+    </style>
 </head>
 <body>
-
-<div id="authContainer" class="center-box">
-  <!-- Simple Logo Section -->
-  <div class="logo-container">
-    <img src="image.png" alt="Logo" class="logo">
-  </div>
-
-  <!-- Simple Header -->
-  <div class="header-content">
-    <h2 class="main-title">
-      <span class="title-gradient">InvManage</span>
-      <span class="title-accent">User</span>
-    </h2>
-    <p class="subtitle">
-      Standard User Access Portal
-    </p>
-  </div>
-
-  <!-- Simple Tabs -->
-  <div class="tabs">
-    <button class="tab active" id="tabLogin">
-      <span class="tab-text">User Login</span>
-    </button>
-    <button class="tab inactive" id="tabRegister">
-      <span class="tab-text">User Register</span>
-    </button>
-  </div>
-
-  <!-- User Login Form -->
-  <form id="loginForm" class="form-container" onsubmit="return false;">
-    <div class="form-header">
-      <h3>User Login</h3>
-      <p>Access your user account for inventory operations</p>
+    <!-- Enterprise Background -->
+    <div class="enterprise-bg">
+        <div class="bg-gradient-primary"></div>
+        <div class="bg-gradient-secondary"></div>
+        <div class="enterprise-grid"></div>
     </div>
 
-    <div class="input-group">
-      <label>Username or Email Address</label>
-      <input type="text" id="userLoginUsername" placeholder="Enter username or email">
-      <div class="input-underline"></div>
+    <!-- Enterprise Navigation -->
+    <nav class="enterprise-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="nav-logo-icon">👤</div>
+                <span class="nav-logo-text">InvManage User</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <button class="nav-cta-enterprise" onclick="window.location.href='admin-login.html'">
+                    <span>Admin Access</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Login/Register Section -->
+    <section class="login-section-enterprise">
+        <div class="container">
+            <div class="login-container-enterprise">
+                <!-- Header -->
+                <div class="login-header-enterprise">
+                    <div class="login-badge-enterprise">
+                        <span class="enterprise-badge">👤 Standard User Portal</span>
+                    </div>
+                    <h1 class="login-title-enterprise">
+                        <span class="title-main">InvManage</span>
+                        <span class="title-accent-enterprise">User</span>
+                    </h1>
+                    <p class="login-subtitle-enterprise">
+                        Professional Inventory Management System for Standard Users
+                    </p>
+                </div>
+
+                <!-- Login/Register Card -->
+                <div class="login-card-enterprise">
+                    <!-- Tab Buttons -->
+                    <div class="auth-tabs-enterprise">
+                        <button class="auth-tab-enterprise active" id="tabLogin" onclick="switchToLogin()">
+                            <span class="tab-icon">🔐</span>
+                            <span class="tab-text">Sign In</span>
+                        </button>
+                        <button class="auth-tab-enterprise inactive" id="tabRegister" onclick="switchToRegister()">
+                            <span class="tab-icon">✨</span>
+                            <span class="tab-text">Create Account</span>
+                        </button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <div id="loginForm" class="auth-form-enterprise">
+                        <div class="form-header-enterprise">
+                            <h3>Welcome Back</h3>
+                            <p>Sign in to access your user dashboard</p>
+                        </div>
+
+                        <div class="form-body-enterprise">
+                            <div class="input-group-enterprise">
+                                <label>Username or Email</label>
+                                <input type="text" id="userLoginUsername" placeholder="Enter username or email">
+                            </div>
+
+                            <div class="input-group-enterprise">
+                                <label>Password</label>
+                                <input type="password" id="userLoginPassword" placeholder="Enter password">
+                            </div>
+
+                            <div class="form-options-enterprise">
+                                <label class="remember-me-enterprise">
+                                    <input type="checkbox" id="rememberMe">
+                                    <span class="checkmark-enterprise"></span>
+                                    Remember me
+                                </label>
+                                <a href="#" class="forgot-password-enterprise" onclick="openResetModal()">Forgot password?</a>
+                            </div>
+                        </div>
+
+                        <div class="form-actions-enterprise">
+                            <button class="btn-primary-enterprise-full" onclick="doUserLogin()">
+                                <span>Access User Portal</span>
+                                <span class="btn-arrow-enterprise">→</span>
+                            </button>
+                        </div>
+
+                        <div class="form-footer-enterprise">
+                            <p>Need admin access? <a href="admin-login.html" class="link-enterprise">Administrator Login</a></p>
+                        </div>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="registerForm" class="auth-form-enterprise hidden">
+                        <div class="form-header-enterprise">
+                            <h3>Join InvManage</h3>
+                            <p>Create your user account</p>
+                        </div>
+
+                        <div class="form-body-enterprise">
+                            <div class="input-group-enterprise">
+                                <label>Username</label>
+                                <input type="text" id="registerUsername" placeholder="Choose unique username">
+                            </div>
+
+                            <div class="input-group-enterprise">
+                                <label>Email Address</label>
+                                <input type="email" id="registerEmail" placeholder="Enter email @gmail.com">
+                            </div>
+
+                            <div class="input-group-enterprise">
+                                <label>Password</label>
+                                <input type="password" id="registerPassword" placeholder="Create strong password">
+                                <div id="passwordStrength" class="password-strength">
+                                    <span id="passwordStrengthText">Enter password to check strength</span>
+                                </div>
+                            </div>
+
+                            <div class="terms-agreement-enterprise">
+                                <label class="checkbox-container-enterprise">
+                                    <input type="checkbox" id="agreeTerms" required>
+                                    <span class="checkmark-enterprise"></span>
+                                    I agree to the <a href="user-terms.html" target="_blank" class="terms-link-enterprise">Terms & Conditions</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions-enterprise">
+                            <button class="btn-primary-enterprise-full" onclick="doUserRegister()">
+                                <span>Create Account</span>
+                                <span class="btn-arrow-enterprise">→</span>
+                            </button>
+                        </div>
+
+                        <div class="form-footer-enterprise">
+                            <p>Already have an account? <a href="#" onclick="switchToLogin()" class="link-enterprise">Sign in here</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enterprise Demo Credentials Section -->
+                <section class="enterprise-demo-section">
+                    <div class="demo-container-enterprise">
+                        <div class="demo-header-enterprise">
+                            <div class="demo-icon-enterprise">🔐</div>
+                            <div class="demo-content-enterprise">
+                                <h3>Demo Credentials</h3>
+                                <p>Experience the system with pre-configured test accounts</p>
+                            </div>
+                        </div>
+
+                        <div class="demo-credentials-enterprise">
+                            <div class="credential-card-enterprise user-credential">
+                                <div class="credential-header-enterprise">
+                                    <div class="credential-avatar-enterprise">
+                                        <span class="avatar-icon">👤</span>
+                                    </div>
+                                    <div class="credential-info-enterprise">
+                                        <h4>Standard User Account</h4>
+                                        <p>Test user access and borrowing features</p>
+                                    </div>
+                                </div>
+
+                                <div class="credential-details-enterprise">
+                                    <div class="credential-field-enterprise">
+                                        <span class="field-label-enterprise">Email Address</span>
+                                        <code class="field-value-enterprise">user@enterprise.com</code>
+                                    </div>
+                                    <div class="credential-field-enterprise">
+                                        <span class="field-label-enterprise">Password</span>
+                                        <code class="field-value-enterprise">user2025</code>
+                                    </div>
+                                </div>
+
+                                <div class="credential-actions-enterprise">
+                                    <button class="btn-copy-enterprise" onclick="copyCredentials('user@enterprise.com', 'user2025')">
+                                        <span class="btn-icon-enterprise">📋</span>
+                                        <span>Copy Credentials</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="demo-notice-enterprise">
+                            <div class="notice-icon-enterprise">💡</div>
+                            <div class="notice-content-enterprise">
+                                <p><strong>Note:</strong> These are demonstration accounts for testing purposes. In a production environment, use your assigned credentials.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enterprise Footer -->
+    <footer class="enterprise-footer-new">
+        <div class="container">
+            <div class="footer-content-enterprise">
+                <div class="footer-main">
+                    <div class="footer-brand">
+                        <div class="footer-logo-enterprise">
+                            <div class="footer-logo-icon">👤</div>
+                            <span>InvManage User Portal</span>
+                        </div>
+                        <p class="footer-description">
+                            Professional inventory management system for standard users.
+                            Complete control over your borrowing operations with enterprise-grade security.
+                        </p>
+                    </div>
+                    <div class="footer-links-enterprise">
+                        <div class="footer-column-enterprise">
+                            <h4>Features</h4>
+                            <a href="#borrow">Borrow Items</a>
+                            <a href="#history">History</a>
+                            <a href="#feedback">Feedback</a>
+                        </div>
+                        <div class="footer-column-enterprise">
+                            <h4>Support</h4>
+                            <a href="#help">Help Center</a>
+                            <a href="#contact">Contact</a>
+                            <a href="#terms">Terms</a>
+                        </div>
+                        <div class="footer-column-enterprise">
+                            <h4>Company</h4>
+                            <a href="index.html">Home</a>
+                            <a href="#about">About</a>
+                            <a href="admin-login.html">Admin</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom-enterprise">
+                    <p>&copy; 2025 InvManage User Portal. All rights reserved.</p>
+                    <div class="footer-team-enterprise">
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">Software Architect & Developer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
+                                    Alifito Rabbani Cahyono
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">UI/UX Architect & Developer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
+                                    Satria Febry Andanu
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-member-enterprise">
+                            <div class="team-role-enterprise">Data Analyst & Engineer</div>
+                            <div class="team-name-enterprise">
+                                <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
+                                    Naufal Thafhan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="modal-bg">
+        <div class="modal">
+            <h3>Reset User Password</h3>
+            <p>Enter your user email to receive password reset link</p>
+
+            <div class="input-group-enterprise">
+                <label>Email Address</label>
+                <input type="email" id="resetEmail" placeholder="Enter your email @gmail.com">
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeResetModal()">Cancel</button>
+                <button class="btn-primary" onclick="sendResetEmail()">Send Reset Link</button>
+            </div>
+        </div>
     </div>
 
-    <div class="input-group">
-      <label>Password</label>
-      <input type="password" id="userLoginPassword" placeholder="Enter password">
-      <div class="input-underline"></div>
+    <!-- Success Modal for Reset -->
+    <div id="resetSuccessModal" class="modal-bg">
+        <div class="modal">
+            <h3>✅ Reset Link Sent!</h3>
+            <p>We have sent a password reset link to your email. Please check your inbox and follow the instructions.</p>
+
+            <div class="modal-buttons">
+                <button class="btn-primary" onclick="closeResetSuccessModal()">Close</button>
+            </div>
+        </div>
     </div>
-
-    <div class="form-options">
-      <label class="remember-me">
-        <input type="checkbox" id="rememberMe">
-        <span class="checkmark"></span>
-        Remember my login
-      </label>
-      <a href="#" class="forgot-password">Forgot password?</a>
-    </div>
-
-    <button type="button" class="primary" onclick="doUserLogin()">
-      <span class="btn-content">
-        <span class="btn-text">Access User Portal</span>
-      </span>
-    </button>
-
-    <div class="form-footer">
-      <p>Need administrator access? <a href="admin-login.html">Administrator Login</a></p>
-    </div>
-  </form>
-
-  <!-- User Register Form -->
-  <div id="registerForm" class="form-container" style="display:none;">
-    <div class="form-header">
-      <h3>Register User</h3>
-      <p>Create your user account for system access</p>
-    </div>
-
-    <div class="input-group">
-      <label>Username</label>
-      <input type="text" id="registerUsername" placeholder="Choose unique username">
-      <div class="input-underline"></div>
-    </div>
-
-    <div class="input-group">
-      <label>Email Address</label>
-      <input type="email" id="registerEmail" placeholder="Enter email @gmail.com">
-      <div class="input-underline"></div>
-    </div>
-
-    <div class="input-group">
-      <label>Password</label>
-      <input type="password" id="registerPassword" placeholder="Create strong password">
-      <div class="input-underline"></div>
-    </div>
-
-    <div class="terms-agreement">
-      <label class="checkbox-container">
-        <input type="checkbox" id="agreeTerms" required>
-        <span class="checkmark"></span>
-        I agree to the <a href="admin-terms.html" target="_blank" class="terms-link">Terms & Conditions</a> for users
-      </label>
-    </div>
-
-    <button class="primary" onclick="doUserRegister()">
-      <span class="btn-content">
-        <span class="btn-text">Create User Account</span>
-      </span>
-    </button>
-
-    <div class="form-footer">
-      <p>Already have an account? <a href="#" onclick="switchToLogin()">Login here</a></p>
-    </div>
-  </div>
-</div>
-
-<!-- Reset Password Modal -->
-<div id="resetPasswordModal" class="modal-bg">
-  <div class="modal">
-    <h3>Reset User Password</h3>
-    <p>Enter your user email to receive password reset link</p>
-
-    <div class="input-group">
-      <label>Email Address</label>
-      <input type="email" id="resetEmail" placeholder="Enter your email @gmail.com">
-      <div class="input-underline"></div>
-    </div>
-
-    <div class="modal-buttons">
-      <button class="btn-red" onclick="closeResetModal()">Cancel</button>
-      <button class="btn-green" onclick="sendResetEmail()">Send Reset Link</button>
-    </div>
-  </div>
-</div>
-
-<!-- Success Modal for Reset -->
-<div id="resetSuccessModal" class="modal-bg">
-  <div class="modal">
-    <h3>✅ Reset Link Sent!</h3>
-    <p>We have sent a password reset link to your email. Please check your inbox and follow the instructions.</p>
-
-    <div class="modal-buttons">
-      <button class="btn-green" onclick="closeResetSuccessModal()">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- Welcome Message -->
-<div class="welcome-message">
-  <h3>Welcome to InvManage User Portal</h3>
-  <p>Access inventory system for borrowing and tracking items</p>
-</div>
 
 <script>
-// User-specific login function
-async function doUserLogin() {
-  const identifier = document.getElementById("userLoginUsername")?.value?.trim();
-  const password = document.getElementById("userLoginPassword")?.value;
-  const loginBtn = document.getElementById("loginForm")?.querySelector("button.primary");
+// Enterprise User Login Page Functionality
 
-  if (!identifier || !password) {
-      showNotification("Username/email dan password wajib diisi", "warning");
-      return;
-  }
+// Role selection function
+function selectRole(role) {
+    if (role === 'admin') {
+        // Redirect to admin login
+        window.location.href = 'admin-login.html';
+    }
+}
 
-  // Show loading state
-  if (loginBtn) {
-    loginBtn.disabled = true;
-    loginBtn.innerHTML = `
-      <span style="display: inline-flex; align-items: center; gap: 8px;">
-        <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: enterpriseSpin 1s linear infinite;"></div>
-        Authenticating...
-      </span>
-    `;
-  }
+// Check for direct login parameter
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize animations
+    initializeAnimations();
+});
 
-  try {
-    const res = await fetch(`${API_BASE}/login/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nama: identifier, password }),
+// Smooth scrolling
+function scrollToAccess() {
+    document.querySelector('.access-section').scrollIntoView({
+        behavior: 'smooth'
+    });
+}
+
+function scrollToFeatures() {
+    document.querySelector('.features-section').scrollIntoView({
+        behavior: 'smooth'
+    });
+}
+
+// Copy credentials functionality
+function copyCredentials(email, password) {
+    const text = `Email: ${email}\nPassword: ${password}`;
+    navigator.clipboard.writeText(text).then(() => {
+        // Show success feedback
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        btn.style.background = 'rgba(16, 185, 129, 0.3)';
+        btn.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+            btn.style.borderColor = '';
+        }, 2000);
+    }).catch(() => {
+        alert('Failed to copy credentials');
+    });
+}
+
+// Initialize animations
+function initializeAnimations() {
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all sections
+    document.querySelectorAll('.features-section, .stats-section, .access-section, .about-section, .contact-section').forEach(section => {
+        observer.observe(section);
     });
 
-    if (!res.ok) {
-      if (loginBtn) {
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = `
-          <span class="btn-content">
-            <span class="btn-text">Access User Portal</span>
-          </span>
-        `;
-      }
+    // Add loading class removal after animations
+    setTimeout(() => {
+        document.body.classList.add('loaded');
+    }, 1000);
+}
 
-      if (res.status === 400) {
-        const errorData = await res.json();
-        showNotification(errorData.error || "Invalid username/email or password", "error");
+// User-specific login function
+async function doUserLogin() {
+    const identifier = document.getElementById("userLoginUsername")?.value?.trim();
+    const password = document.getElementById("userLoginPassword")?.value;
+    const loginBtn = document.querySelector("#loginForm .btn-primary-enterprise-full");
+
+    if (!identifier || !password) {
+        showNotification("Username/email and password are required", "warning");
         return;
-      } else if (res.status >= 500) {
-        showNotification("Server is experiencing issues. Please try again later.", "error");
-        return;
-      } else {
-        showNotification("Failed to connect to server", "error");
-        return;
-      }
     }
 
-    const data = await res.json();
-
-    if (data.success) {
-      // Check if user has user role
-      if (data.user.role !== 'user') {
-        showNotification("This account is not a standard user account. Please use administrator login.", "error");
-        return;
-      }
-
-      // Set user access level
-      const userWithAccess = { ...data.user, accessLevel: 'user' };
-      setCurrentUser(userWithAccess);
-      showNotification("Login successful! Redirecting to User Dashboard...", "success");
-
-      // Smooth transition before redirect
-      setTimeout(() => {
-        window.location.href = "user-dashboard.html";
-      }, 1000);
-    } else {
-      if (loginBtn) {
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = `
-          <span class="btn-content">
-            <span class="btn-text">Access User Portal</span>
-          </span>
-        `;
-      }
-      showNotification(data.error || "Login failed", "error");
-    }
-  } catch (err) {
+    // Show loading state
     if (loginBtn) {
-      loginBtn.disabled = false;
-      loginBtn.innerHTML = `
-        <span class="btn-content">
-          <span class="btn-text">Access User Portal</span>
-        </span>
-      `;
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = `
+            <span style="display: inline-flex; align-items: center; gap: 8px;">
+                <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: enterpriseSpin 1s linear infinite;"></div>
+                Authenticating...
+            </span>
+        `;
     }
-    console.error('User Login Error:', err);
-    showNotification("Failed to connect to server", "error");
-  }
+
+    try {
+        const res = await fetch(`${API_BASE}/login/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nama: identifier, password }),
+        });
+
+        if (!res.ok) {
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = `
+                    <span>Access User Portal</span>
+                    <span class="btn-arrow-enterprise">→</span>
+                `;
+            }
+
+            if (res.status === 400) {
+                const errorData = await res.json();
+                showNotification(errorData.error || "Invalid username/email or password", "error");
+                return;
+            } else if (res.status >= 500) {
+                showNotification("Server is experiencing issues. Please try again later.", "error");
+                return;
+            } else {
+                showNotification("Failed to connect to server", "error");
+                return;
+            }
+        }
+
+        const data = await res.json();
+
+        if (data.success) {
+            // Check if user has user role
+            if (data.user.role !== 'user') {
+                showNotification("This account is not a standard user account. Please use administrator login.", "error");
+                return;
+            }
+
+            // Set user access level
+            const userWithAccess = { ...data.user, accessLevel: 'user' };
+            setCurrentUser(userWithAccess);
+            showNotification("Login successful! Redirecting to User Dashboard...", "success");
+
+            // Smooth transition before redirect
+            setTimeout(() => {
+                window.location.href = "user-dashboard.html";
+            }, 1000);
+        } else {
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = `
+                    <span>Access User Portal</span>
+                    <span class="btn-arrow-enterprise">→</span>
+                `;
+            }
+            showNotification(data.error || "Login failed", "error");
+        }
+    } catch (err) {
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = `
+                <span>Access User Portal</span>
+                <span class="btn-arrow-enterprise">→</span>
+            `;
+        }
+        console.error('User Login Error:', err);
+        showNotification("Failed to connect to server", "error");
+    }
+}
+
+// Password validation function
+function validatePassword(password) {
+    let strength = 'weak';
+    let valid = false;
+    let message = '';
+
+    // Check for letters only (weak)
+    if (/^[a-zA-Z]+$/.test(password)) {
+        strength = 'weak';
+        message = 'Weak: Letters only';
+    }
+    // Check for 8+ chars with letters and at least 1 number (normal)
+    else if (password.length >= 8 && /[a-zA-Z]/.test(password) && /\d/.test(password)) {
+        strength = 'normal';
+        valid = true;
+        message = 'Normal: Good password';
+    }
+    // Check for normal + 1 symbol (strong)
+    else if (password.length >= 8 && /[a-zA-Z]/.test(password) && /\d/.test(password) && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        strength = 'strong';
+        valid = true;
+        message = 'Strong: Excellent password';
+    }
+    else {
+        // Invalid combinations
+        if (password.length < 8) {
+            message = 'Password must be at least 8 characters long';
+        } else if (!/[a-zA-Z]/.test(password)) {
+            message = 'Password must contain letters';
+        } else if (!/\d/.test(password)) {
+            message = 'Password must contain at least 1 number';
+        } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+            message = 'Password must contain at least 1 symbol for strong';
+        }
+    }
+
+    return { valid, strength, message };
+}
+
+// Update password strength indicator
+function updatePasswordStrength(strength, message) {
+    const strengthIndicator = document.getElementById('passwordStrength');
+    const strengthText = document.getElementById('passwordStrengthText');
+
+    if (strengthIndicator && strengthText) {
+        strengthIndicator.className = `password-strength ${strength}`;
+        strengthText.textContent = message;
+    }
 }
 
 // User-specific register function
 async function doUserRegister() {
-  const nama = document.getElementById("registerUsername")?.value?.trim();
-  const email = document.getElementById("registerEmail")?.value?.trim();
-  const password = document.getElementById("registerPassword")?.value;
-  const registerBtn = document.getElementById("registerForm")?.querySelector("button.primary");
+    const nama = document.getElementById("registerUsername")?.value?.trim();
+    const email = document.getElementById("registerEmail")?.value?.trim();
+    const password = document.getElementById("registerPassword")?.value;
+    const registerBtn = document.querySelector("#registerForm .btn-primary-enterprise-full");
 
-  if (!nama || !email || !password) {
-    showNotification("Username, email, and password are required", "warning");
-    return;
-  }
-
-  if (!email.includes('@gmail')) {
-    showNotification("Email must use @gmail.com domain", "warning");
-    return;
-  }
-
-  // Show loading state
-  if (registerBtn) {
-    registerBtn.disabled = true;
-    registerBtn.innerHTML = `
-      <span style="display: inline-flex; align-items: center; gap: 8px;">
-        <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: enterpriseSpin 1s linear infinite;"></div>
-        Creating Account...
-      </span>
-    `;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/register/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nama, email, password }),
-    });
-
-    if (!res.ok) {
-      if (registerBtn) {
-        registerBtn.disabled = false;
-        registerBtn.innerHTML = `
-          <span class="btn-content">
-            <span class="btn-text">Create User Account</span>
-          </span>
-        `;
-      }
-
-      if (res.status === 400) {
-        const errorData = await res.json();
-        showNotification(errorData.error || "Registration data is invalid", "error");
+    if (!nama || !email || !password) {
+        showNotification("Username, email, and password are required", "warning");
         return;
-      } else if (res.status >= 500) {
-        showNotification("Server is experiencing issues. Please try again later.", "error");
-        return;
-      } else {
-        showNotification("Failed to connect to server", "error");
-        return;
-      }
     }
 
-    const data = await res.json();
-
-    if (data.success) {
-      if (registerBtn) {
-        registerBtn.disabled = false;
-        registerBtn.innerHTML = `
-          <span class="btn-content">
-            <span class="btn-text">Create User Account</span>
-          </span>
-        `;
-      }
-      showNotification("Registration successful! Redirecting to login...", "success");
-
-      // Smooth transition to login tab
-      setTimeout(() => {
-        if (document.getElementById("tabLogin")) document.getElementById("tabLogin").click();
-      }, 1500);
-    } else {
-      if (registerBtn) {
-        registerBtn.disabled = false;
-        registerBtn.innerHTML = `
-          <span class="btn-content">
-            <span class="btn-text">Create User Account</span>
-          </span>
-        `;
-      }
-      showNotification(data.error || "Registration failed", "error");
+    if (!email.includes('@')) {
+        showNotification("Email must contain '@' symbol", "warning");
+        return;
     }
-  } catch (err) {
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+        showNotification(passwordValidation.message, "warning");
+        return;
+    }
+
+    // Show loading state
     if (registerBtn) {
-      registerBtn.disabled = false;
-      registerBtn.innerHTML = `
-        <span class="btn-content">
-          <span class="btn-text">Create User Account</span>
-        </span>
-      `;
+        registerBtn.disabled = true;
+        registerBtn.innerHTML = `
+            <span style="display: inline-flex; align-items: center; gap: 8px;">
+                <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: enterpriseSpin 1s linear infinite;"></div>
+                Creating Account...
+            </span>
+        `;
     }
-    console.error('User Register Error:', err);
-    showNotification("Failed to connect to server", "error");
-  }
+
+    try {
+        const res = await fetch(`${API_BASE}/register/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nama, email, password }),
+        });
+
+        if (!res.ok) {
+            if (registerBtn) {
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = `
+                    <span>Create User Account</span>
+                    <span class="btn-arrow-enterprise">→</span>
+                `;
+            }
+
+            if (res.status === 400) {
+                const errorData = await res.json();
+                showNotification(errorData.error || "Registration data is invalid", "error");
+                return;
+            } else if (res.status >= 500) {
+                showNotification("Server is experiencing issues. Please try again later.", "error");
+                return;
+            } else {
+                showNotification("Failed to connect to server", "error");
+                return;
+            }
+        }
+
+        const data = await res.json();
+
+        if (data.success) {
+            if (registerBtn) {
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = `
+                    <span>Create User Account</span>
+                    <span class="btn-arrow-enterprise">→</span>
+                `;
+            }
+            showNotification("Registration successful! Redirecting to login...", "success");
+
+            // Smooth transition to login tab
+            setTimeout(() => {
+                switchToLogin();
+            }, 1500);
+        } else {
+            if (registerBtn) {
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = `
+                    <span>Create User Account</span>
+                    <span class="btn-arrow-enterprise">→</span>
+                `;
+            }
+            showNotification(data.error || "Registration failed", "error");
+        }
+    } catch (err) {
+        if (registerBtn) {
+            registerBtn.disabled = false;
+            registerBtn.innerHTML = `
+                <span>Create User Account</span>
+                <span class="btn-arrow-enterprise">→</span>
+            `;
+        }
+        console.error('User Register Error:', err);
+        showNotification("Failed to connect to server", "error");
+    }
 }
 
-// Navigate to admin login
-function goToAdminLogin() {
-  window.location.href = "admin-login.html";
-}
-
-// Simple Tab Switching
+// Enhanced Tab Switching
 const loginTab = document.getElementById("tabLogin");
 const registerTab = document.getElementById("tabRegister");
 const loginForm = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
 
 function switchToLogin() {
-  loginTab.classList.add("active");
-  loginTab.classList.remove("inactive");
-  registerTab.classList.remove("active");
-  registerTab.classList.add("inactive");
+    loginTab.classList.add("active");
+    loginTab.classList.remove("inactive");
+    registerTab.classList.remove("active");
+    registerTab.classList.add("inactive");
 
-  loginForm.style.display = "block";
-  registerForm.style.display = "none";
+    loginForm.classList.remove("hidden");
+    registerForm.classList.add("hidden");
 }
 
 function switchToRegister() {
-  registerTab.classList.add("active");
-  registerTab.classList.remove("inactive");
-  loginTab.classList.remove("active");
-  loginTab.classList.add("inactive");
+    registerTab.classList.add("active");
+    registerTab.classList.remove("inactive");
+    loginTab.classList.remove("active");
+    loginTab.classList.add("inactive");
 
-  loginForm.style.display = "none";
-  registerForm.style.display = "block";
+    loginForm.classList.add("hidden");
+    registerForm.classList.remove("hidden");
 }
 
-loginTab.onclick = switchToLogin;
-registerTab.onclick = switchToRegister;
+if (loginTab) loginTab.onclick = switchToLogin;
+if (registerTab) registerTab.onclick = switchToRegister;
 
 // Enhanced Enter key support
 document.getElementById("userLoginPassword")?.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") doUserLogin();
+    if (e.key === "Enter") doUserLogin();
 });
 document.getElementById("registerPassword")?.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") doUserRegister();
+    if (e.key === "Enter") doUserRegister();
 });
 
-// Basic email validation for user
-document.getElementById("registerEmail")?.addEventListener("blur", (e) => {
-  const email = e.target.value;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isValid = email === "" || (emailRegex.test(email) && email.includes("@gmail.com"));
+// Enhanced form validation
+document.addEventListener('DOMContentLoaded', function() {
+    // Email validation for user register
+    const registerEmail = document.getElementById('registerEmail');
+    if (registerEmail) {
+        registerEmail.addEventListener('blur', function(e) {
+            const email = e.target.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValid = email === '' || (emailRegex.test(email) && email.includes('@'));
 
-  e.target.classList.toggle("valid", isValid && email.length > 0);
-  e.target.classList.toggle("invalid", !isValid && email.length > 0);
-});
+            e.target.classList.toggle('valid', isValid && email.length > 0);
+            e.target.classList.toggle('invalid', !isValid && email.length > 0);
+        });
+    }
 
-// Basic password validation for user
-document.getElementById("registerPassword")?.addEventListener("blur", (e) => {
-  const password = e.target.value;
-  const isValid = password === "" || password.length >= 4;
+    // Password validation for user register
+    const registerPassword = document.getElementById('registerPassword');
+    if (registerPassword) {
+        registerPassword.addEventListener('input', function(e) {
+            const password = e.target.value;
+            const validation = validatePassword(password);
+            const isValid = password === '' || validation.valid;
 
-  e.target.classList.toggle("valid", isValid && password.length > 0);
-  e.target.classList.toggle("invalid", !isValid && password.length > 0);
-});
+            e.target.classList.toggle('valid', isValid && password.length > 0);
+            e.target.classList.toggle('invalid', !isValid && password.length > 0);
 
-// Basic username validation for user
-document.getElementById("registerUsername")?.addEventListener("blur", (e) => {
-  const username = e.target.value;
-  const isValid = username === "" || username.length >= 3;
+            // Update strength indicator
+            updatePasswordStrength(validation.strength, validation.message);
+        });
+    }
 
-  e.target.classList.toggle("valid", isValid && username.length > 0);
-  e.target.classList.toggle("invalid", !isValid && username.length > 0);
-});
+    // Username validation for user register
+    const registerUsername = document.getElementById('registerUsername');
+    if (registerUsername) {
+        registerUsername.addEventListener('blur', function(e) {
+            const username = e.target.value;
+            const isValid = username === '' || username.length >= 3;
 
-// Terms agreement validation
-document.getElementById("agreeTerms")?.addEventListener("change", (e) => {
-  const registerBtn = document.querySelector("#registerForm .primary");
-  if (registerBtn) {
-    registerBtn.disabled = !e.target.checked;
-    registerBtn.style.opacity = e.target.checked ? "1" : "0.6";
-  }
-});
+            e.target.classList.toggle('valid', isValid && username.length > 0);
+            e.target.classList.toggle('invalid', !isValid && username.length > 0);
+        });
+    }
 
-// Remember me functionality
-document.getElementById("rememberMe")?.addEventListener("change", (e) => {
-  if (e.target.checked) {
-    showNotification("Remember me feature will save your login", "success", 3000);
-  }
+    // Terms agreement validation for user register
+    const agreeTerms = document.getElementById('agreeTerms');
+    if (agreeTerms) {
+        agreeTerms.addEventListener('change', function(e) {
+            const registerBtn = document.querySelector("#registerForm .btn-primary-enterprise-full");
+            if (registerBtn) {
+                registerBtn.disabled = !e.target.checked;
+                registerBtn.style.opacity = e.target.checked ? '1' : '0.6';
+            }
+        });
+    }
+
+    // Remember me functionality
+    const rememberMe = document.getElementById('rememberMe');
+    if (rememberMe) {
+        rememberMe.addEventListener('change', function(e) {
+            if (e.target.checked) {
+                showNotification("Remember me feature will save your login", "success", 3000);
+            }
+        });
+    }
 });
 
 // Reset Password functionality
-document.querySelector(".forgot-password")?.addEventListener("click", (e) => {
-  e.preventDefault();
-  openResetModal();
-});
-
 function openResetModal() {
-  const modal = document.getElementById("resetPasswordModal");
-  modal.style.display = "flex";
-  modal.style.alignItems = "center";
-  modal.style.justifyContent = "center";
+    const modal = document.getElementById("resetPasswordModal");
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
 
-  // Focus on email input
-  setTimeout(() => {
-    document.getElementById("resetEmail").focus();
-  }, 100);
+    // Focus on email input
+    setTimeout(() => {
+        document.getElementById("resetEmail").focus();
+    }, 100);
 }
 
 function closeResetModal() {
-  const modal = document.getElementById("resetPasswordModal");
-  modal.style.display = "none";
-  document.getElementById("resetEmail").value = "";
+    const modal = document.getElementById("resetPasswordModal");
+    modal.style.display = "none";
+    document.getElementById("resetEmail").value = "";
 }
 
 function closeResetSuccessModal() {
-  const modal = document.getElementById("resetSuccessModal");
-  modal.style.display = "none";
+    const modal = document.getElementById("resetSuccessModal");
+    modal.style.display = "none";
 }
 
 function sendResetEmail() {
-  const email = document.getElementById("resetEmail").value.trim();
+    const email = document.getElementById("resetEmail").value.trim();
 
-  if (!email) {
-    showNotification("Please enter your email address", "error");
-    return;
-  }
+    if (!email) {
+        showNotification("Please enter your email address", "error");
+        return;
+    }
 
-  if (!email.includes("@gmail.com")) {
-    showNotification("Email must use @gmail.com domain", "error");
-    return;
-  }
+    if (!email.includes("@gmail.com")) {
+        showNotification("Email must use @gmail.com domain", "error");
+        return;
+    }
 
-  // Simulate sending reset email
-  const resetBtn = event.target;
-  const originalText = resetBtn.textContent;
-  resetBtn.textContent = "Sending...";
-  resetBtn.disabled = true;
+    // Simulate sending reset email
+    const resetBtn = event.target;
+    const originalText = resetBtn.textContent;
+    resetBtn.textContent = "Sending...";
+    resetBtn.disabled = true;
 
-  setTimeout(() => {
-    // Close reset modal
-    closeResetModal();
+    setTimeout(() => {
+        // Close reset modal
+        closeResetModal();
 
-    // Show success modal
-    const successModal = document.getElementById("resetSuccessModal");
-    successModal.style.display = "flex";
-    successModal.style.alignItems = "center";
-    successModal.style.justifyContent = "center";
+        // Show success modal
+        const successModal = document.getElementById("resetSuccessModal");
+        successModal.style.display = "flex";
+        successModal.style.alignItems = "center";
+        successModal.style.justifyContent = "center";
 
-    // Reset button
-    resetBtn.textContent = originalText;
-    resetBtn.disabled = false;
+        // Reset button
+        resetBtn.textContent = originalText;
+        resetBtn.disabled = false;
 
-    showNotification("Password reset link has been sent to your email", "success");
-  }, 2000);
+        showNotification("Password reset link has been sent to your email", "success");
+    }, 2000);
 }
 
 // Close modals when clicking outside
-document.getElementById("resetPasswordModal")?.addEventListener("click", (e) => {
-  if (e.target.id === "resetPasswordModal") {
-    closeResetModal();
-  }
-});
+document.addEventListener('click', function(e) {
+    const resetModal = document.getElementById('resetPasswordModal');
+    const resetSuccessModal = document.getElementById('resetSuccessModal');
 
-document.getElementById("resetSuccessModal")?.addEventListener("click", (e) => {
-  if (e.target.id === "resetSuccessModal") {
-    closeResetSuccessModal();
-  }
+    if (resetModal && e.target.id === 'resetPasswordModal') {
+        closeResetModal();
+    }
+    if (resetSuccessModal && e.target.id === 'resetSuccessModal') {
+        closeResetSuccessModal();
+    }
 });
 
 // Enter key support for reset email
-document.getElementById("resetEmail")?.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    sendResetEmail();
-  }
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const resetEmail = document.getElementById('resetEmail');
+        if (resetEmail && document.activeElement === resetEmail) {
+            sendResetEmail();
+        }
+    }
 });
 
 // Username input Enter key support
-document.getElementById("userLoginUsername").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") document.getElementById("userLoginPassword").focus();
-});
-document.getElementById("registerUsername").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") document.getElementById("registerEmail").focus();
-});
-document.getElementById("registerEmail").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") document.getElementById("registerPassword").focus();
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const userLoginUsername = document.getElementById('userLoginUsername');
+        const userLoginPassword = document.getElementById('userLoginPassword');
+        const registerUsername = document.getElementById('registerUsername');
+        const registerEmail = document.getElementById('registerEmail');
+        const registerPassword = document.getElementById('registerPassword');
+
+        // Login form navigation
+        if (userLoginUsername && userLoginPassword && loginForm && !loginForm.classList.contains('hidden')) {
+            if (document.activeElement === userLoginPassword) {
+                doUserLogin();
+            } else if (document.activeElement === userLoginUsername) {
+                userLoginPassword.focus();
+            }
+        }
+
+        // Register form navigation
+        if (registerUsername && registerEmail && registerPassword && registerForm && !registerForm.classList.contains('hidden')) {
+            if (document.activeElement === registerPassword) {
+                doUserRegister();
+            } else if (document.activeElement === registerUsername) {
+                registerEmail.focus();
+            } else if (document.activeElement === registerEmail) {
+                registerPassword.focus();
+            }
+        }
+    }
 });
 
 // Initialize form states
 document.addEventListener("DOMContentLoaded", () => {
-  // Set initial display
-  loginForm.style.display = "block";
-  registerForm.style.display = "none";
+    // Set initial display
+    if (loginForm) loginForm.classList.remove("hidden");
+    if (registerForm) registerForm.classList.add("hidden");
 });
 </script>
 
-<script src="app.js?v=20251226"></script>
-
-<!-- Copyright Footer -->
-<footer class="copyright-footer">
-  <p>&copy; 2025 InvManage. All rights reserved.</p>
-  <div class="copyright-team">
-    <div class="team-member">
-      <div class="team-role">Software Architect & Developer</div>
-      <div class="team-name">
-        <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/eDuxj6_KTmf6YPT4mS22ImxLcI2AMpeH-UDBV4sZj3dkDlM-mOCRH1tohrHDnMuLchCNVg==" target="_blank">
-          Alifito Rabbani Cahyono
-        </a>
-      </div>
-    </div>
-    <div class="team-member">
-      <div class="team-role">UI/UX Architect & Developer</div>
-      <div class="team-name">
-        <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/NOLSmx8LbYciDdNeAiC78KLe0D79FgZs3AQQ-Rp0U9MwtQK3A48MEeHOf-_ZwbtJOMFwxw==" target="_blank">
-          Satria Febry Andanu
-        </a>
-      </div>
-    </div>
-    <div class="team-member">
-      <div class="team-role">Data Analyst & Engineer</div>
-      <div class="team-name">
-        <a href="https://pddikti.kemdiktisaintek.go.id/detail-mahasiswa/mhbV5ChTDJtuFBK7x0DFSQMCI7JObDTv_hYV9KHaAA3_Xioi_j3PO2C4_oiCFjQwte-7Ig==" target="_blank">
-          Naufal Thafhan
-        </a>
-      </div>
-    </div>
-  </div>
-</footer>
+<script src="app.js?v=20251227"></script>
 </body>
 </html></content>
 </xai:function_call
